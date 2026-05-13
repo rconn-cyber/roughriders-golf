@@ -1,0 +1,11 @@
+{
+  "name": "roughriders-golf",
+  "version": "1.0.0",
+  "description": "Rough Riders Golf Tournament — Registration & Sponsorship",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "stripe": "^14.0.0"
+  }
+}
