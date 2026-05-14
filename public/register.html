@@ -908,7 +908,6 @@ function proceedWithoutSponsor() {
 // PAY — REGISTRATION ONLY
 // ════════════════════════════════
 async function handleProceed() {
-  // Only validate if they've actually filled in golfer info
   const fn = document.getElementById('inp-fn').value.trim();
   const ln = document.getElementById('inp-ln').value.trim();
   const em = document.getElementById('inp-em').value.trim();
@@ -917,6 +916,7 @@ async function handleProceed() {
     return;
   }
   if (Object.keys(addons).length === 0) {
+    window._addonModalFrom = 'proceed';
     document.getElementById('addon-modal').style.display = 'flex';
     highlightAddons();
     return;
@@ -929,19 +929,18 @@ async function handleProceed() {
 }
 
 async function handleViewSponsorship() {
-  // No validation needed — sponsorship is independent of golfer registration
-  if (Object.keys(addons).length === 0) {
-    document.getElementById('addon-modal').style.display = 'flex';
-    highlightAddons();
-    return;
-  }
   goPage(1);
 }
 
 async function proceedWithoutAddons() {
-  // They've been warned — close modal and go straight to checkout (no second sponsor intercept)
   document.getElementById('addon-modal').style.display = 'none';
-  await doCheckout();
+  const from = window._addonModalFrom || 'proceed';
+  window._addonModalFrom = null;
+  if (from === 'proceed') {
+    await doCheckout();
+  } else {
+    goPage(1);
+  }
 }
 
 async function doCheckout() {
