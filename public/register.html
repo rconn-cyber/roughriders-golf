@@ -321,7 +321,8 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 </head>
 <body>
 
-<header style="text-align:center;padding:28px 20px 24px;background:linear-gradient(135deg,#0d2d5c,#1a4a8a);margin-bottom:28px;">
+<header style="text-align:center;padding:28px 20px 24px;background:linear-gradient(135deg,#0d2d5c,#1a4a8a);margin-bottom:28px;position:relative;">
+  <div style="position:absolute;top:12px;right:16px;font-size:11px;color:rgba(255,255,255,0.45);font-family:'DM Sans',sans-serif;" id="rr-timestamp"></div>
   <div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:8px;">1st U.S. Volunteer Cavalry Regiment — Rough Riders</div>
   <h1 style="font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,36px);font-weight:900;color:#ffffff;line-height:1.15;margin-bottom:8px;">39th Annual Charity<br>Golf Tournament</h1>
   <div style="display:inline-block;background:rgba(255,255,255,0.12);border-radius:20px;padding:5px 16px;">
@@ -952,18 +953,32 @@ async function doCheckout() {
 
   const primary    = getPrimaryGolfer();
   const additional = getAdditionalPlayers();
+  const hasGolfer  = primary.firstName || primary.lastName || primary.email;
 
-  // Build line items for Stripe
-  const sponsorships = [
-    { name: `Golf Registration — ${playerCount} Player${playerCount>1?'s':''}`, price: playerCount * PLAYER_PRICE },
-    ...Object.entries(addons).map(([name, price]) => ({ name, price })),
-  ];
+  // Build line items — only include registration if golfer info was entered
+  const sponsorships = [];
+  if (hasGolfer) {
+    sponsorships.push({ name: `Golf Registration — ${playerCount} Player${playerCount>1?'s':''}`, price: playerCount * PLAYER_PRICE });
+    Object.entries(addons).forEach(([name, price]) => sponsorships.push({ name, price }));
+  } else if (Object.keys(addons).length > 0) {
+    Object.entries(addons).forEach(([name, price]) => sponsorships.push({ name, price }));
+  }
 
-  // All players for metadata
-  const allPlayers = [
+  // Also include any sponsorship selections
+  Object.values(sponsorSelections).forEach(s => sponsorships.push({ name: s.name, price: s.price }));
+
+  if (!sponsorships.length) {
+    errEl.textContent = 'Nothing selected. Please register as a golfer or choose a sponsorship.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Proceed to Payment →';
+    return;
+  }
+
+  const allPlayers = hasGolfer ? [
     { firstName: primary.firstName, lastName: primary.lastName, email: primary.email, phone: primary.phone },
     ...additional,
-  ];
+  ] : [];
 
   try {
     const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-checkout`, {
@@ -1239,6 +1254,17 @@ function goPage(n) {
 
 // Check for Stripe success redirect
 if(window.location.search.includes('session_id')) goPage(2);
+
+// Live timestamp
+function updateTimestamp() {
+  const el = document.getElementById('rr-timestamp');
+  if (!el) return;
+  const now = new Date();
+  el.textContent = now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + ' · ' +
+    now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+updateTimestamp();
+setInterval(updateTimestamp, 60000);
 </script>
 <!-- No add-ons modal -->
 <div id="addon-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;">
