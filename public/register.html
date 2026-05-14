@@ -334,7 +334,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 <nav class="steps-nav" id="steps-nav">
   <button class="step-tab active" onclick="goPage(0)"><span class="step-num">1</span>Player Info</button>
   <button class="step-tab"        onclick="goPage(1)"><span class="step-num">2</span>Sponsorship</button>
-  <button class="step-tab"        onclick="goPage(2)"><span class="step-num">3</span>Confirmation</button>
+  <button class="step-tab"        id="confirm-tab" onclick="return false;" style="opacity:0.4;cursor:not-allowed;"><span class="step-num">3</span>Confirmation</button>
 </nav>
 
 <main>
@@ -481,7 +481,10 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
         <button class="btn-proceed" id="proceed-btn" onclick="handleProceed()" style="display:none;">
-          Proceed to Payment →
+          Pay by Card →
+        </button>
+        <button id="invoice-reg-btn" onclick="showInvoiceModalForReg()" style="display:none;background:none;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);border-radius:5px;padding:7px 18px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;">
+          📄 Invoice Me
         </button>
         <button onclick="handleViewSponsorship()" style="background:none;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);border-radius:5px;padding:7px 18px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.6)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,0.25)';this.style.color='rgba(255,255,255,0.7)'">
           View Sponsorships →
@@ -755,12 +758,59 @@ function hasAnythingOrdered() {
 }
 
 function updatePayButton() {
-  var btn = document.getElementById('proceed-btn');
-  var viewBtn = document.getElementById('view-sponsor-btn');
-  var hasOrder = hasAnythingOrdered();
-  if (btn) {
-    btn.style.display = hasOrder ? 'block' : 'none';
+  var btn        = document.getElementById('proceed-btn');
+  var invoiceBtn = document.getElementById('invoice-reg-btn');
+  var hasOrder   = hasAnythingOrdered();
+  if (btn)        btn.style.display        = hasOrder ? 'block' : 'none';
+  if (invoiceBtn) invoiceBtn.style.display = hasOrder ? 'block' : 'none';
+}
+
+function unlockConfirmation() {
+  var tab = document.getElementById('confirm-tab');
+  if (tab) {
+    tab.style.opacity = '1';
+    tab.style.cursor  = 'pointer';
+    tab.setAttribute('onclick', 'goPage(2)');
   }
+}
+
+// ════════════════════════════════
+// INVOICE ME — REGISTRATION (page 1)
+// ════════════════════════════════
+function showInvoiceModalForReg() {
+  // Build combined line items: registration + add-ons
+  var items = [];
+  var primary = getPrimaryGolfer();
+
+  if (playerCount > 0) {
+    items.push({ name: 'Golf Registration — ' + playerCount + ' Player' + (playerCount > 1 ? 's' : ''), price: playerCount * PLAYER_PRICE });
+  }
+  Object.entries(addons).forEach(function(e) { items.push({ name: e[0], price: e[1] }); });
+  // Also include any sponsorships already selected
+  Object.values(sponsorSelections).forEach(function(s) { items.push({ name: s.name, price: s.price }); });
+
+  if (!items.length) return;
+
+  // Pre-fill invoice modal fields
+  if (primary.firstName) document.getElementById('inv-fn').value = primary.firstName;
+  if (primary.lastName)  document.getElementById('inv-ln').value = primary.lastName;
+  if (primary.email)     document.getElementById('inv-em').value = primary.email;
+  if (primary.phone)     document.getElementById('inv-ph').value = primary.phone;
+  if (primary.company)   document.getElementById('inv-co').value = primary.company;
+
+  // Build summary for the modal
+  var fmt = function(n) { return '$' + Number(n).toLocaleString('en-US'); };
+  var total = items.reduce(function(s, v) { return s + v.price; }, 0);
+  var html = '<div style="font-weight:700;color:#1a3320;margin-bottom:8px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;">Your Order</div>';
+  items.forEach(function(s) {
+    html += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.06);"><span style="color:#4a4a45;">' + s.name + '</span><span style="font-weight:600;color:#1a3320;">' + fmt(s.price) + '</span></div>';
+  });
+  html += '<div style="display:flex;justify-content:space-between;padding:8px 0 0;font-weight:700;font-size:14px;"><span style="color:#1a3320;">Total</span><span style="color:#c9a84c;font-family:\'Playfair Display\',serif;font-size:18px;">' + fmt(total) + '</span></div>';
+  document.getElementById('invoice-summary').innerHTML = html;
+
+  // Store items for submitInvoice to use
+  window._invoiceItems = items;
+  document.getElementById('invoice-modal').style.display = 'flex';
 }
 
 // Base prices per player for per-player addons
@@ -1273,6 +1323,7 @@ function showInvoiceModal() {
   });
   html += `<div style="display:flex;justify-content:space-between;padding:8px 0 0;font-weight:700;font-size:14px;"><span style="color:#1a3320;">Total</span><span style="color:#c9a84c;font-family:'Playfair Display',serif;font-size:18px;">${fmt(total)}</span></div>`;
   document.getElementById('invoice-summary').innerHTML = html;
+  window._invoiceItems = sponsorships; // store for submitInvoice
   document.getElementById('invoice-modal').style.display = 'flex';
 }
 
@@ -1289,17 +1340,18 @@ async function submitInvoice() {
   if (!fn || !ln) { errEl.textContent = 'Please enter your first and last name.'; errEl.style.display='block'; return; }
   if (!em || !/\S+@\S+\.\S+/.test(em)) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display='block'; return; }
 
-  var sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
+  var sponsorships = window._invoiceItems || Object.values(sponsorSelections).map(function(s) { return { name: s.name, price: s.price }; });
+  window._invoiceItems = null; // clear after use
 
-  // Guard: must have sponsorships with real prices
+  // Guard: must have items with real prices
   if (!sponsorships.length) {
-    errEl.textContent = 'No sponsorship selected. Please go back and choose a sponsorship package.';
+    errEl.textContent = 'No items selected. Please add players, add-ons, or a sponsorship first.';
     errEl.style.display = 'block';
     return;
   }
-  var totalAmount = sponsorships.reduce((s,v) => s + v.price, 0);
+  var totalAmount = sponsorships.reduce(function(s, v) { return s + v.price; }, 0);
   if (totalAmount <= 0) {
-    errEl.textContent = 'Invoice total is $0. Please select a sponsorship package first.';
+    errEl.textContent = 'Total is $0. Please select items first.';
     errEl.style.display = 'block';
     return;
   }
@@ -1316,6 +1368,7 @@ async function submitInvoice() {
     var data = await res.json();
     if (!res.ok || !data.success) throw new Error(data.error || 'Could not create invoice');
     document.getElementById('invoice-modal').style.display = 'none';
+    unlockConfirmation();
     goPage(2);
     document.querySelector('.success-screen h2').textContent = 'Invoice on its way!';
     document.querySelector('.success-screen p').textContent = `A Stripe invoice has been sent to ${em} with a secure Pay Now link. Payment terms: net 30 days. Questions? Email r.conn@tamparoughriders.org`;
@@ -1385,7 +1438,10 @@ document.addEventListener('DOMContentLoaded', function() {
   setInterval(updateTimestamp, 60000);
 
   // Check for Stripe success redirect
-  if (window.location.search.includes('session_id')) goPage(2);
+  if (window.location.search.includes('session_id')) {
+    unlockConfirmation();
+    goPage(2);
+  }
 
 }); // end DOMContentLoaded
 
