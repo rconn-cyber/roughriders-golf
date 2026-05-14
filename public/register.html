@@ -677,7 +677,12 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="total-figure" id="total-figure">$0</div>
       </div>
       <button class="btn-bar-clear" onclick="clearAll()">Clear</button>
-      <button class="btn-bar-continue" onclick="handleSponsorPay()">Pay Now →</button>
+      <div style="display:flex;flex-direction:column;gap:5px;align-items:stretch;">
+        <button class="btn-bar-continue" onclick="handleSponsorPay()">Pay Now →</button>
+        <button onclick="showInvoiceModal()" style="background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);border-radius:3px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;letter-spacing:0.03em;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.6)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.borderColor='rgba(255,255,255,0.3)'">
+          📄 Invoice Me
+        </button>
+      </div>
     </div>
   </div>
 </div>
