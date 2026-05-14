@@ -379,7 +379,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
           <span>Max 4 per team · $165 per player · 0 if sponsoring only</span>
         </div>
         <div class="qty-controls">
-          <button class="qty-btn" id="player-minus" onclick="changePlayerCount(-1)">−</button>
+          <button class="qty-btn" id="player-minus" onclick="changePlayerCount(-1)" disabled>−</button>
           <div class="qty-display" id="player-count">0</div>
           <button class="qty-btn" id="player-plus" onclick="changePlayerCount(1)">+</button>
         </div>
@@ -469,8 +469,8 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
     <div id="pay-error"></div>
     <div class="total-bar">
       <div class="total-bar-left">
-        <div class="total-bar-amount" id="reg-total">$165.00</div>
-        <div class="total-bar-breakdown" id="reg-breakdown">1 player</div>
+        <div class="total-bar-amount" id="reg-total">$0.00</div>
+        <div class="total-bar-breakdown" id="reg-breakdown">Nothing selected yet</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
         <button class="btn-proceed" id="proceed-btn" onclick="handleProceed()" style="display:none;">
