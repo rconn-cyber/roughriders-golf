@@ -701,6 +701,8 @@ const MAX_PLAYERS  = 4;
 // ════════════════════════════════
 let playerCount = 0;
 const addons = {}; // { name: price }
+const sponsorSelections = {}; // declared here so hasAnythingOrdered() can reference it
+let holeQty = 1;
 
 function changePlayerCount(delta) {
   playerCount = Math.min(MAX_PLAYERS, Math.max(0, playerCount + delta));
@@ -1041,8 +1043,6 @@ const BENEFITS_DATA = {
   'vip-tent':     { perks:['VIP tent signage','Awards shoutout'] },
 };
 
-const sponsorSelections = {};
-let holeQty = 1;
 const fmt = n => '$' + n.toLocaleString('en-US');
 
 function computeBenefits() {
