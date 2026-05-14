@@ -174,7 +174,7 @@ tr:hover td{background:#f8fbf8}
   <div class="tb">
     <div class="tb-brand">⛳ Rough Riders <span>Admin</span></div>
     <div class="tb-r">
-      <span style="font-size:11px;color:rgba(255,255,255,.45);" id="ts"></span>
+      <span style="font-size:11px;color:rgba(255,255,255,.45);" id="topbar-ts"></span>
       <button class="tb-btn" onclick="loadAll()">↻ Refresh</button>
       <button class="tb-btn" onclick="doLogout()">Sign Out</button>
     </div>
@@ -442,7 +442,7 @@ function doLogout() { localStorage.removeItem(TK); tok=null; document.getElement
 function showApp() { document.getElementById('login').style.display='none'; document.getElementById('app').style.display='block'; loadAll(); setInterval(updateTS,60000); updateTS(); }
 if (tok) showApp();
 
-function updateTS() { var el=document.getElementById('ts'); if(el){ var n=new Date(); el.textContent=n.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' · ' + n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); } }
+function updateTS() { var el=document.getElementById('topbar-ts'); if(el){ var n=new Date(); el.textContent=n.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' · ' + n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); } }
 
 // ── API ──
 async function call(method, fn, body) {
