@@ -643,7 +643,12 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
   <div class="nav-btns">
     <button class="btn-secondary" onclick="goPage(0)">← Back</button>
-    <button class="btn-primary" onclick="handleSponsorPay()">Proceed to Payment →</button>
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+      <button class="btn-primary" onclick="handleSponsorPay()">Pay by Card →</button>
+      <button onclick="showInvoiceModal()" style="background:none;border:1px solid rgba(0,0,0,0.18);color:var(--text-mid);border-radius:5px;padding:9px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#4a8c62';this.style.color='#1a3320'" onmouseout="this.style.borderColor='rgba(0,0,0,0.18)';this.style.color='var(--text-mid)'">
+        📄 Request an Invoice
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1119,6 +1124,77 @@ async function handleSponsorPay() {
 }
 
 // ════════════════════════════════
+// INVOICE ME
+// ════════════════════════════════
+function showInvoiceModal() {
+  const sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
+  if (!sponsorships.length) {
+    const holeEl = document.querySelector('[data-id="hole"]');
+    if (holeEl) { holeEl.scrollIntoView({behavior:'smooth',block:'center'}); holeEl.classList.add('addon-highlight'); setTimeout(()=>holeEl.classList.remove('addon-highlight'),2000); }
+    document.getElementById('sponsor-modal').style.display = 'flex';
+    return;
+  }
+  // Pre-fill from registration form if available
+  const fn = document.getElementById('inp-fn')?.value.trim();
+  const ln = document.getElementById('inp-ln')?.value.trim();
+  const em = document.getElementById('inp-em')?.value.trim();
+  const ph = document.getElementById('inp-ph')?.value.trim();
+  if (fn) document.getElementById('inv-fn').value = fn;
+  if (ln) document.getElementById('inv-ln').value = ln;
+  if (em) document.getElementById('inv-em').value = em;
+  if (ph) document.getElementById('inv-ph').value = ph;
+
+  // Build order summary
+  const fmt = n => '$' + n.toLocaleString('en-US');
+  let total = sponsorships.reduce((s,v)=>s+v.price, 0);
+  let html = '<div style="font-weight:700;color:#1a3320;margin-bottom:8px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;">Your Sponsorship Order</div>';
+  sponsorships.forEach(s => {
+    html += `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.06);"><span style="color:#4a4a45;">${s.name}</span><span style="font-weight:600;color:#1a3320;">${fmt(s.price)}</span></div>`;
+  });
+  html += `<div style="display:flex;justify-content:space-between;padding:8px 0 0;font-weight:700;font-size:14px;"><span style="color:#1a3320;">Total</span><span style="color:#c9a84c;font-family:'Playfair Display',serif;font-size:18px;">${fmt(total)}</span></div>`;
+  document.getElementById('invoice-summary').innerHTML = html;
+  document.getElementById('invoice-modal').style.display = 'flex';
+}
+
+async function submitInvoice() {
+  const fn = document.getElementById('inv-fn').value.trim();
+  const ln = document.getElementById('inv-ln').value.trim();
+  const em = document.getElementById('inv-em').value.trim();
+  const co = document.getElementById('inv-co').value.trim();
+  const ph = document.getElementById('inv-ph').value.trim();
+  const errEl = document.getElementById('inv-error');
+  const btn   = document.getElementById('inv-submit-btn');
+
+  errEl.style.display = 'none';
+  if (!fn || !ln) { errEl.textContent = 'Please enter your first and last name.'; errEl.style.display='block'; return; }
+  if (!em || !/\S+@\S+\.\S+/.test(em)) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display='block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Creating invoice…';
+
+  const sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
+
+  try {
+    const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-invoice`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName:fn, lastName:ln, email:em, company:co, phone:ph, sponsorships }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Could not create invoice');
+    document.getElementById('invoice-modal').style.display = 'none';
+    goPage(2);
+    document.querySelector('.success-screen h2').textContent = 'Invoice on its way!';
+    document.querySelector('.success-screen p').textContent = `A Stripe invoice has been sent to ${em} with a secure Pay Now link. Payment terms: net 30 days. Questions? Email r.conn@tamparoughriders.org`;
+  } catch(err) {
+    errEl.textContent = `Error: ${err.message}. Please try again or contact us directly.`;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Send Invoice Request →';
+  }
+}
+
+// ════════════════════════════════
 // PAGE NAV
 // ════════════════════════════════
 let currentPage = 0;
@@ -1180,6 +1256,58 @@ if(window.location.search.includes('session_id')) goPage(2);
         No thanks, pay now
       </button>
     </div>
+  </div>
+</div>
+
+<!-- Invoice Me modal -->
+<div id="invoice-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;overflow-y:auto;">
+  <div style="background:#fff;border-radius:10px;padding:36px 32px;max-width:460px;width:92%;margin:20px auto;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:40px;margin-bottom:10px;">📄</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#1a3320;margin-bottom:6px;">Request an Invoice</h3>
+      <p style="font-size:13px;color:#7a7a72;line-height:1.5;">Stripe will email you a professional invoice with a secure Pay Now link. Due date: net 30 days.</p>
+    </div>
+
+    <!-- Invoice order summary -->
+    <div id="invoice-summary" style="background:#f8f4ed;border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:13px;"></div>
+
+    <!-- Invoice form -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4a4a45;display:block;margin-bottom:4px;">First Name *</label>
+          <input id="inv-fn" type="text" placeholder="Theodore" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4a4a45;display:block;margin-bottom:4px;">Last Name *</label>
+          <input id="inv-ln" type="text" placeholder="Roosevelt" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4a4a45;display:block;margin-bottom:4px;">Company / Organization</label>
+        <input id="inv-co" type="text" placeholder="Acme Corp (optional)" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4a4a45;display:block;margin-bottom:4px;">Email Address * <span style="font-weight:400;text-transform:none">(invoice sent here)</span></label>
+        <input id="inv-em" type="email" placeholder="you@example.com" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4a4a45;display:block;margin-bottom:4px;">Phone</label>
+        <input id="inv-ph" type="tel" placeholder="(813) 555-0100" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+      </div>
+    </div>
+
+    <div id="inv-error" style="display:none;font-size:13px;color:#c0392b;background:#fdf0ef;border-radius:4px;padding:9px 12px;border-left:3px solid #c0392b;margin-top:14px;"></div>
+
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button onclick="submitInvoice()" id="inv-submit-btn" style="flex:1;padding:13px;background:#1a3320;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.04em;">
+        Send Invoice Request →
+      </button>
+      <button onclick="document.getElementById('invoice-modal').style.display='none'" style="padding:13px 18px;background:none;border:1px solid rgba(0,0,0,0.15);color:#4a4a45;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">
+        Cancel
+      </button>
+    </div>
+    <p style="font-size:11px;color:#7a7a72;text-align:center;margin-top:10px;">Invoice processed securely by Stripe · Net 30 payment terms</p>
   </div>
 </div>
 
