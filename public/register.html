@@ -368,6 +368,12 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
           <input id="inp-ph" type="tel" placeholder="(813) 555-0100">
         </div>
       </div>
+      <div class="field-row single">
+        <div class="field">
+          <label>Company / Organization <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="inp-co" type="text" placeholder="Acme Corp">
+        </div>
+      </div>
     </div>
 
     <!-- Player count -->
@@ -692,17 +698,17 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 // ════════════════════════════════
 // CONFIG
 // ════════════════════════════════
-const NETLIFY_BASE = 'https://rr-golf.netlify.app';
-const PLAYER_PRICE = 165;
-const MAX_PLAYERS  = 4;
+var NETLIFY_BASE = 'https://rr-golf.netlify.app';
+var PLAYER_PRICE = 165;
+var MAX_PLAYERS  = 4;
 
 // ════════════════════════════════
 // REGISTRATION STATE
 // ════════════════════════════════
-let playerCount = 0;
-const addons = {}; // { name: price }
-const sponsorSelections = {}; // declared here so hasAnythingOrdered() can reference it
-let holeQty = 1;
+var playerCount = 0;
+var addons = {}; // { name: price }
+var sponsorSelections = {}; // declared here so hasAnythingOrdered() can reference it
+var holeQty = 1;
 
 function changePlayerCount(delta) {
   playerCount = Math.min(MAX_PLAYERS, Math.max(0, playerCount + delta));
@@ -715,11 +721,11 @@ function changePlayerCount(delta) {
 }
 
 function renderAdditionalPlayers() {
-  const container = document.getElementById('additional-players');
+  var container = document.getElementById('additional-players');
   container.innerHTML = '';
   if (playerCount === 0) return;
-  for (let i = 2; i <= playerCount; i++) {
-    const div = document.createElement('div');
+  for (var i = 2; i <= playerCount; i++) {
+    var div = document.createElement('div');
     div.className = 'add-player-block';
     div.innerHTML = `
       <div class="add-player-title">Player ${i}</div>
@@ -747,16 +753,16 @@ function hasAnythingOrdered() {
 }
 
 function updatePayButton() {
-  const btn = document.getElementById('proceed-btn');
-  const viewBtn = document.getElementById('view-sponsor-btn');
-  const hasOrder = hasAnythingOrdered();
+  var btn = document.getElementById('proceed-btn');
+  var viewBtn = document.getElementById('view-sponsor-btn');
+  var hasOrder = hasAnythingOrdered();
   if (btn) {
     btn.style.display = hasOrder ? 'block' : 'none';
   }
 }
 
 function toggleAddon(el, price, name) {
-  const superEl = document.querySelector('.addon-super');
+  var superEl = document.querySelector('.addon-super');
   if (superEl && superEl.classList.contains('checked')) {
     superEl.classList.remove('checked');
     delete addons['Super Ticket'];
@@ -768,8 +774,8 @@ function toggleAddon(el, price, name) {
 }
 
 function toggleSuperTicket(el) {
-  const SUPER_NAMES = ['Mulligan Pack','Closest to Pin','Longest Drive','Raffle Tickets','Awards Dinner Guest'];
-  const grid = document.getElementById('addons-grid');
+  var SUPER_NAMES = ['Mulligan Pack','Closest to Pin','Longest Drive','Raffle Tickets','Awards Dinner Guest'];
+  var grid = document.getElementById('addons-grid');
   if (el.classList.contains('checked')) {
     el.classList.remove('checked');
     delete addons['Super Ticket'];
@@ -786,18 +792,18 @@ function toggleSuperTicket(el) {
 }
 
 function updateRegTotal() {
-  const regSubtotal     = playerCount * PLAYER_PRICE;
-  const addonTotal      = Object.values(addons).reduce((s,v)=>s+v, 0);
-  const sponsorSubtotal = Object.values(sponsorSelections).reduce((s,v)=>s+v.price, 0);
-  const total           = regSubtotal + addonTotal + sponsorSubtotal;
-  const fmt             = n => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  var regSubtotal     = playerCount * PLAYER_PRICE;
+  var addonTotal      = Object.values(addons).reduce((s,v)=>s+v, 0);
+  var sponsorSubtotal = Object.values(sponsorSelections).reduce((s,v)=>s+v.price, 0);
+  var total           = regSubtotal + addonTotal + sponsorSubtotal;
+  var fmt             = n => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 
   document.getElementById('reg-total').textContent = fmt(total);
 
-  let breakdown = playerCount > 0 ? `${playerCount} player${playerCount>1?'s':''}` : '';
-  const addonNames = Object.keys(addons);
+  var breakdown = playerCount > 0 ? `${playerCount} player${playerCount>1?'s':''}` : '';
+  var addonNames = Object.keys(addons);
   if (addonNames.length) breakdown += (breakdown ? ' + ' : '') + addonNames.join(', ');
-  const sponsorNames = Object.values(sponsorSelections).map(s=>s.name);
+  var sponsorNames = Object.values(sponsorSelections).map(s=>s.name);
   if (sponsorNames.length) breakdown += (breakdown ? ' · ' : '') + sponsorNames.join(', ');
   document.getElementById('reg-breakdown').textContent = breakdown || 'Nothing selected yet';
   updatePayButton();
@@ -807,14 +813,14 @@ function updateRegTotal() {
 // VALIDATION
 // ════════════════════════════════
 function validateReg() {
-  let valid = true;
-  const fn = document.getElementById('inp-fn').value.trim();
-  const ln = document.getElementById('inp-ln').value.trim();
-  const em = document.getElementById('inp-em').value.trim();
+  var valid = true;
+  var fn = document.getElementById('inp-fn').value.trim();
+  var ln = document.getElementById('inp-ln').value.trim();
+  var em = document.getElementById('inp-em').value.trim();
 
-  const anyFilled = fn || ln || em;
+  var anyFilled = fn || ln || em;
 
-  // If they haven't filled anything in, let them through to sponsorship
+  // If they haven't filled anything in, var them through to sponsorship
   if (!anyFilled) return true;
 
   // If they've started filling in the form, require all three
@@ -828,9 +834,9 @@ function validateReg() {
   }
 
   ['fn','ln'].forEach(f => {
-    const inp  = document.getElementById(`inp-${f}`);
-    const wrap = document.getElementById(`f-${f}`);
-    const ok   = inp.value.trim().length > 0;
+    var inp  = document.getElementById(`inp-${f}`);
+    var wrap = document.getElementById(`f-${f}`);
+    var ok   = inp.value.trim().length > 0;
     wrap.classList.toggle('has-error', !ok);
     inp.classList.toggle('error', !ok);
     if (!ok) valid = false;
@@ -841,18 +847,19 @@ function validateReg() {
 
 function getPrimaryGolfer() {
   return {
-    firstName: document.getElementById('inp-fn').value.trim(),
-    lastName:  document.getElementById('inp-ln').value.trim(),
-    email:     document.getElementById('inp-em').value.trim(),
-    phone:     document.getElementById('inp-ph')?.value.trim() || '',
+    firstName: document.getElementById('inp-fn') ? document.getElementById('inp-fn').value.trim() : '',
+    lastName:  document.getElementById('inp-ln') ? document.getElementById('inp-ln').value.trim() : '',
+    email:     document.getElementById('inp-em') ? document.getElementById('inp-em').value.trim() : '',
+    phone:     document.getElementById('inp-ph') ? document.getElementById('inp-ph').value.trim() : '',
+    company:   document.getElementById('inp-co') ? document.getElementById('inp-co').value.trim() : '',
   };
 }
 
 function getAdditionalPlayers() {
-  const players = [];
-  for (let i = 2; i <= playerCount; i++) {
-    const fn = document.getElementById(`p${i}-fn`)?.value.trim() || '';
-    const ln = document.getElementById(`p${i}-ln`)?.value.trim() || '';
+  var players = [];
+  for (var i = 2; i <= playerCount; i++) {
+    var fn = document.getElementById(`p${i}-fn`)?.value.trim() || '';
+    var ln = document.getElementById(`p${i}-ln`)?.value.trim() || '';
     players.push({ firstName: fn, lastName: ln });
   }
   return players;
@@ -863,13 +870,13 @@ function getAdditionalPlayers() {
 // ════════════════════════════════
 function highlightAddons() {
   // Pulse every addon item so they're all visible
-  const allAddons = document.querySelectorAll('.addon-item');
+  var allAddons = document.querySelectorAll('.addon-item');
   allAddons.forEach(el => {
     el.classList.add('addon-highlight');
     setTimeout(() => el.classList.remove('addon-highlight'), 2200);
   });
   // Scroll to the super ticket at top of addons
-  const superEl = document.querySelector('.addon-super');
+  var superEl = document.querySelector('.addon-super');
   if (superEl) superEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
@@ -895,14 +902,14 @@ function viewAllSponsorshipsFromModal() {
   goPage(1);
   // Scroll to top of sponsorship page and highlight the tiers
   setTimeout(() => {
-    const tiersEl = document.querySelector('.tiers');
+    var tiersEl = document.querySelector('.tiers');
     if (tiersEl) tiersEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 300);
 }
 
 function selectSuperFromModal() {
   document.getElementById('addon-modal').style.display = 'none';
-  const superEl = document.querySelector('.addon-super');
+  var superEl = document.querySelector('.addon-super');
   if (superEl && !superEl.classList.contains('checked')) {
     toggleSuperTicket(superEl);
   }
@@ -914,7 +921,7 @@ function selectHoleSponsorFromModal() {
   goPage(1);
   // Select hole sponsor and scroll to it
   setTimeout(() => {
-    const holeEl = document.querySelector('[data-id="hole"]');
+    var holeEl = document.querySelector('[data-id="hole"]');
     if (holeEl && !holeEl.classList.contains('selected')) {
       holeEl.click();
     }
@@ -931,9 +938,9 @@ function proceedWithoutSponsor() {
 // PAY — REGISTRATION ONLY
 // ════════════════════════════════
 async function handleProceed() {
-  const fn = document.getElementById('inp-fn').value.trim();
-  const ln = document.getElementById('inp-ln').value.trim();
-  const em = document.getElementById('inp-em').value.trim();
+  var fn = document.getElementById('inp-fn').value.trim();
+  var ln = document.getElementById('inp-ln').value.trim();
+  var em = document.getElementById('inp-em').value.trim();
   if ((fn || ln || em) && !validateReg()) {
     document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth', block:'center'});
     return;
@@ -957,7 +964,7 @@ async function handleViewSponsorship() {
 
 async function proceedWithoutAddons() {
   document.getElementById('addon-modal').style.display = 'none';
-  const from = window._addonModalFrom || 'proceed';
+  var from = window._addonModalFrom || 'proceed';
   window._addonModalFrom = null;
   if (from === 'proceed') {
     await doCheckout();
@@ -967,18 +974,18 @@ async function proceedWithoutAddons() {
 }
 
 async function doCheckout() {
-  const btn    = document.getElementById('proceed-btn');
-  const errEl  = document.getElementById('pay-error');
+  var btn    = document.getElementById('proceed-btn');
+  var errEl  = document.getElementById('pay-error');
   errEl.style.display = 'none';
   btn.disabled = true;
   btn.textContent = 'Creating checkout…';
 
-  const primary    = getPrimaryGolfer();
-  const additional = getAdditionalPlayers();
-  const hasGolfer  = primary.firstName || primary.lastName || primary.email;
+  var primary    = getPrimaryGolfer();
+  var additional = getAdditionalPlayers();
+  var hasGolfer  = primary.firstName || primary.lastName || primary.email;
 
   // Build line items — only include registration if golfer info was entered
-  const sponsorships = [];
+  var sponsorships = [];
   if (hasGolfer) {
     sponsorships.push({ name: `Golf Registration — ${playerCount} Player${playerCount>1?'s':''}`, price: playerCount * PLAYER_PRICE });
     Object.entries(addons).forEach(([name, price]) => sponsorships.push({ name, price }));
@@ -997,18 +1004,18 @@ async function doCheckout() {
     return;
   }
 
-  const allPlayers = hasGolfer ? [
+  var allPlayers = hasGolfer ? [
     { firstName: primary.firstName, lastName: primary.lastName, email: primary.email, phone: primary.phone },
     ...additional,
   ] : [];
 
   try {
-    const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-checkout`, {
+    var res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ golfers: allPlayers, sponsorships }),
     });
-    const data = await res.json();
+    var data = await res.json();
     if (!res.ok || !data.url) throw new Error(data.error || 'Could not create checkout');
     window.location.href = data.url;
   } catch (err) {
@@ -1022,7 +1029,7 @@ async function doCheckout() {
 // ════════════════════════════════
 // SPONSORSHIP SELECTION
 // ════════════════════════════════
-const BENEFITS_DATA = {
+var BENEFITS_DATA = {
   title:          { golfers:12, tickets:12, holeSigns:5, banner:true, website:true },
   gold:           { golfers:8,  tickets:8,  holeSigns:3, banner:true, website:false },
   silver:         { golfers:4,  tickets:4,  holeSigns:2, banner:false, website:false },
@@ -1043,12 +1050,12 @@ const BENEFITS_DATA = {
   'vip-tent':     { perks:['VIP tent signage','Awards shoutout'] },
 };
 
-const fmt = n => '$' + n.toLocaleString('en-US');
+var fmt = n => '$' + n.toLocaleString('en-US');
 
 function computeBenefits() {
-  let g=0,t=0,h=0,banner=false,website=false; const perks=[];
+  var g=0,t=0,h=0,banner=false,website=false; var perks=[];
   for (const [id] of Object.entries(sponsorSelections)) {
-    const b = BENEFITS_DATA[id]||{};
+    var b = BENEFITS_DATA[id]||{};
     g+=b.golfers||0; t+=b.tickets||0; h+=b.holeSigns||0;
     if(b.banner) banner=true; if(b.website) website=true;
     if(id==='hole') h+=holeQty;
@@ -1058,7 +1065,7 @@ function computeBenefits() {
 }
 
 function updateSponsorTotal() {
-  let total=0; const chips=[];
+  var total=0; var chips=[];
   for(const [id,item] of Object.entries(sponsorSelections)) {
     total+=item.price; chips.push({id,name:item.name,price:item.price});
   }
@@ -1067,13 +1074,13 @@ function updateSponsorTotal() {
     `<span class="chip">${c.name}<span class="chip-price"> ${fmt(c.price)}</span><button class="chip-x" onclick="removeSponsor('${c.id}')">×</button></span>`
   ).join('');
 
-  const b=computeBenefits();
-  const hasSponsor=Object.keys(sponsorSelections).length>0;
-  const brow=document.getElementById('benefits-row');
-  const bstats=document.getElementById('bstats');
+  var b=computeBenefits();
+  var hasSponsor=Object.keys(sponsorSelections).length>0;
+  var brow=document.getElementById('benefits-row');
+  var bstats=document.getElementById('bstats');
   if(hasSponsor) {
     brow.classList.add('show');
-    let html='';
+    var html='';
     if(b.golfers)   html+=`<div class="bstat-big"><span class="bval">${b.golfers}</span><span class="blbl">Golfers</span></div>`;
     if(b.tickets)   html+=`<div class="bstat-big"><span class="bval">${b.tickets}</span><span class="blbl">Super Tickets</span></div>`;
     if(b.holeSigns) html+=`<div class="bstat-big"><span class="bval">${b.holeSigns}</span><span class="blbl">Hole Signs</span></div>`;
@@ -1096,50 +1103,23 @@ function removeSponsor(id) {
 
 function clearAll() {
   document.querySelectorAll('.selectable.selected').forEach(el=>el.classList.remove('selected'));
-  holeQty=1; const hq=document.getElementById('hole-qty'); if(hq) hq.textContent='1';
-  for(const k in sponsorSelections) delete sponsorSelections[k];
+  holeQty=1; var hq=document.getElementById('hole-qty'); if(hq) hq.textContent='1';
+  for(var k in sponsorSelections) delete sponsorSelections[k];
   updateSponsorTotal();
 }
 
-const holeMinus = document.getElementById('hole-minus');
-const holePlus  = document.getElementById('hole-plus');
-if (holeMinus) holeMinus.addEventListener('click',e=>{
-  e.stopPropagation(); holeQty=Math.max(1,holeQty-1);
-  document.getElementById('hole-qty').textContent=holeQty;
-  if(sponsorSelections['hole']){sponsorSelections['hole'].price=250*holeQty;sponsorSelections['hole'].name=holeQty>1?`Hole Sponsor ×${holeQty}`:'Hole Sponsor';updateSponsorTotal();}
-});
-if (holePlus) holePlus.addEventListener('click',e=>{
-  e.stopPropagation(); holeQty=Math.min(18,holeQty+1);
-  document.getElementById('hole-qty').textContent=holeQty;
-  if(sponsorSelections['hole']){sponsorSelections['hole'].price=250*holeQty;sponsorSelections['hole'].name=holeQty>1?`Hole Sponsor ×${holeQty}`:'Hole Sponsor';updateSponsorTotal();}
-});
-
-document.querySelectorAll('.selectable').forEach(el=>{
-  if (!el) return;
-  el.addEventListener('click',function(){
-    const id=this.dataset.id,name=this.dataset.name,base=parseInt(this.dataset.price);
-    if(this.classList.contains('selected')){
-      this.classList.remove('selected');
-      if(id==='hole'){holeQty=1;document.getElementById('hole-qty').textContent='1';}
-      delete sponsorSelections[id];
-    } else {
-      this.classList.add('selected');
-      const price=id==='hole'?base*holeQty:base;
-      const displayName=(id==='hole'&&holeQty>1)?`Hole Sponsor ×${holeQty}`:name;
-      sponsorSelections[id]={name:displayName,price};
-    }
-    updateSponsorTotal();
-  });
-});
+// ════════════════════════════════
+// PAGE NAV
+// ════════════════════════════════
 
 // ════════════════════════════════
 // PAY — SPONSORSHIP
 // ════════════════════════════════
 async function handleSponsorPay() {
-  const sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
+  var sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
   if (!sponsorships.length) {
     // Highlight the hole sponsor card and show modal
-    const holeEl = document.querySelector('[data-id="hole"]');
+    var holeEl = document.querySelector('[data-id="hole"]');
     if (holeEl) {
       holeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       holeEl.classList.add('addon-highlight');
@@ -1149,15 +1129,15 @@ async function handleSponsorPay() {
     return;
   }
 
-  const primary = getPrimaryGolfer();
-  const golfers = primary.email ? [primary] : [];
+  var primary = getPrimaryGolfer();
+  var golfers = primary.email ? [primary] : [];
 
   try {
-    const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-checkout`, {
+    var res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-checkout`, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({golfers, sponsorships}),
     });
-    const data = await res.json();
+    var data = await res.json();
     if(!res.ok||!data.url) throw new Error(data.error||'Could not create checkout');
     window.location.href = data.url;
   } catch(err) {
@@ -1169,8 +1149,8 @@ async function handleSponsorPay() {
 // INVOICE ME
 // ════════════════════════════════
 function showInvoiceModal() {
-  const sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
-  const total = sponsorships.reduce((s,v) => s + v.price, 0);
+  var sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
+  var total = sponsorships.reduce((s,v) => s + v.price, 0);
 
   if (!sponsorships.length || total === 0) {
     // Not on sponsorship page yet — take them there first
@@ -1180,26 +1160,26 @@ function showInvoiceModal() {
         document.getElementById('sponsor-modal').style.display = 'flex';
       }, 400);
     } else {
-      const holeEl = document.querySelector('[data-id="hole"]');
+      var holeEl = document.querySelector('[data-id="hole"]');
       if (holeEl) { holeEl.scrollIntoView({behavior:'smooth',block:'center'}); holeEl.classList.add('addon-highlight'); setTimeout(()=>holeEl.classList.remove('addon-highlight'),2000); }
       document.getElementById('sponsor-modal').style.display = 'flex';
     }
     return;
   }
   // Pre-fill from registration form if available
-  const fn = document.getElementById('inp-fn')?.value.trim();
-  const ln = document.getElementById('inp-ln')?.value.trim();
-  const em = document.getElementById('inp-em')?.value.trim();
-  const ph = document.getElementById('inp-ph')?.value.trim();
+  var fn = document.getElementById('inp-fn')?.value.trim();
+  var ln = document.getElementById('inp-ln')?.value.trim();
+  var em = document.getElementById('inp-em')?.value.trim();
+  var ph = document.getElementById('inp-ph')?.value.trim();
   if (fn) document.getElementById('inv-fn').value = fn;
   if (ln) document.getElementById('inv-ln').value = ln;
   if (em) document.getElementById('inv-em').value = em;
   if (ph) document.getElementById('inv-ph').value = ph;
 
   // Build order summary
-  const fmt = n => '$' + n.toLocaleString('en-US');
-  let total = sponsorships.reduce((s,v)=>s+v.price, 0);
-  let html = '<div style="font-weight:700;color:#1a3320;margin-bottom:8px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;">Your Sponsorship Order</div>';
+  var fmt = n => '$' + n.toLocaleString('en-US');
+  var total = sponsorships.reduce((s,v)=>s+v.price, 0);
+  var html = '<div style="font-weight:700;color:#1a3320;margin-bottom:8px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;">Your Sponsorship Order</div>';
   sponsorships.forEach(s => {
     html += `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.06);"><span style="color:#4a4a45;">${s.name}</span><span style="font-weight:600;color:#1a3320;">${fmt(s.price)}</span></div>`;
   });
@@ -1209,19 +1189,19 @@ function showInvoiceModal() {
 }
 
 async function submitInvoice() {
-  const fn = document.getElementById('inv-fn').value.trim();
-  const ln = document.getElementById('inv-ln').value.trim();
-  const em = document.getElementById('inv-em').value.trim();
-  const co = document.getElementById('inv-co').value.trim();
-  const ph = document.getElementById('inv-ph').value.trim();
-  const errEl = document.getElementById('inv-error');
-  const btn   = document.getElementById('inv-submit-btn');
+  var fn = document.getElementById('inv-fn').value.trim();
+  var ln = document.getElementById('inv-ln').value.trim();
+  var em = document.getElementById('inv-em').value.trim();
+  var co = document.getElementById('inv-co').value.trim();
+  var ph = document.getElementById('inv-ph').value.trim();
+  var errEl = document.getElementById('inv-error');
+  var btn   = document.getElementById('inv-submit-btn');
 
   errEl.style.display = 'none';
   if (!fn || !ln) { errEl.textContent = 'Please enter your first and last name.'; errEl.style.display='block'; return; }
   if (!em || !/\S+@\S+\.\S+/.test(em)) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display='block'; return; }
 
-  const sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
+  var sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
 
   // Guard: must have sponsorships with real prices
   if (!sponsorships.length) {
@@ -1229,7 +1209,7 @@ async function submitInvoice() {
     errEl.style.display = 'block';
     return;
   }
-  const totalAmount = sponsorships.reduce((s,v) => s + v.price, 0);
+  var totalAmount = sponsorships.reduce((s,v) => s + v.price, 0);
   if (totalAmount <= 0) {
     errEl.textContent = 'Invoice total is $0. Please select a sponsorship package first.';
     errEl.style.display = 'block';
@@ -1240,12 +1220,12 @@ async function submitInvoice() {
   btn.textContent = 'Creating invoice…';
 
   try {
-    const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-invoice`, {
+    var res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-invoice`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ firstName:fn, lastName:ln, email:em, company:co, phone:ph, sponsorships }),
     });
-    const data = await res.json();
+    var data = await res.json();
     if (!res.ok || !data.success) throw new Error(data.error || 'Could not create invoice');
     document.getElementById('invoice-modal').style.display = 'none';
     goPage(2);
@@ -1260,41 +1240,92 @@ async function submitInvoice() {
 }
 
 // ════════════════════════════════
+// INIT — runs after DOM is ready
+// ════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Hole qty buttons (on page 2 — safe to attach now DOM is loaded)
+  var hm = document.getElementById('hole-minus');
+  var hp = document.getElementById('hole-plus');
+  if (hm) hm.addEventListener('click', function(e) {
+    e.stopPropagation();
+    holeQty = Math.max(1, holeQty - 1);
+    document.getElementById('hole-qty').textContent = holeQty;
+    if (sponsorSelections['hole']) {
+      sponsorSelections['hole'].price = 250 * holeQty;
+      sponsorSelections['hole'].name  = holeQty > 1 ? 'Hole Sponsor x' + holeQty : 'Hole Sponsor';
+      updateSponsorTotal();
+    }
+  });
+  if (hp) hp.addEventListener('click', function(e) {
+    e.stopPropagation();
+    holeQty = Math.min(18, holeQty + 1);
+    document.getElementById('hole-qty').textContent = holeQty;
+    if (sponsorSelections['hole']) {
+      sponsorSelections['hole'].price = 250 * holeQty;
+      sponsorSelections['hole'].name  = holeQty > 1 ? 'Hole Sponsor x' + holeQty : 'Hole Sponsor';
+      updateSponsorTotal();
+    }
+  });
+
+  // Sponsorship card clicks
+  document.querySelectorAll('.selectable').forEach(function(el) {
+    el.addEventListener('click', function() {
+      var id   = this.dataset.id;
+      var name = this.dataset.name;
+      var base = parseInt(this.dataset.price);
+      if (this.classList.contains('selected')) {
+        this.classList.remove('selected');
+        if (id === 'hole') { holeQty = 1; var hq = document.getElementById('hole-qty'); if(hq) hq.textContent = '1'; }
+        delete sponsorSelections[id];
+      } else {
+        this.classList.add('selected');
+        var price = id === 'hole' ? base * holeQty : base;
+        var displayName = (id === 'hole' && holeQty > 1) ? 'Hole Sponsor x' + holeQty : name;
+        sponsorSelections[id] = { name: displayName, price: price };
+      }
+      updateSponsorTotal();
+    });
+  });
+
+  // Initialize totals and button state
+  updateRegTotal();
+  updatePayButton();
+
+  // Timestamp
+  updateTimestamp();
+  setInterval(updateTimestamp, 60000);
+
+  // Check for Stripe success redirect
+  if (window.location.search.includes('session_id')) goPage(2);
+
+}); // end DOMContentLoaded
+
+// ════════════════════════════════
 // PAGE NAV
 // ════════════════════════════════
-let currentPage = 0;
-const tabs = document.querySelectorAll('.step-tab');
+var currentPage = 0;
 
 function goPage(n) {
-  document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===n));
-  tabs.forEach((t,i)=>{t.classList.toggle('active',i===n);t.classList.toggle('done',i<n);});
-  currentPage=n;
-  // Show/hide sticky sponsor bar only on page 2
-  const bar = document.getElementById('total-bar');
-  if(n!==1) bar.classList.remove('visible');
-  else updateSponsorTotal();
+  var pages = document.querySelectorAll('.page');
+  var tabEls = document.querySelectorAll('.step-tab');
+  pages.forEach(function(p,i){ p.classList.toggle('active', i===n); });
+  tabEls.forEach(function(t,i){ t.classList.toggle('active', i===n); t.classList.toggle('done', i<n); });
+  currentPage = n;
+  var bar = document.getElementById('total-bar');
+  if (bar) { if(n!==1) bar.classList.remove('visible'); else updateSponsorTotal(); }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// Check for Stripe success redirect
-if(window.location.search.includes('session_id')) goPage(2);
-
-// Initialize state on load
-updateRegTotal();
-updatePayButton();
-
-// Live timestamp
 function updateTimestamp() {
-  const el = document.getElementById('rr-timestamp');
+  var el = document.getElementById('rr-timestamp');
   if (!el) return;
-  const now = new Date();
+  var now = new Date();
   el.textContent = now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + ' · ' +
     now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
 }
-updateTimestamp();
-setInterval(updateTimestamp, 60000);
+
 </script>
-<!-- No add-ons modal -->
 <div id="addon-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:10px;padding:36px 32px;max-width:420px;width:92%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
     <div style="font-size:44px;margin-bottom:14px;">🎯</div>
