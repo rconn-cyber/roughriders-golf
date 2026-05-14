@@ -1,9 +1,7 @@
 // netlify/functions/admin-data.js
-// CRUD for entries, sponsors, complimentary teams, and admin settings
-// Uses Netlify Blobs for persistent storage
+// CRUD using Netlify Blobs REST API directly
 
 const crypto = require('crypto');
-const { getStore } = require('@netlify/blobs');
 
 function verifyToken(token, secret) {
   try {
@@ -21,80 +19,78 @@ function auth(event) {
   return verifyToken(h.replace('Bearer ', ''), process.env.SESSION_SECRET || 'fallback');
 }
 
+function getBlobStore() {
+  const siteID = process.env.NETLIFY_SITE_ID;
+  const token  = process.env.NETLIFY_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
+  const base   = `https://api.netlify.com/api/v1/blobs/${siteID}/golf-admin`;
+  const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+
+  return {
+    async get(key) {
+      const r = await fetch(`${base}/${key}`, { headers });
+      if (r.status === 404) return null;
+      if (!r.ok) throw new Error(`Blob get ${key} failed: ${r.status}`);
+      return r.text();
+    },
+    async set(key, value) {
+      const r = await fetch(`${base}/${key}`, { method: 'PUT', headers, body: typeof value === 'string' ? value : JSON.stringify(value) });
+      if (!r.ok) throw new Error(`Blob set ${key} failed: ${r.status}`);
+    },
+  };
+}
+
+function getDefaults(resource) {
+  if (resource === 'settings') return { adminEmails: [], notifyOnEntry: true, notifyOnSponsor: true };
+  return [];
+}
+
+const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+
 exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type,Authorization', 'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE' }, body: '' };
-  }
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type,Authorization', 'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE' }, body: '' };
+  if (!auth(event)) return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
 
-  if (!auth(event)) return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
-
-  const store = getStore('golf-admin');
-  const params = event.queryStringParameters || {};
-  const resource = params.resource; // entries | sponsors | complimentary | settings | admins
-
-  const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+  const store    = getBlobStore();
+  const resource = (event.queryStringParameters || {}).resource;
+  const id       = (event.queryStringParameters || {}).id;
 
   try {
-    // ── GET ──
     if (event.httpMethod === 'GET') {
-      const raw = await store.get(resource).catch(() => null);
+      const raw  = await store.get(resource);
       const data = raw ? JSON.parse(raw) : getDefaults(resource);
-      return { statusCode: 200, headers, body: JSON.stringify(data) };
+      return { statusCode: 200, headers: CORS, body: JSON.stringify(data) };
     }
 
-    // ── PUT — full replace ──
     if (event.httpMethod === 'PUT') {
       const body = JSON.parse(event.body);
       await store.set(resource, JSON.stringify(body));
-      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ success: true }) };
     }
 
-    // ── POST — append one record ──
     if (event.httpMethod === 'POST') {
       const body = JSON.parse(event.body);
-      const raw  = await store.get(resource).catch(() => null);
-      const data = raw ? JSON.parse(raw) : getDefaults(resource);
-      const id   = 'rr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-      const record = { ...body, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-      if (Array.isArray(data)) {
-        data.push(record);
-      } else if (data.items) {
-        data.items.push(record);
-      }
-      await store.set(resource, JSON.stringify(data));
-      return { statusCode: 201, headers, body: JSON.stringify(record) };
+      const raw  = await store.get(resource);
+      const data = raw ? JSON.parse(raw) : [];
+      const newId = 'rr_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+      const record = { ...body, id: newId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+      const arr = Array.isArray(data) ? data : (data.items || []);
+      arr.push(record);
+      await store.set(resource, JSON.stringify(arr));
+      return { statusCode: 201, headers: CORS, body: JSON.stringify(record) };
     }
 
-    // ── DELETE — remove by id ──
     if (event.httpMethod === 'DELETE') {
-      const { id } = params;
-      const raw  = await store.get(resource).catch(() => null);
-      const data = raw ? JSON.parse(raw) : getDefaults(resource);
-      if (Array.isArray(data)) {
-        const updated = data.filter(r => r.id !== id);
-        await store.set(resource, JSON.stringify(updated));
-      } else if (data.items) {
-        data.items = data.items.filter(r => r.id !== id);
-        await store.set(resource, JSON.stringify(data));
-      }
-      return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+      const raw  = await store.get(resource);
+      const data = raw ? JSON.parse(raw) : [];
+      const arr  = Array.isArray(data) ? data : (data.items || []);
+      const updated = arr.filter(r => r.id !== id);
+      await store.set(resource, JSON.stringify(updated));
+      return { statusCode: 200, headers: CORS, body: JSON.stringify({ success: true }) };
     }
 
-    return { statusCode: 405, body: 'Method Not Allowed' };
+    return { statusCode: 405, headers: CORS, body: 'Method Not Allowed' };
   } catch (err) {
     console.error('admin-data error:', err);
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return { statusCode: 500, headers: CORS, body: JSON.stringify({ error: err.message }) };
   }
 };
-
-function getDefaults(resource) {
-  if (resource === 'settings') return {
-    adminEmails: [],
-    notifyOnEntry: true,
-    notifyOnSponsor: true,
-    eventName: '39th Annual Charity Golf Tournament',
-    eventDate: 'Monday, September 14, 2026',
-    eventVenue: "Hunter's Green Country Club, Tampa FL",
-  };
-  return [];
-}
