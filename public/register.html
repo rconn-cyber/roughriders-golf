@@ -376,11 +376,11 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
       <div class="player-count-row">
         <div class="player-count-label">
           Number of players
-          <span>Including yourself — max 4 per team · $165 per player</span>
+          <span>Max 4 per team · $165 per player · 0 if sponsoring only</span>
         </div>
         <div class="qty-controls">
           <button class="qty-btn" id="player-minus" onclick="changePlayerCount(-1)">−</button>
-          <div class="qty-display" id="player-count">1</div>
+          <div class="qty-display" id="player-count">0</div>
           <button class="qty-btn" id="player-plus" onclick="changePlayerCount(1)">+</button>
         </div>
       </div>
@@ -473,7 +473,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="total-bar-breakdown" id="reg-breakdown">1 player</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
-        <button class="btn-proceed" id="proceed-btn" onclick="handleProceed()">
+        <button class="btn-proceed" id="proceed-btn" onclick="handleProceed()" style="display:none;">
           Proceed to Payment →
         </button>
         <button onclick="handleViewSponsorship()" style="background:none;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);border-radius:5px;padding:7px 18px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.6)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,0.25)';this.style.color='rgba(255,255,255,0.7)'">
@@ -699,21 +699,23 @@ const MAX_PLAYERS  = 4;
 // ════════════════════════════════
 // REGISTRATION STATE
 // ════════════════════════════════
-let playerCount = 1;
+let playerCount = 0;
 const addons = {}; // { name: price }
 
 function changePlayerCount(delta) {
-  playerCount = Math.min(MAX_PLAYERS, Math.max(1, playerCount + delta));
+  playerCount = Math.min(MAX_PLAYERS, Math.max(0, playerCount + delta));
   document.getElementById('player-count').textContent = playerCount;
-  document.getElementById('player-minus').disabled = playerCount <= 1;
+  document.getElementById('player-minus').disabled = playerCount <= 0;
   document.getElementById('player-plus').disabled  = playerCount >= MAX_PLAYERS;
   renderAdditionalPlayers();
   updateRegTotal();
+  updatePayButton();
 }
 
 function renderAdditionalPlayers() {
   const container = document.getElementById('additional-players');
   container.innerHTML = '';
+  if (playerCount === 0) return;
   for (let i = 2; i <= playerCount; i++) {
     const div = document.createElement('div');
     div.className = 'add-player-block';
@@ -735,8 +737,23 @@ function renderAdditionalPlayers() {
   }
 }
 
+function hasAnythingOrdered() {
+  if (playerCount > 0) return true;
+  if (Object.keys(addons).length > 0) return true;
+  if (Object.keys(sponsorSelections).length > 0) return true;
+  return false;
+}
+
+function updatePayButton() {
+  const btn = document.getElementById('proceed-btn');
+  const viewBtn = document.getElementById('view-sponsor-btn');
+  const hasOrder = hasAnythingOrdered();
+  if (btn) {
+    btn.style.display = hasOrder ? 'block' : 'none';
+  }
+}
+
 function toggleAddon(el, price, name) {
-  // Uncheck Super Ticket if individual picked
   const superEl = document.querySelector('.addon-super');
   if (superEl && superEl.classList.contains('checked')) {
     superEl.classList.remove('checked');
@@ -745,6 +762,7 @@ function toggleAddon(el, price, name) {
   el.classList.toggle('checked');
   if (el.classList.contains('checked')) { addons[name] = price; } else { delete addons[name]; }
   updateRegTotal();
+  updatePayButton();
 }
 
 function toggleSuperTicket(el) {
@@ -762,6 +780,7 @@ function toggleSuperTicket(el) {
     grid.style.display = 'none';
   }
   updateRegTotal();
+  updatePayButton();
 }
 
 function updateRegTotal() {
@@ -773,12 +792,13 @@ function updateRegTotal() {
 
   document.getElementById('reg-total').textContent = fmt(total);
 
-  let breakdown = `${playerCount} player${playerCount>1?'s':''}`;
+  let breakdown = playerCount > 0 ? `${playerCount} player${playerCount>1?'s':''}` : '';
   const addonNames = Object.keys(addons);
-  if (addonNames.length) breakdown += ' + ' + addonNames.join(', ');
+  if (addonNames.length) breakdown += (breakdown ? ' + ' : '') + addonNames.join(', ');
   const sponsorNames = Object.values(sponsorSelections).map(s=>s.name);
-  if (sponsorNames.length) breakdown += ' · ' + sponsorNames.join(', ');
-  document.getElementById('reg-breakdown').textContent = breakdown;
+  if (sponsorNames.length) breakdown += (breakdown ? ' · ' : '') + sponsorNames.join(', ');
+  document.getElementById('reg-breakdown').textContent = breakdown || 'Nothing selected yet';
+  updatePayButton();
 }
 
 // ════════════════════════════════
@@ -1063,8 +1083,9 @@ function updateSponsorTotal() {
     bstats.innerHTML=html;
   } else { brow.classList.remove('show'); }
   document.getElementById('total-bar').classList.toggle('visible', total>0);
-  // Keep page-1 total bar in sync too
+  // Keep page-1 total bar and button in sync
   updateRegTotal();
+  updatePayButton();
 }
 
 function removeSponsor(id) {
@@ -1254,6 +1275,10 @@ function goPage(n) {
 
 // Check for Stripe success redirect
 if(window.location.search.includes('session_id')) goPage(2);
+
+// Initialize state on load
+updateRegTotal();
+updatePayButton();
 
 // Live timestamp
 function updateTimestamp() {
