@@ -22,19 +22,39 @@ function auth(event) {
 function getBlobStore() {
   const siteID = process.env.NETLIFY_SITE_ID;
   const token  = process.env.NETLIFY_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
-  const base   = `https://api.netlify.com/api/v1/blobs/${siteID}/golf-admin`;
+  const apiBase = `https://api.netlify.com/api/v1/sites/${siteID}/blobs`;
   const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
 
   return {
     async get(key) {
-      const r = await fetch(`${base}/${key}`, { headers });
-      if (r.status === 404) return null;
-      if (!r.ok) throw new Error(`Blob get ${key} failed: ${r.status}`);
-      return r.text();
+      // First get the presigned URL for the blob
+      const metaR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/' + key)}`, { headers });
+      if (metaR.status === 404) return null;
+      if (!metaR.ok) {
+        const txt = await metaR.text();
+        console.error('Blob meta GET failed:', metaR.status, txt);
+        return null;
+      }
+      const meta = await metaR.json();
+      if (!meta.url) return null;
+      // Fetch the actual content from the presigned URL
+      const dataR = await fetch(meta.url);
+      if (!dataR.ok) return null;
+      return dataR.text();
     },
     async set(key, value) {
-      const r = await fetch(`${base}/${key}`, { method: 'PUT', headers, body: typeof value === 'string' ? value : JSON.stringify(value) });
-      if (!r.ok) throw new Error(`Blob set ${key} failed: ${r.status}`);
+      const body = typeof value === 'string' ? value : JSON.stringify(value);
+      // Get presigned upload URL
+      const metaR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/' + key)}`, {
+        method: 'PUT',
+        headers: { ...headers, 'Content-Length': Buffer.byteLength(body).toString() },
+      });
+      if (!metaR.ok) throw new Error('Blob set presign failed: ' + metaR.status + ' ' + await metaR.text());
+      const meta = await metaR.json();
+      if (!meta.url) throw new Error('No presigned URL returned');
+      // Upload to presigned URL
+      const uploadR = await fetch(meta.url, { method: 'PUT', body, headers: { 'Content-Type': 'application/json' } });
+      if (!uploadR.ok) throw new Error('Blob upload failed: ' + uploadR.status);
     },
   };
 }
