@@ -358,7 +358,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
       </div>
       <div class="field-row">
         <div class="field" id="f-em">
-          <label>Email address *</label>
+          <label>Email address</label>
           <input id="inp-em" type="email" placeholder="you@example.com">
           <span class="err-msg">Valid email required</span>
         </div>
@@ -908,17 +908,19 @@ function proceedWithoutSponsor() {
 // PAY — REGISTRATION ONLY
 // ════════════════════════════════
 async function handleProceed() {
-  if (!validateReg()) {
+  // Only validate if they've actually filled in golfer info
+  const fn = document.getElementById('inp-fn').value.trim();
+  const ln = document.getElementById('inp-ln').value.trim();
+  const em = document.getElementById('inp-em').value.trim();
+  if ((fn || ln || em) && !validateReg()) {
     document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth', block:'center'});
     return;
   }
-  // No add-ons? Warn once — show modal AND highlight all addon items
   if (Object.keys(addons).length === 0) {
     document.getElementById('addon-modal').style.display = 'flex';
     highlightAddons();
     return;
   }
-  // No sponsorship? Warn once
   if (Object.keys(sponsorSelections).length === 0) {
     document.getElementById('sponsor-modal').style.display = 'flex';
     return;
@@ -927,11 +929,7 @@ async function handleProceed() {
 }
 
 async function handleViewSponsorship() {
-  if (!validateReg()) {
-    document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth', block:'center'});
-    return;
-  }
-  // No add-ons? Warn first
+  // No validation needed — sponsorship is independent of golfer registration
   if (Object.keys(addons).length === 0) {
     document.getElementById('addon-modal').style.display = 'flex';
     highlightAddons();
