@@ -1101,18 +1101,21 @@ function clearAll() {
   updateSponsorTotal();
 }
 
-document.getElementById('hole-minus').addEventListener('click',e=>{
+const holeMinus = document.getElementById('hole-minus');
+const holePlus  = document.getElementById('hole-plus');
+if (holeMinus) holeMinus.addEventListener('click',e=>{
   e.stopPropagation(); holeQty=Math.max(1,holeQty-1);
   document.getElementById('hole-qty').textContent=holeQty;
   if(sponsorSelections['hole']){sponsorSelections['hole'].price=250*holeQty;sponsorSelections['hole'].name=holeQty>1?`Hole Sponsor ×${holeQty}`:'Hole Sponsor';updateSponsorTotal();}
 });
-document.getElementById('hole-plus').addEventListener('click',e=>{
+if (holePlus) holePlus.addEventListener('click',e=>{
   e.stopPropagation(); holeQty=Math.min(18,holeQty+1);
   document.getElementById('hole-qty').textContent=holeQty;
   if(sponsorSelections['hole']){sponsorSelections['hole'].price=250*holeQty;sponsorSelections['hole'].name=holeQty>1?`Hole Sponsor ×${holeQty}`:'Hole Sponsor';updateSponsorTotal();}
 });
 
 document.querySelectorAll('.selectable').forEach(el=>{
+  if (!el) return;
   el.addEventListener('click',function(){
     const id=this.dataset.id,name=this.dataset.name,base=parseInt(this.dataset.price);
     if(this.classList.contains('selected')){
