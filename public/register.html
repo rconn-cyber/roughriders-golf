@@ -754,16 +754,19 @@ function toggleSuperTicket(el) {
 }
 
 function updateRegTotal() {
-  const regSubtotal  = playerCount * PLAYER_PRICE;
-  const addonTotal   = Object.values(addons).reduce((s,v)=>s+v, 0);
-  const total        = regSubtotal + addonTotal;
-  const fmt          = n => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const regSubtotal     = playerCount * PLAYER_PRICE;
+  const addonTotal      = Object.values(addons).reduce((s,v)=>s+v, 0);
+  const sponsorSubtotal = Object.values(sponsorSelections).reduce((s,v)=>s+v.price, 0);
+  const total           = regSubtotal + addonTotal + sponsorSubtotal;
+  const fmt             = n => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 
   document.getElementById('reg-total').textContent = fmt(total);
 
   let breakdown = `${playerCount} player${playerCount>1?'s':''}`;
   const addonNames = Object.keys(addons);
   if (addonNames.length) breakdown += ' + ' + addonNames.join(', ');
+  const sponsorNames = Object.values(sponsorSelections).map(s=>s.name);
+  if (sponsorNames.length) breakdown += ' · ' + sponsorNames.join(', ');
   document.getElementById('reg-breakdown').textContent = breakdown;
 }
 
@@ -825,13 +828,15 @@ function getAdditionalPlayers() {
 // ADDON HIGHLIGHT — scroll to & pulse
 // ════════════════════════════════
 function highlightAddons() {
-  document.getElementById('addon-modal').style.display = 'none';
-  const addonsSection = document.querySelector('.addon-super');
-  if (addonsSection) {
-    addonsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    addonsSection.classList.add('addon-highlight');
-    setTimeout(() => addonsSection.classList.remove('addon-highlight'), 2000);
-  }
+  // Pulse every addon item so they're all visible
+  const allAddons = document.querySelectorAll('.addon-item');
+  allAddons.forEach(el => {
+    el.classList.add('addon-highlight');
+    setTimeout(() => el.classList.remove('addon-highlight'), 2200);
+  });
+  // Scroll to the super ticket at top of addons
+  const superEl = document.querySelector('.addon-super');
+  if (superEl) superEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function selectSuperFromModal() {
@@ -869,13 +874,13 @@ async function handleProceed() {
     document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth', block:'center'});
     return;
   }
-  // No add-ons? Show upsell modal and highlight section
+  // No add-ons? Warn once — show modal AND highlight all addon items
   if (Object.keys(addons).length === 0) {
     document.getElementById('addon-modal').style.display = 'flex';
     highlightAddons();
     return;
   }
-  // No sponsorship? Show sponsor upsell modal
+  // No sponsorship? Warn once
   if (Object.keys(sponsorSelections).length === 0) {
     document.getElementById('sponsor-modal').style.display = 'flex';
     return;
@@ -888,7 +893,7 @@ async function handleViewSponsorship() {
     document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth', block:'center'});
     return;
   }
-  // No add-ons? Show upsell modal first before letting them go to sponsorships
+  // No add-ons? Warn first
   if (Object.keys(addons).length === 0) {
     document.getElementById('addon-modal').style.display = 'flex';
     highlightAddons();
@@ -898,12 +903,8 @@ async function handleViewSponsorship() {
 }
 
 async function proceedWithoutAddons() {
+  // They've been warned — close modal and go straight to checkout (no second sponsor intercept)
   document.getElementById('addon-modal').style.display = 'none';
-  // Still check for sponsorship
-  if (Object.keys(sponsorSelections).length === 0) {
-    document.getElementById('sponsor-modal').style.display = 'flex';
-    return;
-  }
   await doCheckout();
 }
 
@@ -1012,6 +1013,8 @@ function updateSponsorTotal() {
     bstats.innerHTML=html;
   } else { brow.classList.remove('show'); }
   document.getElementById('total-bar').classList.toggle('visible', total>0);
+  // Keep page-1 total bar in sync too
+  updateRegTotal();
 }
 
 function removeSponsor(id) {
