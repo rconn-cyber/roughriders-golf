@@ -49,31 +49,20 @@ exports.handler = async (event) => {
       });
     }
 
-    // 2. Create invoice items for each sponsorship
-    for (const item of sponsorships) {
-      await stripe.invoiceItems.create({
-        customer: customer.id,
-        amount: Math.round(item.price * 100), // cents
-        currency: 'usd',
-        description: item.name,
-      });
-    }
-
-    // 3. Create the invoice with auto-send and net 30 due date
-    const dueDate = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60); // 30 days from now
+    // 2. Create the invoice FIRST, then attach items to it
+    const dueDate = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60);
 
     const invoice = await stripe.invoices.create({
       customer: customer.id,
       collection_method: 'send_invoice',
       due_date: dueDate,
       description: 'Rough Riders 39th Annual Charity Golf Tournament — Sponsorship',
-      footer: 'Thank you for supporting the Rough Riders! Questions? Contact r.conn@tamparoughriders.org',
+      footer: 'Thank you for supporting the Rough Riders!\n\nTo pay by check, make payable to: "1st U.S. Volunteer Cavalry Regiment Rough Riders Inc"\nMail to: Tampa Rough Riders, PO Box 0000, Tampa, FL 33601\nInclude invoice number on your check.\n\nQuestions? Contact r.conn@tamparoughriders.org · (813) 239-4501',
       metadata: {
         source: 'rough-riders-golf',
         company: company || '',
         contact: `${firstName} ${lastName}`,
       },
-      // Custom fields shown on the invoice PDF
       custom_fields: [
         { name: 'Event', value: '39th Annual Charity Golf Tournament' },
         { name: 'Event Date', value: 'Monday, September 14, 2026' },
@@ -82,7 +71,18 @@ exports.handler = async (event) => {
       ],
     });
 
-    // 4. Finalize and send the invoice (triggers Stripe email to customer)
+    // 3. Create invoice items attached directly to this specific invoice
+    for (const item of sponsorships) {
+      await stripe.invoiceItems.create({
+        customer: customer.id,
+        invoice: invoice.id,          // ← attach to THIS invoice explicitly
+        amount: Math.round(item.price * 100),
+        currency: 'usd',
+        description: item.name,
+      });
+    }
+
+    // 4. Finalize and send
     await stripe.invoices.finalizeInvoice(invoice.id);
     await stripe.invoices.sendInvoice(invoice.id);
 
