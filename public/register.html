@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,63 +5,202 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Golf Tournament — Register & Sponsor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --green-dark: #1a3320; --green-mid: #2d5a3d; --green-light: #4a8c62;
   --green-pale: #d4e8d8; --gold: #c9a84c; --gold-light: #f0d48a;
-  --white: #ffffff; --text-dark: #1a1a18; --text-mid: #4a4a45; --text-light: #7a7a72;
+  --cream: #f8f4ed; --white: #ffffff;
+  --text-dark: #1a1a18; --text-mid: #4a4a45; --text-light: #7a7a72;
   --silver: #9aa4a8; --bronze: #b87333; --red: #c0392b;
+  --border: rgba(0,0,0,0.1);
 }
 html { font-size: 16px; }
 body { font-family: 'DM Sans', sans-serif; background: transparent; color: var(--text-dark); line-height: 1.6; }
 
 /* ── STEP NAV ── */
-.steps-nav { display: flex; margin-bottom: 36px; background: var(--white); border-radius: 6px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
-.step-tab { flex: 1; padding: 13px 8px; text-align: center; font-size: 13px; font-weight: 500; color: var(--text-light); background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; transition: all 0.18s; }
+.steps-nav {
+  display: flex; margin-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+.step-tab {
+  flex: 1; padding: 14px 8px; text-align: center;
+  font-size: 13px; font-weight: 500; color: var(--text-light);
+  background: none; border: none; border-bottom: 3px solid transparent;
+  cursor: pointer; transition: all 0.18s; margin-bottom: -1px;
+}
 .step-tab.active { color: var(--green-dark); border-bottom-color: var(--gold); }
 .step-tab.done { color: var(--green-light); }
-.step-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 11px; font-weight: 700; background: rgba(0,0,0,0.07); color: var(--text-mid); margin-right: 6px; }
+.step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%; font-size: 11px;
+  font-weight: 700; background: rgba(0,0,0,0.07); color: var(--text-mid);
+  margin-right: 7px; transition: all 0.18s;
+}
 .step-tab.active .step-num { background: var(--gold); color: var(--green-dark); }
 .step-tab.done .step-num { background: var(--green-light); color: white; }
 
 /* ── LAYOUT ── */
-main { max-width: 920px; margin: 0 auto; padding: 0 0 160px; }
+main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 .page { display: none; }
 .page.active { display: block; }
-.section-heading { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--green-dark); margin-bottom: 6px; }
-.section-sub { font-size: 14px; color: var(--text-light); margin-bottom: 32px; }
-.divider { border: none; border-top: 1px solid rgba(0,0,0,0.06); margin: 44px 0; }
-.nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
 
-/* ── BUTTONS ── */
-.btn-primary { padding: 13px 32px; border: none; border-radius: 4px; background: var(--green-dark); color: var(--white); font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: background 0.18s; }
-.btn-primary:hover { background: var(--green-mid); }
-.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn-secondary { padding: 11px 22px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; background: var(--white); color: var(--text-mid); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
-.btn-secondary:hover { border-color: var(--green-light); color: var(--green-dark); }
+/* ── REGISTRATION CARD ── */
+.reg-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
 
-/* ── GOLFER FORM ── */
-.golfer-block { background: var(--white); border: 1px solid rgba(0,0,0,0.09); border-radius: 6px; padding: 22px; margin-bottom: 14px; }
-.golfer-block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-.golfer-block-title { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green-dark); }
-.btn-remove { background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 20px; line-height: 1; padding: 0; transition: color 0.15s; }
-.btn-remove:hover { color: var(--red); }
-.reg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.field { display: flex; flex-direction: column; gap: 4px; }
-.field label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-mid); }
-.field input, .field select { padding: 9px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-dark); background: var(--white); outline: none; transition: border-color 0.15s; }
-.field input:focus, .field select:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(74,140,98,0.1); }
+.reg-section {
+  padding: 28px 32px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.reg-section:last-child { border-bottom: none; }
+
+.reg-section-title {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--green-dark); margin-bottom: 20px;
+}
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.field-row.single { grid-template-columns: 1fr; }
+.field-row:last-child { margin-bottom: 0; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-mid); }
+.field input, .field select {
+  padding: 10px 12px; border: 1px solid rgba(0,0,0,0.15); border-radius: 5px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-dark);
+  background: var(--white); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field input::placeholder { color: rgba(0,0,0,0.28); }
+.field input:focus, .field select:focus {
+  border-color: var(--green-light);
+  box-shadow: 0 0 0 3px rgba(74,140,98,0.12);
+}
 .field input.error { border-color: var(--red); }
 .err-msg { font-size: 11px; color: var(--red); display: none; }
 .has-error .err-msg { display: block; }
-.btn-add-golfer { width: 100%; padding: 12px; border: 2px dashed rgba(0,0,0,0.12); border-radius: 6px; background: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-light); transition: all 0.15s; margin-top: 4px; }
-.btn-add-golfer:hover { border-color: var(--green-light); color: var(--green-mid); background: var(--green-pale); }
 
-/* ── TIER CARDS ── */
+/* ── PLAYER COUNT ── */
+.player-count-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 0;
+}
+.player-count-label { font-size: 14px; color: var(--text-mid); }
+.player-count-label span { font-size: 12px; color: var(--text-light); display: block; }
+.qty-controls { display: flex; align-items: center; gap: 0; border: 1px solid var(--border); border-radius: 5px; overflow: hidden; }
+.qty-btn {
+  width: 36px; height: 36px; border: none; background: var(--white);
+  cursor: pointer; font-size: 18px; font-weight: 300; color: var(--text-mid);
+  transition: background 0.12s; display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.qty-btn:hover { background: var(--green-pale); color: var(--green-dark); }
+.qty-display {
+  width: 40px; text-align: center; font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700; color: var(--green-dark);
+  border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+}
+
+/* ── ADDITIONAL PLAYERS ── */
+.additional-players { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+.add-player-block {
+  background: #fafbfa; border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 6px; padding: 16px 18px;
+}
+.add-player-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-light); margin-bottom: 12px;
+}
+.add-player-note {
+  font-size: 12px; color: var(--text-light); margin-top: 8px; font-style: italic;
+}
+
+/* ── ADD-ONS ── */
+.addons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.addon-item {
+  display: flex; align-items: center; justify-content: space-between;
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 14px 16px; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.addon-item:hover { border-color: var(--green-light); background: #fafffe; }
+.addon-item.checked { border-color: var(--green-light); background: #f0f8f3; }
+.addon-item input[type="checkbox"] { display: none; }
+.addon-left { flex: 1; }
+.addon-name { font-size: 13.5px; font-weight: 500; color: var(--text-dark); }
+.addon-desc { font-size: 11.5px; color: var(--text-light); margin-top: 1px; }
+.addon-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: 10px; }
+.addon-price { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--green-dark); }
+.addon-check {
+  width: 20px; height: 20px; border-radius: 4px;
+  border: 2px solid rgba(0,0,0,0.2); background: white;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.addon-item.checked .addon-check {
+  background: var(--green-light); border-color: var(--green-light);
+}
+.addon-check svg { opacity: 0; transform: scale(0.5); transition: all 0.15s; }
+.addon-item.checked .addon-check svg { opacity: 1; transform: scale(1); }
+
+/* ── TOTAL BAR ── */
+.total-bar {
+  background: var(--green-dark); border-radius: 0 0 8px 8px;
+  padding: 18px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.total-bar-left { color: rgba(255,255,255,0.6); font-size: 13px; }
+.total-bar-amount {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 900; color: var(--gold-light);
+}
+.total-bar-breakdown { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+
+.btn-proceed {
+  background: var(--gold); color: var(--green-dark);
+  border: none; border-radius: 5px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 13px 28px; cursor: pointer; transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-proceed:hover { background: var(--gold-light); }
+.btn-proceed:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.secure-note {
+  text-align: center; font-size: 12px; color: var(--text-light);
+  margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.secure-note a { color: var(--green-light); text-decoration: none; }
+
+/* ── PAY ERROR ── */
+#pay-error {
+  display: none; margin: 0 32px 16px;
+  font-size: 13px; color: var(--red);
+  background: #fdf0ef; border-radius: 5px;
+  padding: 10px 14px; border-left: 3px solid var(--red);
+}
+
+/* ── SPONSORSHIP (PAGE 2) — reuse existing styles ── */
+.section-heading { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--green-dark); margin-bottom: 6px; }
+.section-sub { font-size: 14px; color: var(--text-light); margin-bottom: 32px; }
+.divider { border: none; border-top: 1px solid rgba(0,0,0,0.06); margin: 40px 0; }
+.nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
+.btn-primary { padding: 13px 32px; border: none; border-radius: 5px; background: var(--green-dark); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: background 0.18s; }
+.btn-primary:hover { background: var(--green-mid); }
+.btn-secondary { padding: 11px 22px; border: 1px solid rgba(0,0,0,0.15); border-radius: 5px; background: var(--white); color: var(--text-mid); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.btn-secondary:hover { border-color: var(--green-light); color: var(--green-dark); }
+
+/* TIERS */
 .tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 48px; }
-.tier { border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; background: var(--white); border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s, border-color 0.18s; cursor: pointer; user-select: none; position: relative; }
+.tier { border-radius: 5px; overflow: hidden; display: flex; flex-direction: column; background: var(--white); border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s, border-color 0.18s; cursor: pointer; user-select: none; position: relative; }
 .tier:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
 .tier.selected { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.22); }
 .tier-header { padding: 22px 20px 18px; position: relative; }
@@ -71,8 +209,8 @@ main { max-width: 920px; margin: 0 auto; padding: 0 0 160px; }
 .tier.silver-tier .tier-header { background: linear-gradient(135deg, #2a2e30, #4a5255); }
 .tier.bronze-tier .tier-header { background: linear-gradient(135deg, #3d1e0a, #6b3316); }
 .tier-label { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px; }
-.tier.title-tier  .tier-label { color: var(--gold-light); }
-.tier.gold-tier   .tier-label { color: var(--gold-light); }
+.tier.title-tier .tier-label { color: var(--gold-light); }
+.tier.gold-tier  .tier-label { color: var(--gold-light); }
 .tier.silver-tier .tier-label { color: #c8d0d4; }
 .tier.bronze-tier .tier-label { color: #e8c4a0; }
 .tier-price { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 900; color: var(--white); line-height: 1; }
@@ -87,16 +225,14 @@ main { max-width: 920px; margin: 0 auto; padding: 0 0 160px; }
 .tier.silver-tier .perk-dot { background: var(--silver); }
 .tier.bronze-tier .perk-dot { background: var(--bronze); }
 .perk strong { color: var(--text-dark); font-weight: 500; }
-
-/* check badge */
 .check-badge { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); background: transparent; display: flex; align-items: center; justify-content: center; transition: all 0.18s; z-index: 2; }
 .check-badge svg { opacity: 0; transform: scale(0.5); transition: all 0.18s; }
 .selectable { cursor: pointer; user-select: none; position: relative; }
 .selectable.selected .check-badge { background: var(--gold); border-color: var(--gold); }
 .selectable.selected .check-badge svg { opacity: 1; transform: scale(1); }
 
-/* ── HOLE SPONSOR ── */
-.hole-sponsor { background: var(--white); border: 2px solid transparent; border-left: 4px solid var(--green-light); border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.07); padding: 24px 28px; display: flex; align-items: flex-start; gap: 28px; margin-bottom: 48px; flex-wrap: wrap; transition: border-color 0.18s, box-shadow 0.18s; cursor: pointer; user-select: none; position: relative; }
+/* HOLE SPONSOR */
+.hole-sponsor { background: var(--white); border: 2px solid transparent; border-left: 4px solid var(--green-light); border-radius: 5px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.07); padding: 24px 28px; display: flex; align-items: flex-start; gap: 28px; margin-bottom: 48px; flex-wrap: wrap; transition: border-color 0.18s, box-shadow 0.18s; cursor: pointer; user-select: none; position: relative; }
 .hole-sponsor.selected { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.2); }
 .hole-sponsor .check-badge { border-color: rgba(0,0,0,0.2); }
 .hole-sponsor.selected .check-badge { background: var(--gold); border-color: var(--gold); }
@@ -105,17 +241,14 @@ main { max-width: 920px; margin: 0 auto; padding: 0 0 160px; }
 .hole-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--green-light); font-weight: 600; margin-bottom: 4px; }
 .hole-price { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 900; color: var(--green-dark); line-height: 1; }
 .hole-perks { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-top: 4px; }
-.perk-tag { font-size: 12px; background: var(--green-pale); padding: 4px 10px; border-radius: 2px; color: var(--green-dark); }
+.perk-tag { font-size: 12px; background: var(--green-pale); padding: 4px 10px; border-radius: 3px; color: var(--green-dark); }
 .hole-qty-row { display: none; align-items: center; gap: 10px; margin-top: 4px; width: 100%; flex-basis: 100%; }
 .hole-sponsor.selected .hole-qty-row { display: flex; }
 .hole-qty-label { font-size: 13px; color: var(--text-mid); }
-.qty-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); background: var(--white); cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
-.qty-btn:hover { background: var(--green-pale); }
-.qty-val { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; min-width: 24px; text-align: center; color: var(--green-dark); }
 
-/* ── À LA CARTE ── */
+/* ALACARTE */
 .alacarte-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; align-items: start; }
-.alacarte-card { background: var(--white); border: 2px solid transparent; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.07); padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: border-color 0.18s, box-shadow 0.18s; }
+.alacarte-card { background: var(--white); border: 2px solid transparent; border-radius: 5px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.07); padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: border-color 0.18s, box-shadow 0.18s; }
 .alacarte-card:hover { box-shadow: inset 0 0 0 1px var(--green-light), 0 4px 14px rgba(0,0,0,0.06); }
 .alacarte-card.selected { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.2); }
 .alacarte-card .check-badge { border-color: rgba(0,0,0,0.18); }
@@ -127,59 +260,19 @@ main { max-width: 920px; margin: 0 auto; padding: 0 0 160px; }
 .alacarte-benefits li { font-size: 12px; color: var(--text-mid); display: flex; align-items: flex-start; gap: 6px; }
 .alacarte-benefits li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--green-light); flex-shrink: 0; margin-top: 4px; }
 
-/* ── REVIEW PAGE ── */
-.review-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; align-items: start; }
-.review-panel { background: var(--white); border: 1px solid rgba(0,0,0,0.08); border-radius: 6px; padding: 24px; }
-.review-panel h3 { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--green-dark); margin-bottom: 18px; }
-.order-line { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13.5px; }
-.order-line:last-of-type { border-bottom: none; }
-.order-line-name { color: var(--text-mid); flex: 1; }
-.order-line-price { font-weight: 500; white-space: nowrap; }
-.order-total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 2px solid rgba(0,0,0,0.1); margin-top: 6px; }
-.order-total-label { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-mid); }
-.order-total-price { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--green-dark); }
-.golfer-review-list { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(0,0,0,0.06); }
-.golfer-review-list h4 { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-light); margin-bottom: 10px; }
-.golfer-review-item { font-size: 13px; color: var(--text-mid); padding: 5px 0; border-bottom: 1px solid rgba(0,0,0,0.04); }
-.golfer-review-item:last-child { border-bottom: none; }
-.golfer-review-item strong { color: var(--text-dark); }
-
-/* pay button */
-.pay-panel { display: flex; flex-direction: column; gap: 14px; }
-.pay-note { font-size: 12.5px; color: var(--text-light); line-height: 1.5; }
-.pay-note a { color: var(--green-light); }
-#pay-btn { width: 100%; padding: 15px; border: none; border-radius: 4px; background: var(--green-dark); color: var(--white); font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 900; cursor: pointer; transition: background 0.18s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-#pay-btn:hover { background: var(--green-mid); }
-#pay-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.pay-logos { display: flex; gap: 8px; justify-content: center; font-size: 11px; color: var(--text-light); align-items: center; }
-.square-badge { background: var(--green-dark); color: white; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 3px; }
-#pay-error { font-size: 13px; color: var(--red); display: none; padding: 10px 14px; background: #fdf0ef; border-radius: 4px; border-left: 3px solid var(--red); }
-
-/* success */
-.success-screen { text-align: center; padding: 64px 20px; }
-.success-icon { font-size: 64px; margin-bottom: 16px; }
-.success-screen h2 { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 900; color: var(--green-dark); margin-bottom: 10px; }
-.success-screen p { font-size: 15px; color: var(--text-mid); max-width: 460px; margin: 0 auto; }
-
-/* ── STICKY BAR ── */
+/* STICKY SPONSOR BAR */
 #total-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--green-dark); z-index: 100; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1); box-shadow: 0 -4px 24px rgba(0,0,0,0.3); }
 #total-bar.visible { transform: translateY(0); }
-
-/* Benefits row */
-.benefits-row { max-width: 920px; margin: 0 auto; padding: 12px 24px 10px; border-bottom: 1px solid rgba(255,255,255,0.09); display: none; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
+.benefits-row { max-width: 680px; margin: 0 auto; padding: 10px 24px 8px; border-bottom: 1px solid rgba(255,255,255,0.09); display: none; flex-wrap: wrap; align-items: flex-start; gap: 10px; }
 .benefits-row.show { display: flex; }
-.benefits-heading { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.4); flex-shrink: 0; padding-top: 8px; }
+.benefits-heading { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.4); flex-shrink: 0; padding-top: 6px; }
 .bstats { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
-/* Big stat tiles */
-.bstat-big { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.12); border-radius: 6px; padding: 8px 18px; min-width: 72px; border: 1px solid rgba(255,255,255,0.08); }
-.bstat-big .bval { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; color: var(--gold-light); line-height: 1; }
-.bstat-big .blbl { font-size: 9px; color: rgba(255,255,255,0.55); margin-top: 3px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.07em; }
-/* Perk pills */
-.bstat-pill { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: rgba(255,255,255,0.7); white-space: nowrap; }
-.bstat-pill::before { content: '✓'; color: var(--gold); font-size: 11px; font-weight: 700; }
-
-/* Bottom row */
-.total-bar-inner { max-width: 920px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.bstat-big { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.12); border-radius: 5px; padding: 6px 14px; min-width: 64px; border: 1px solid rgba(255,255,255,0.08); }
+.bstat-big .bval { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--gold-light); line-height: 1; }
+.bstat-big .blbl { font-size: 9px; color: rgba(255,255,255,0.55); margin-top: 2px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.06em; }
+.bstat-pill { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 4px 10px; font-size: 11.5px; color: rgba(255,255,255,0.7); white-space: nowrap; }
+.bstat-pill::before { content: '✓'; color: var(--gold); font-size: 10px; font-weight: 700; }
+.total-bar-inner { max-width: 680px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .total-chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
 .chip { font-size: 11.5px; color: var(--white); background: rgba(255,255,255,0.1); border-radius: 3px; padding: 3px 8px 3px 10px; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
 .chip-price { opacity: 0.5; font-size: 10.5px; }
@@ -187,49 +280,199 @@ main { max-width: 920px; margin: 0 auto; padding: 0 0 160px; }
 .chip-x:hover { color: var(--white); }
 .total-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
 .total-label-sm { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
-.total-figure { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 900; color: var(--gold-light); line-height: 1; }
+.total-figure { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--gold-light); line-height: 1; }
 .btn-bar-clear { background: none; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); cursor: pointer; font-size: 11px; padding: 6px 12px; border-radius: 3px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
 .btn-bar-clear:hover { border-color: rgba(255,255,255,0.45); color: var(--white); }
-.btn-bar-continue { background: var(--gold); color: var(--green-dark); border: none; font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; padding: 10px 22px; border-radius: 4px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.btn-bar-continue { background: var(--gold); color: var(--green-dark); border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 10px 20px; border-radius: 4px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
 .btn-bar-continue:hover { background: var(--gold-light); }
 
-@media (max-width: 720px) {
-  .review-grid { grid-template-columns: 1fr; }
-  .reg-grid { grid-template-columns: 1fr; }
+/* SUCCESS */
+.success-screen { text-align: center; padding: 64px 20px; }
+.success-icon { font-size: 64px; margin-bottom: 16px; }
+.success-screen h2 { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 900; color: var(--green-dark); margin-bottom: 10px; }
+.success-screen p { font-size: 15px; color: var(--text-mid); max-width: 460px; margin: 0 auto; }
+
+@media (max-width: 600px) {
+  .addons-grid { grid-template-columns: 1fr; }
+  .field-row { grid-template-columns: 1fr; }
+  .reg-section { padding: 20px; }
+  .total-bar { padding: 14px 20px; }
   .tiers { grid-template-columns: 1fr 1fr; }
   .total-chips { display: none; }
-  .benefits-row { padding: 10px 16px 8px; }
-  .total-bar-inner { padding: 10px 16px; }
 }
-@media (max-width: 420px) { .tiers { grid-template-columns: 1fr; } }
+@media (max-width: 400px) { .tiers { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
 <nav class="steps-nav" id="steps-nav">
-  <button class="step-tab active" onclick="goPage(0)"><span class="step-num">1</span>Golfer Info</button>
+  <button class="step-tab active" onclick="goPage(0)"><span class="step-num">1</span>Player Info</button>
   <button class="step-tab"        onclick="goPage(1)"><span class="step-num">2</span>Sponsorship</button>
-  <button class="step-tab"        onclick="goPage(2)"><span class="step-num">3</span>Review &amp; Pay</button>
+  <button class="step-tab"        onclick="goPage(2)"><span class="step-num">3</span>Confirmation</button>
 </nav>
 
 <main>
 
-<!-- ══════════ PAGE 1: GOLFER REGISTRATION ══════════ -->
+<!-- ══════════ PAGE 1: REGISTRATION ══════════ -->
 <div class="page active" id="page-0">
-  <p class="section-heading">Golfer Registration</p>
-  <p class="section-sub">Add everyone in your group. At least one golfer is required to continue.</p>
-  <div id="golfers-container"></div>
-  <button class="btn-add-golfer" onclick="addGolfer()">+ Add another golfer</button>
-  <div class="nav-btns">
-    <span></span>
-    <button class="btn-primary" onclick="nextPage(0)">Continue to Sponsorship →</button>
+  <div class="reg-card">
+
+    <!-- Primary registrant -->
+    <div class="reg-section">
+      <div class="reg-section-title">Player Information</div>
+      <div class="field-row">
+        <div class="field" id="f-fn">
+          <label>First name *</label>
+          <input id="inp-fn" type="text" placeholder="Theodore">
+          <span class="err-msg">Required</span>
+        </div>
+        <div class="field" id="f-ln">
+          <label>Last name *</label>
+          <input id="inp-ln" type="text" placeholder="Roosevelt">
+          <span class="err-msg">Required</span>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field" id="f-em">
+          <label>Email address *</label>
+          <input id="inp-em" type="email" placeholder="you@example.com">
+          <span class="err-msg">Valid email required</span>
+        </div>
+        <div class="field" id="f-ph">
+          <label>Phone number</label>
+          <input id="inp-ph" type="tel" placeholder="(813) 555-0100">
+        </div>
+      </div>
+      <div class="field-row single">
+        <div class="field">
+          <label>Member # <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="inp-mb" type="text" placeholder="Optional">
+        </div>
+      </div>
+    </div>
+
+    <!-- Player count -->
+    <div class="reg-section">
+      <div class="reg-section-title">Players in Your Group</div>
+      <div class="player-count-row">
+        <div class="player-count-label">
+          Number of players
+          <span>Including yourself — max 4 per team · $165 per player</span>
+        </div>
+        <div class="qty-controls">
+          <button class="qty-btn" id="player-minus" onclick="changePlayerCount(-1)">−</button>
+          <div class="qty-display" id="player-count">1</div>
+          <button class="qty-btn" id="player-plus" onclick="changePlayerCount(1)">+</button>
+        </div>
+      </div>
+      <!-- Additional player name fields -->
+      <div class="additional-players" id="additional-players"></div>
+    </div>
+
+    <!-- Add-ons -->
+    <div class="reg-section">
+      <div class="reg-section-title">Add-ons <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional</span></div>
+      <div class="addons-grid">
+
+        <label class="addon-item" onclick="toggleAddon(this, 20, 'Mulligan Pack')">
+          <input type="checkbox">
+          <div class="addon-left">
+            <div class="addon-name">Mulligan pack</div>
+            <div class="addon-desc">3 mulligans per player</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$20</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </label>
+
+        <label class="addon-item" onclick="toggleAddon(this, 10, 'Closest to Pin')">
+          <input type="checkbox">
+          <div class="addon-left">
+            <div class="addon-name">Closest to pin</div>
+            <div class="addon-desc">Contest entry</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$10</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </label>
+
+        <label class="addon-item" onclick="toggleAddon(this, 10, 'Longest Drive')">
+          <input type="checkbox">
+          <div class="addon-left">
+            <div class="addon-name">Longest drive</div>
+            <div class="addon-desc">Contest entry</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$10</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </label>
+
+        <label class="addon-item" onclick="toggleAddon(this, 25, 'Raffle Tickets')">
+          <input type="checkbox">
+          <div class="addon-left">
+            <div class="addon-name">Raffle tickets</div>
+            <div class="addon-desc">5 tickets</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$25</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </label>
+
+        <label class="addon-item" onclick="toggleAddon(this, 50, 'Hole Sponsorship')">
+          <input type="checkbox">
+          <div class="addon-left">
+            <div class="addon-name">Hole sponsorship</div>
+            <div class="addon-desc">Signage on one hole</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$50</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </label>
+
+        <label class="addon-item" onclick="toggleAddon(this, 30, 'Awards Dinner Guest')">
+          <input type="checkbox">
+          <div class="addon-left">
+            <div class="addon-name">Awards dinner</div>
+            <div class="addon-desc">Additional guest ticket</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$30</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </label>
+
+      </div>
+    </div>
+
+    <!-- Total + proceed -->
+    <div id="pay-error"></div>
+    <div class="total-bar">
+      <div class="total-bar-left">
+        <div class="total-bar-amount" id="reg-total">$165.00</div>
+        <div class="total-bar-breakdown" id="reg-breakdown">1 player</div>
+      </div>
+      <button class="btn-proceed" id="proceed-btn" onclick="handleProceed()">
+        Proceed to Payment →
+      </button>
+    </div>
+
+  </div>
+  <div class="secure-note">
+    <svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M6 1L1 3.5V7c0 2.76 2.14 5.34 5 6 2.86-.66 5-3.24 5-6V3.5L6 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+    Secure payment processed by Stripe
+    · Questions? <a href="mailto:r.conn@tamparoughriders.org">r.conn@tamparoughriders.org</a>
   </div>
 </div>
 
 <!-- ══════════ PAGE 2: SPONSORSHIP ══════════ -->
 <div class="page" id="page-1">
   <p class="section-heading">Presenting Sponsorships</p>
-  <p class="section-sub">Full tournament packages — click any card to select. Sponsorship is optional.</p>
+  <p class="section-sub">Full tournament packages — click any card to select. Sponsorship is optional, skip to pay registration only.</p>
 
   <div class="tiers">
     <div class="tier title-tier selectable" data-id="title" data-name="Title Sponsor" data-price="7500">
@@ -294,19 +537,21 @@ main { max-width: 920px; margin: 0 auto; padding: 0 0 160px; }
     <div class="hole-price-block"><div class="hole-label">Per hole</div><div class="hole-price">$250</div></div>
     <div class="hole-perks">
       <span class="perk-tag">Custom tee sign</span><span class="perk-tag">Name &amp; logo on-course</span>
-      <span class="perk-tag">Sponsor board</span><span class="perk-tag">Website listing</span><span class="perk-tag">Social media</span>
+      <span class="perk-tag">Sponsor board</span><span class="perk-tag">Website listing</span>
     </div>
     <div class="hole-qty-row">
       <span class="hole-qty-label">Number of holes:</span>
-      <button class="qty-btn" id="hole-minus">−</button>
-      <span class="qty-val" id="hole-qty">1</span>
-      <button class="qty-btn" id="hole-plus">+</button>
+      <div class="qty-controls">
+        <button class="qty-btn" id="hole-minus">−</button>
+        <div class="qty-display" id="hole-qty">1</div>
+        <button class="qty-btn" id="hole-plus">+</button>
+      </div>
     </div>
   </div>
 
   <hr class="divider">
 
-  <p class="section-heading">À La Carte &amp; Specialty Sponsorships</p>
+  <p class="section-heading">À La Carte &amp; Specialty</p>
   <p class="section-sub">Add individual opportunities to your package</p>
   <div class="alacarte-grid">
     <div class="alacarte-card selectable" data-id="bev-cart" data-name="Beverage Cart" data-price="750">
@@ -329,12 +574,12 @@ main { max-width: 920px; margin: 0 auto; padding: 0 0 160px; }
       <div class="alacarte-card-top"><span class="alacarte-name">Lunch / Dinner</span><span class="alacarte-price">$1,250</span></div>
       <ul class="alacarte-benefits"><li>Prominent branded signage at meal service</li><li>Verbal recognition &amp; thank-you during awards</li><li>Logo on tournament materials &amp; website</li></ul>
     </div>
-    <div class="alacarte-card selectable" data-id="long-drive" data-name="Longest Drive" data-price="400">
+    <div class="alacarte-card selectable" data-id="long-drive-sp" data-name="Longest Drive Sponsor" data-price="400">
       <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="alacarte-card-top"><span class="alacarte-name">Longest Drive</span><span class="alacarte-price">$400</span></div>
       <ul class="alacarte-benefits"><li>Branded tee sign at contest hole</li><li>Name announced when winner is presented</li><li>Logo on tournament materials &amp; website</li></ul>
     </div>
-    <div class="alacarte-card selectable" data-id="close-pin" data-name="Closest to the Pin" data-price="400">
+    <div class="alacarte-card selectable" data-id="close-pin-sp" data-name="Closest to the Pin Sponsor" data-price="400">
       <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="alacarte-card-top"><span class="alacarte-name">Closest to the Pin</span><span class="alacarte-price">$400</span></div>
       <ul class="alacarte-benefits"><li>Branded tee sign at contest hole</li><li>Name announced when winner is presented</li><li>Logo on tournament materials &amp; website</li></ul>
@@ -347,7 +592,7 @@ main { max-width: 920px; margin: 0 auto; padding: 0 0 160px; }
     <div class="alacarte-card selectable" data-id="cooler" data-name="Cooler Bag" data-price="600">
       <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="alacarte-card-top"><span class="alacarte-name">Cooler Bag</span><span class="alacarte-price">$600</span></div>
-      <ul class="alacarte-benefits"><li>Logo imprinted on every player's cooler bag</li><li>Lasting impression — bags go home with golfers</li><li>Logo on tournament materials &amp; website</li></ul>
+      <ul class="alacarte-benefits"><li>Logo imprinted on every player's cooler bag</li><li>Bags go home with golfers</li><li>Logo on tournament materials &amp; website</li></ul>
     </div>
     <div class="alacarte-card selectable" data-id="tee-gift" data-name="Tee Gift" data-price="500">
       <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -378,61 +623,22 @@ main { max-width: 920px; margin: 0 auto; padding: 0 0 160px; }
 
   <div class="nav-btns">
     <button class="btn-secondary" onclick="goPage(0)">← Back</button>
-    <button class="btn-primary" onclick="nextPage(1)">Review &amp; Pay →</button>
+    <button class="btn-primary" onclick="handleSponsorPay()">Proceed to Payment →</button>
   </div>
 </div>
 
-<!-- ══════════ PAGE 3: REVIEW & PAY ══════════ -->
+<!-- ══════════ PAGE 3: SUCCESS ══════════ -->
 <div class="page" id="page-2">
-  <p class="section-heading">Review &amp; Pay</p>
-  <p class="section-sub">Confirm everything looks right, then click Pay Now to complete your order through Square.</p>
-  <div class="review-grid">
-    <div class="review-panel">
-      <h3>Order Summary</h3>
-      <div id="order-lines"></div>
-      <div class="order-total-row">
-        <span class="order-total-label">Total</span>
-        <span class="order-total-price" id="order-total-price">$0</span>
-      </div>
-      <div class="golfer-review-list" id="golfer-review-list"></div>
-    </div>
-    <div class="pay-panel">
-      <div class="review-panel">
-        <h3>Complete Payment</h3>
-        <p class="pay-note">
-          Clicking <strong>Pay Now</strong> will open Square's secure checkout in a new tab.
-          Your card details are handled entirely by Square and never touch our servers.
-        </p>
-        <br>
-        <div id="pay-error"></div>
-        <button id="pay-btn" onclick="handlePayNow()">
-          <span id="pay-btn-text">Pay Now →</span>
-        </button>
-        <div class="pay-logos">
-          <span class="square-badge">Secured by Square</span>
-          <span>· Visa · Mastercard · Amex · Apple Pay · Google Pay</span>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="nav-btns">
-    <button class="btn-secondary" onclick="goPage(1)">← Back</button>
-    <span></span>
-  </div>
-</div>
-
-<!-- ══════════ PAGE 4: SUCCESS ══════════ -->
-<div class="page" id="page-3">
   <div class="success-screen">
     <div class="success-icon">🏌️</div>
     <h2>You're on the course!</h2>
-    <p>Your registration and sponsorship have been confirmed. Check your email for a receipt from Square. We'll be in touch with event details — see you on the green!</p>
+    <p>Your registration is confirmed. Check your email for a receipt from Stripe. We'll be in touch with all event details — see you on the green!</p>
   </div>
 </div>
 
 </main>
 
-<!-- Sticky total bar -->
+<!-- Sticky sponsor bar (page 2 only) -->
 <div id="total-bar">
   <div class="benefits-row" id="benefits-row">
     <span class="benefits-heading">What you get:</span>
@@ -442,130 +648,190 @@ main { max-width: 920px; margin: 0 auto; padding: 0 0 160px; }
     <div class="total-chips" id="total-chips"></div>
     <div class="total-right">
       <div>
-        <div class="total-label-sm">Total</div>
+        <div class="total-label-sm">Sponsorship</div>
         <div class="total-figure" id="total-figure">$0</div>
       </div>
       <button class="btn-bar-clear" onclick="clearAll()">Clear</button>
-      <button class="btn-bar-continue" onclick="nextPage(1)">Review &amp; Pay →</button>
+      <button class="btn-bar-continue" onclick="handleSponsorPay()">Pay Now →</button>
     </div>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════════════
-// CONFIG — set your Netlify site URL here
-// ════════════════════════════════════════
-const NETLIFY_BASE = 'https://YOUR-SITE.netlify.app';
+// ════════════════════════════════
+// CONFIG
+// ════════════════════════════════
+const NETLIFY_BASE = 'https://rr-golf.netlify.app';
+const PLAYER_PRICE = 165;
+const MAX_PLAYERS  = 4;
 
-// ════════════════════════════════════════
-// GOLFER REGISTRATION
-// ════════════════════════════════════════
-let golferIndex = 0;
-const SHIRTS = ['XS','S','M','L','XL','2XL','3XL'];
+// ════════════════════════════════
+// REGISTRATION STATE
+// ════════════════════════════════
+let playerCount = 1;
+const addons = {}; // { name: price }
 
-function addGolfer() {
-  const idx = golferIndex++;
-  const wrap = document.createElement('div');
-  wrap.className = 'golfer-block';
-  wrap.id = `golfer-${idx}`;
-  wrap.innerHTML = `
-    <div class="golfer-block-header">
-      <span class="golfer-block-title">Golfer ${document.querySelectorAll('.golfer-block').length + 1}</span>
-      ${idx > 0 ? `<button class="btn-remove" onclick="removeGolfer(${idx})" title="Remove">×</button>` : ''}
-    </div>
-    <div class="reg-grid">
-      <div class="field" id="f-fn-${idx}"><label>First Name *</label><input id="fn-${idx}" type="text" placeholder="Jane"><span class="err-msg">Required</span></div>
-      <div class="field" id="f-ln-${idx}"><label>Last Name *</label><input id="ln-${idx}" type="text" placeholder="Smith"><span class="err-msg">Required</span></div>
-      <div class="field" id="f-em-${idx}"><label>Email *</label><input id="em-${idx}" type="email" placeholder="jane@example.com"><span class="err-msg">Valid email required</span></div>
-      <div class="field" id="f-ph-${idx}"><label>Phone *</label><input id="ph-${idx}" type="tel" placeholder="(813) 555-0100"><span class="err-msg">Required</span></div>
-      <div class="field"><label>Company / Team</label><input id="co-${idx}" type="text" placeholder="Acme Corp"></div>
-      <div class="field"><label>Handicap</label><input id="hc-${idx}" type="number" placeholder="12" min="0" max="54"></div>
-      <div class="field">
-        <label>Shirt Size</label>
-        <select id="sh-${idx}"><option value="">Select…</option>${SHIRTS.map(s=>`<option>${s}</option>`).join('')}</select>
+function changePlayerCount(delta) {
+  playerCount = Math.min(MAX_PLAYERS, Math.max(1, playerCount + delta));
+  document.getElementById('player-count').textContent = playerCount;
+  document.getElementById('player-minus').disabled = playerCount <= 1;
+  document.getElementById('player-plus').disabled  = playerCount >= MAX_PLAYERS;
+  renderAdditionalPlayers();
+  updateRegTotal();
+}
+
+function renderAdditionalPlayers() {
+  const container = document.getElementById('additional-players');
+  container.innerHTML = '';
+  for (let i = 2; i <= playerCount; i++) {
+    const div = document.createElement('div');
+    div.className = 'add-player-block';
+    div.innerHTML = `
+      <div class="add-player-title">Player ${i}</div>
+      <div class="field-row">
+        <div class="field">
+          <label>First name</label>
+          <input id="p${i}-fn" type="text" placeholder="First name (optional)">
+        </div>
+        <div class="field">
+          <label>Last name</label>
+          <input id="p${i}-ln" type="text" placeholder="Last name (optional)">
+        </div>
       </div>
-    </div>`;
-  document.getElementById('golfers-container').appendChild(wrap);
-  // Renumber visible golfer headers
-  renumberGolfers();
+      <div class="add-player-note">Names can be added later if not known yet</div>
+    `;
+    container.appendChild(div);
+  }
 }
 
-function removeGolfer(idx) {
-  document.getElementById(`golfer-${idx}`)?.remove();
-  renumberGolfers();
+function toggleAddon(el, price, name) {
+  el.classList.toggle('checked');
+  const cb = el.querySelector('input[type="checkbox"]');
+  cb.checked = !cb.checked;
+  if (cb.checked) { addons[name] = price; } else { delete addons[name]; }
+  updateRegTotal();
 }
 
-function renumberGolfers() {
-  document.querySelectorAll('.golfer-block').forEach((b, i) => {
-    b.querySelector('.golfer-block-title').textContent = `Golfer ${i + 1}`;
-  });
+function updateRegTotal() {
+  const regSubtotal  = playerCount * PLAYER_PRICE;
+  const addonTotal   = Object.values(addons).reduce((s,v)=>s+v, 0);
+  const total        = regSubtotal + addonTotal;
+  const fmt          = n => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  document.getElementById('reg-total').textContent = fmt(total);
+
+  let breakdown = `${playerCount} player${playerCount>1?'s':''}`;
+  const addonNames = Object.keys(addons);
+  if (addonNames.length) breakdown += ' + ' + addonNames.join(', ');
+  document.getElementById('reg-breakdown').textContent = breakdown;
 }
 
-function getGolferData() {
-  return [...document.querySelectorAll('.golfer-block')].map(block => {
-    const idx = parseInt(block.id.replace('golfer-',''));
-    return {
-      firstName: document.getElementById(`fn-${idx}`)?.value.trim() || '',
-      lastName:  document.getElementById(`ln-${idx}`)?.value.trim() || '',
-      email:     document.getElementById(`em-${idx}`)?.value.trim() || '',
-      phone:     document.getElementById(`ph-${idx}`)?.value.trim() || '',
-      company:   document.getElementById(`co-${idx}`)?.value.trim() || '',
-      handicap:  document.getElementById(`hc-${idx}`)?.value.trim() || '',
-      shirt:     document.getElementById(`sh-${idx}`)?.value || '',
-    };
-  });
-}
-
-function validateGolfers() {
+// ════════════════════════════════
+// VALIDATION
+// ════════════════════════════════
+function validateReg() {
   let valid = true;
-  document.querySelectorAll('.golfer-block').forEach(block => {
-    const idx = parseInt(block.id.replace('golfer-',''));
-    [['fn','Required'],['ln','Required'],['ph','Required']].forEach(([f, msg]) => {
-      const inp  = document.getElementById(`${f}-${idx}`);
-      const wrap = document.getElementById(`f-${f}-${idx}`);
-      if (!inp || !wrap) return;
-      const ok = inp.value.trim().length > 0;
-      wrap.classList.toggle('has-error', !ok);
-      inp.classList.toggle('error', !ok);
-      if (!ok) valid = false;
-    });
-    const em   = document.getElementById(`em-${idx}`);
-    const emw  = document.getElementById(`f-em-${idx}`);
-    if (em && emw) {
-      const ok = /\S+@\S+\.\S+/.test(em.value);
-      emw.classList.toggle('has-error', !ok);
-      em.classList.toggle('error', !ok);
-      if (!ok) valid = false;
-    }
+  [['fn','Required'],['ln','Required'],['em','Valid email required']].forEach(([f]) => {
+    const inp  = document.getElementById(`inp-${f}`);
+    const wrap = document.getElementById(`f-${f}`);
+    if (!inp || !wrap) return;
+    const ok = f === 'em' ? /\S+@\S+\.\S+/.test(inp.value) : inp.value.trim().length > 0;
+    wrap.classList.toggle('has-error', !ok);
+    inp.classList.toggle('error', !ok);
+    if (!ok) valid = false;
   });
   return valid;
 }
 
-// Init with one golfer
-addGolfer();
+function getPrimaryGolfer() {
+  return {
+    firstName: document.getElementById('inp-fn').value.trim(),
+    lastName:  document.getElementById('inp-ln').value.trim(),
+    email:     document.getElementById('inp-em').value.trim(),
+    phone:     document.getElementById('inp-ph').value.trim(),
+    member:    document.getElementById('inp-mb').value.trim(),
+  };
+}
 
-// ════════════════════════════════════════
+function getAdditionalPlayers() {
+  const players = [];
+  for (let i = 2; i <= playerCount; i++) {
+    const fn = document.getElementById(`p${i}-fn`)?.value.trim() || '';
+    const ln = document.getElementById(`p${i}-ln`)?.value.trim() || '';
+    players.push({ firstName: fn, lastName: ln });
+  }
+  return players;
+}
+
+// ════════════════════════════════
+// PAY — REGISTRATION ONLY
+// ════════════════════════════════
+async function handleProceed() {
+  if (!validateReg()) {
+    document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+
+  const btn    = document.getElementById('proceed-btn');
+  const errEl  = document.getElementById('pay-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Creating checkout…';
+
+  const primary    = getPrimaryGolfer();
+  const additional = getAdditionalPlayers();
+
+  // Build line items for Stripe
+  const sponsorships = [
+    { name: `Golf Registration — ${playerCount} Player${playerCount>1?'s':''}`, price: playerCount * PLAYER_PRICE },
+    ...Object.entries(addons).map(([name, price]) => ({ name, price })),
+  ];
+
+  // All players for metadata
+  const allPlayers = [
+    { firstName: primary.firstName, lastName: primary.lastName, email: primary.email, phone: primary.phone },
+    ...additional,
+  ];
+
+  try {
+    const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ golfers: allPlayers, sponsorships }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.url) throw new Error(data.error || 'Could not create checkout');
+    window.location.href = data.url;
+  } catch (err) {
+    errEl.textContent = `Error: ${err.message}. Please try again or contact us.`;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Proceed to Payment →';
+  }
+}
+
+// ════════════════════════════════
 // SPONSORSHIP SELECTION
-// ════════════════════════════════════════
+// ════════════════════════════════
 const BENEFITS_DATA = {
-  title:        { golfers:12, tickets:12, holeSigns:5,  banner:true,  website:true  },
-  gold:         { golfers:8,  tickets:8,  holeSigns:3,  banner:true,  website:false },
-  silver:       { golfers:4,  tickets:4,  holeSigns:2,  banner:false, website:false },
-  bronze:       { golfers:4,  tickets:0,  holeSigns:1,  banner:false, website:false },
-  hole:         {},
-  'bev-cart':   { perks:['Beverage cart signage','Check-in mention'] },
-  cigar:        { perks:['Cigar station signage','On-site sampling'] },
-  breakfast:    { perks:['Breakfast signage','Morning announcement'] },
-  lunch:        { perks:['Meal signage','Awards recognition'] },
-  'long-drive': { perks:['Longest Drive sign','Winner announcement'] },
-  'close-pin':  { perks:['Closest to Pin sign','Winner announcement'] },
-  putting:      { perks:['Putting green signage','All-participant visibility'] },
-  cooler:       { perks:['Logo on cooler bags','Players take home'] },
-  'tee-gift':   { perks:['Brand in gift bag','Post-event takeaway'] },
-  range:        { perks:['Range signage','First brand on course'] },
-  'golf-ball':  { perks:['Branded golf balls','In-hand all round'] },
-  scorecard:    { perks:['Logo on scorecards','Handled all round'] },
-  'vip-tent':   { perks:['VIP tent signage','Awards shoutout'] },
+  title:          { golfers:12, tickets:12, holeSigns:5, banner:true, website:true },
+  gold:           { golfers:8,  tickets:8,  holeSigns:3, banner:true, website:false },
+  silver:         { golfers:4,  tickets:4,  holeSigns:2, banner:false, website:false },
+  bronze:         { golfers:4,  tickets:0,  holeSigns:1, banner:false, website:false },
+  hole:           {},
+  'bev-cart':     { perks:['Beverage cart signage','Check-in mention'] },
+  cigar:          { perks:['Cigar station signage','On-site sampling'] },
+  breakfast:      { perks:['Breakfast signage','Morning announcement'] },
+  lunch:          { perks:['Meal signage','Awards recognition'] },
+  'long-drive-sp':{ perks:['Longest Drive sign','Winner announcement'] },
+  'close-pin-sp': { perks:['Closest to Pin sign','Winner announcement'] },
+  putting:        { perks:['Putting green signage','All-participant visibility'] },
+  cooler:         { perks:['Logo on cooler bags','Players take home'] },
+  'tee-gift':     { perks:['Brand in gift bag','Post-event takeaway'] },
+  range:          { perks:['Range signage','First brand on course'] },
+  'golf-ball':    { perks:['Branded golf balls','In-hand all round'] },
+  scorecard:      { perks:['Logo on scorecards','Handled all round'] },
+  'vip-tent':     { perks:['VIP tent signage','Awards shoutout'] },
 };
 
 const sponsorSelections = {};
@@ -573,203 +839,128 @@ let holeQty = 1;
 const fmt = n => '$' + n.toLocaleString('en-US');
 
 function computeBenefits() {
-  let g=0, t=0, h=0, banner=false, website=false; const perks=[];
+  let g=0,t=0,h=0,banner=false,website=false; const perks=[];
   for (const [id] of Object.entries(sponsorSelections)) {
-    const b = BENEFITS_DATA[id] || {};
-    g += b.golfers||0; t += b.tickets||0; h += b.holeSigns||0;
-    if (b.banner)  banner=true;
-    if (b.website) website=true;
-    if (id==='hole') h += holeQty;
-    if (b.perks) perks.push(...b.perks);
+    const b = BENEFITS_DATA[id]||{};
+    g+=b.golfers||0; t+=b.tickets||0; h+=b.holeSigns||0;
+    if(b.banner) banner=true; if(b.website) website=true;
+    if(id==='hole') h+=holeQty;
+    if(b.perks) perks.push(...b.perks);
   }
-  return { golfers:g, tickets:t, holeSigns:h, banner, website, perks };
+  return {golfers:g,tickets:t,holeSigns:h,banner,website,perks};
 }
 
-function updateTotal() {
-  let total = 0;
-  const chips = [];
-  for (const [id, item] of Object.entries(sponsorSelections)) {
-    total += item.price; chips.push({ id, name:item.name, price:item.price });
+function updateSponsorTotal() {
+  let total=0; const chips=[];
+  for(const [id,item] of Object.entries(sponsorSelections)) {
+    total+=item.price; chips.push({id,name:item.name,price:item.price});
   }
   document.getElementById('total-figure').textContent = fmt(total);
-  document.getElementById('total-chips').innerHTML = chips.map(c =>
+  document.getElementById('total-chips').innerHTML = chips.map(c=>
     `<span class="chip">${c.name}<span class="chip-price"> ${fmt(c.price)}</span><button class="chip-x" onclick="removeSponsor('${c.id}')">×</button></span>`
   ).join('');
 
-  // Benefits
-  const b = computeBenefits();
-  const hasSponsor = Object.keys(sponsorSelections).length > 0;
-  const brow = document.getElementById('benefits-row');
-  const bstats = document.getElementById('bstats');
-
-  if (hasSponsor) {
+  const b=computeBenefits();
+  const hasSponsor=Object.keys(sponsorSelections).length>0;
+  const brow=document.getElementById('benefits-row');
+  const bstats=document.getElementById('bstats');
+  if(hasSponsor) {
     brow.classList.add('show');
-    let html = '';
-    if (b.golfers)   html += `<div class="bstat-big"><span class="bval">${b.golfers}</span><span class="blbl">Golfers</span></div>`;
-    if (b.tickets)   html += `<div class="bstat-big"><span class="bval">${b.tickets}</span><span class="blbl">Super Tickets</span></div>`;
-    if (b.holeSigns) html += `<div class="bstat-big"><span class="bval">${b.holeSigns}</span><span class="blbl">Hole Signs</span></div>`;
-    if (b.banner)    html += `<div class="bstat-pill">Sponsor Banner</div>`;
-    if (b.website)   html += `<div class="bstat-pill">Website Listing</div>`;
-    b.perks.forEach(p => { html += `<div class="bstat-pill">${p}</div>`; });
-    bstats.innerHTML = html;
-  } else {
-    brow.classList.remove('show');
-  }
-
-  document.getElementById('total-bar').classList.toggle('visible', total > 0);
+    let html='';
+    if(b.golfers)   html+=`<div class="bstat-big"><span class="bval">${b.golfers}</span><span class="blbl">Golfers</span></div>`;
+    if(b.tickets)   html+=`<div class="bstat-big"><span class="bval">${b.tickets}</span><span class="blbl">Super Tickets</span></div>`;
+    if(b.holeSigns) html+=`<div class="bstat-big"><span class="bval">${b.holeSigns}</span><span class="blbl">Hole Signs</span></div>`;
+    if(b.banner)    html+=`<div class="bstat-pill">Sponsor Banner</div>`;
+    if(b.website)   html+=`<div class="bstat-pill">Website Listing</div>`;
+    b.perks.forEach(p=>{html+=`<div class="bstat-pill">${p}</div>`;});
+    bstats.innerHTML=html;
+  } else { brow.classList.remove('show'); }
+  document.getElementById('total-bar').classList.toggle('visible', total>0);
 }
 
 function removeSponsor(id) {
   document.querySelector(`[data-id="${id}"]`)?.classList.remove('selected');
-  if (id==='hole') { holeQty=1; document.getElementById('hole-qty').textContent='1'; }
-  delete sponsorSelections[id];
-  updateTotal();
+  if(id==='hole'){holeQty=1;document.getElementById('hole-qty').textContent='1';}
+  delete sponsorSelections[id]; updateSponsorTotal();
 }
 
 function clearAll() {
-  document.querySelectorAll('.selectable.selected').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('.selectable.selected').forEach(el=>el.classList.remove('selected'));
   holeQty=1; const hq=document.getElementById('hole-qty'); if(hq) hq.textContent='1';
-  for (const k in sponsorSelections) delete sponsorSelections[k];
-  updateTotal();
+  for(const k in sponsorSelections) delete sponsorSelections[k];
+  updateSponsorTotal();
 }
 
-document.getElementById('hole-minus').addEventListener('click', e => {
+document.getElementById('hole-minus').addEventListener('click',e=>{
   e.stopPropagation(); holeQty=Math.max(1,holeQty-1);
   document.getElementById('hole-qty').textContent=holeQty;
-  if (sponsorSelections['hole']) { sponsorSelections['hole'].price=250*holeQty; sponsorSelections['hole'].name=holeQty>1?`Hole Sponsor ×${holeQty}`:'Hole Sponsor'; updateTotal(); }
+  if(sponsorSelections['hole']){sponsorSelections['hole'].price=250*holeQty;sponsorSelections['hole'].name=holeQty>1?`Hole Sponsor ×${holeQty}`:'Hole Sponsor';updateSponsorTotal();}
 });
-document.getElementById('hole-plus').addEventListener('click', e => {
+document.getElementById('hole-plus').addEventListener('click',e=>{
   e.stopPropagation(); holeQty=Math.min(18,holeQty+1);
   document.getElementById('hole-qty').textContent=holeQty;
-  if (sponsorSelections['hole']) { sponsorSelections['hole'].price=250*holeQty; sponsorSelections['hole'].name=holeQty>1?`Hole Sponsor ×${holeQty}`:'Hole Sponsor'; updateTotal(); }
+  if(sponsorSelections['hole']){sponsorSelections['hole'].price=250*holeQty;sponsorSelections['hole'].name=holeQty>1?`Hole Sponsor ×${holeQty}`:'Hole Sponsor';updateSponsorTotal();}
 });
 
-document.querySelectorAll('.selectable').forEach(el => {
-  el.addEventListener('click', function() {
-    const id=this.dataset.id, name=this.dataset.name, base=parseInt(this.dataset.price);
-    if (this.classList.contains('selected')) {
+document.querySelectorAll('.selectable').forEach(el=>{
+  el.addEventListener('click',function(){
+    const id=this.dataset.id,name=this.dataset.name,base=parseInt(this.dataset.price);
+    if(this.classList.contains('selected')){
       this.classList.remove('selected');
-      if (id==='hole') { holeQty=1; document.getElementById('hole-qty').textContent='1'; }
+      if(id==='hole'){holeQty=1;document.getElementById('hole-qty').textContent='1';}
       delete sponsorSelections[id];
     } else {
       this.classList.add('selected');
-      const price = id==='hole' ? base*holeQty : base;
-      const displayName = (id==='hole'&&holeQty>1) ? `Hole Sponsor ×${holeQty}` : name;
-      sponsorSelections[id] = { name:displayName, price };
+      const price=id==='hole'?base*holeQty:base;
+      const displayName=(id==='hole'&&holeQty>1)?`Hole Sponsor ×${holeQty}`:name;
+      sponsorSelections[id]={name:displayName,price};
     }
-    updateTotal();
+    updateSponsorTotal();
   });
 });
 
-// ════════════════════════════════════════
-// PAGE NAVIGATION
-// ════════════════════════════════════════
+// ════════════════════════════════
+// PAY — SPONSORSHIP
+// ════════════════════════════════
+async function handleSponsorPay() {
+  const sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
+  if(!sponsorships.length) { alert('Please select at least one sponsorship, or go back to complete registration.'); return; }
+
+  const primary = getPrimaryGolfer();
+  const golfers = primary.email ? [primary] : [];
+
+  try {
+    const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-checkout`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({golfers, sponsorships}),
+    });
+    const data = await res.json();
+    if(!res.ok||!data.url) throw new Error(data.error||'Could not create checkout');
+    window.location.href = data.url;
+  } catch(err) {
+    alert(`Error: ${err.message}`);
+  }
+}
+
+// ════════════════════════════════
+// PAGE NAV
+// ════════════════════════════════
 let currentPage = 0;
 const tabs = document.querySelectorAll('.step-tab');
 
 function goPage(n) {
-  document.querySelectorAll('.page').forEach((p,i) => p.classList.toggle('active', i===n));
-  tabs.forEach((t,i) => { t.classList.toggle('active', i===n); t.classList.toggle('done', i<n); });
-  currentPage = n;
-  window.scrollTo({top:0, behavior:'smooth'});
-  if (n===2) buildReview();
+  document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('active',i===n));
+  tabs.forEach((t,i)=>{t.classList.toggle('active',i===n);t.classList.toggle('done',i<n);});
+  currentPage=n;
+  // Show/hide sticky sponsor bar only on page 2
+  const bar = document.getElementById('total-bar');
+  if(n!==1) bar.classList.remove('visible');
+  else updateSponsorTotal();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function nextPage(from) {
-  if (from===0 && !validateGolfers()) {
-    document.querySelector('.has-error input, .has-error select')?.scrollIntoView({behavior:'smooth', block:'center'});
-    return;
-  }
-  goPage(from+1);
-}
-
-// ════════════════════════════════════════
-// REVIEW PAGE
-// ════════════════════════════════════════
-function buildReview() {
-  let total = 0;
-  let linesHtml = '';
-
-  // Sponsorships
-  for (const [, item] of Object.entries(sponsorSelections)) {
-    total += item.price;
-    linesHtml += `<div class="order-line"><span class="order-line-name">${item.name}</span><span class="order-line-price">${fmt(item.price)}</span></div>`;
-  }
-  if (!linesHtml) linesHtml = `<div class="order-line"><span class="order-line-name" style="color:var(--text-light);font-style:italic;">No sponsorship selected</span><span class="order-line-price">—</span></div>`;
-
-  document.getElementById('order-lines').innerHTML = linesHtml;
-  document.getElementById('order-total-price').textContent = fmt(total);
-
-  // Golfers
-  const golfers = getGolferData();
-  let gHtml = '<h4>Registered Golfers</h4>';
-  golfers.forEach((g, i) => {
-    const extras = [g.company, g.shirt && `Shirt: ${g.shirt}`, g.handicap && `HCP: ${g.handicap}`].filter(Boolean).join(' · ');
-    gHtml += `<div class="golfer-review-item"><strong>${g.firstName} ${g.lastName}</strong> — ${g.email}${extras ? `<br><span style="font-size:12px;color:var(--text-light)">${extras}</span>` : ''}</div>`;
-  });
-  document.getElementById('golfer-review-list').innerHTML = gHtml;
-}
-
-// ════════════════════════════════════════
-// PAY NOW → SQUARE CHECKOUT
-// ════════════════════════════════════════
-async function handlePayNow() {
-  const btn      = document.getElementById('pay-btn');
-  const btnText  = document.getElementById('pay-btn-text');
-  const errEl    = document.getElementById('pay-error');
-
-  btn.disabled = true;
-  btnText.textContent = 'Creating secure checkout…';
-  errEl.style.display = 'none';
-
-  const golfers = getGolferData();
-  const sponsorships = Object.values(sponsorSelections).map(s => ({ name: s.name, price: s.price }));
-
-  // If nothing selected at all, warn
-  if (golfers.length === 0 && sponsorships.length === 0) {
-    errEl.textContent = 'Please add at least one golfer or sponsorship.';
-    errEl.style.display = 'block';
-    btn.disabled = false; btnText.textContent = 'Pay Now →';
-    return;
-  }
-
-  // If sponsorships are $0 (registration only), skip Square and go to success
-  const total = sponsorships.reduce((s, i) => s + i.price, 0);
-  if (total === 0) {
-    goPage(3); return;
-  }
-
-  try {
-    const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-checkout`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ golfers, sponsorships, totalCents: total * 100 }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.url) {
-      throw new Error(data.error || 'Unknown error from checkout function');
-    }
-
-    // Open Square checkout in new tab
-    window.open(data.url, '_blank');
-
-    // Show a "waiting for payment" state
-    btnText.textContent = '✓ Square checkout opened';
-    btn.style.background = 'var(--green-light)';
-
-    // After a short delay, go to success page
-    // (In production you'd verify via Square webhook instead)
-    setTimeout(() => goPage(3), 2000);
-
-  } catch (err) {
-    errEl.textContent = `Error: ${err.message}. Please try again or contact us directly.`;
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btnText.textContent = 'Pay Now →';
-  }
-}
+// Check for Stripe success redirect
+if(window.location.search.includes('session_id')) goPage(2);
 </script>
 </body>
 </html>
