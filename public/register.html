@@ -156,12 +156,16 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
   padding: 18px 32px;
   display: flex; align-items: center; justify-content: space-between;
 }
-.total-bar-left { color: rgba(255,255,255,0.6); font-size: 13px; }
+.total-bar-left { font-size: 13px; }
 .total-bar-amount {
   font-family: 'Playfair Display', serif;
   font-size: 28px; font-weight: 900; color: var(--gold-light);
 }
-.total-bar-breakdown { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+.total-bar-breakdown {
+  font-size: 14px; font-weight: 600;
+  color: rgba(255,255,255,0.85); margin-top: 3px;
+  letter-spacing: 0.02em;
+}
 
 .btn-proceed {
   background: var(--gold); color: var(--green-dark);
@@ -305,10 +309,12 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 </head>
 <body>
 
-<header style="text-align:center;padding:28px 20px 24px;border-bottom:1px solid rgba(0,0,0,0.07);margin-bottom:28px;">
-  <div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#4a8c62;margin-bottom:6px;">1st U.S. Volunteer Cavalry Regiment — Rough Riders</div>
-  <h1 style="font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,34px);font-weight:900;color:#1a3320;line-height:1.15;margin-bottom:4px;">39th Annual Charity<br>Golf Tournament</h1>
-  <div style="font-size:13px;color:#7a7a72;margin-top:8px;">Hunter's Green Country Club · Tampa, FL · Monday, September 14, 2026</div>
+<header style="text-align:center;padding:28px 20px 24px;background:linear-gradient(135deg,#0d2d5c,#1a4a8a);margin-bottom:28px;">
+  <div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:8px;">1st U.S. Volunteer Cavalry Regiment — Rough Riders</div>
+  <h1 style="font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,36px);font-weight:900;color:#ffffff;line-height:1.15;margin-bottom:8px;">39th Annual Charity<br>Golf Tournament</h1>
+  <div style="display:inline-block;background:rgba(255,255,255,0.12);border-radius:20px;padding:5px 16px;">
+    <span style="font-size:13px;color:rgba(255,255,255,0.8);">Hunter's Green Country Club · Tampa, FL · Monday, September 14, 2026</span>
+  </div>
 </header>
 
 <nav class="steps-nav" id="steps-nav">
@@ -371,13 +377,13 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
     <!-- Add-ons -->
     <div class="reg-section">
-      <div class="reg-section-title">Add-ons <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional</span></div>
+      <div class="reg-section-title">Add-ons <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional · applies to all players on your team</span></div>
 
       <!-- Super Ticket — full width -->
       <div class="addon-item addon-super" onclick="toggleSuperTicket(this)" style="margin-bottom:10px;border-color:#c9a84c;background:linear-gradient(135deg,#fdf8ec,#fefaf0);display:flex;gap:14px;">
         <div class="addon-left">
           <div class="addon-name" style="color:#1a3320;font-size:14px;">⭐ Super Ticket — Best Value</div>
-          <div class="addon-desc">Includes everything: Mulligan pack · Closest to pin · Longest drive · Raffle tickets (5) · Awards dinner guest</div>
+          <div class="addon-desc">Includes everything for your whole team: Mulligan pack · Closest to pin · Longest drive · Raffle tickets (5) · Awards dinner guest</div>
         </div>
         <div class="addon-right">
           <div style="text-align:right;">
@@ -392,7 +398,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="addon-item" onclick="toggleAddon(this, 20, 'Mulligan Pack')">
           <div class="addon-left">
             <div class="addon-name">Mulligan pack</div>
-            <div class="addon-desc">3 mulligans per player</div>
+            <div class="addon-desc">3 mulligans per player, whole team</div>
           </div>
           <div class="addon-right">
             <div class="addon-price">$20</div>
@@ -403,7 +409,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="addon-item" onclick="toggleAddon(this, 10, 'Closest to Pin')">
           <div class="addon-left">
             <div class="addon-name">Closest to pin</div>
-            <div class="addon-desc">Contest entry</div>
+            <div class="addon-desc">Entry for each team member</div>
           </div>
           <div class="addon-right">
             <div class="addon-price">$10</div>
@@ -414,7 +420,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="addon-item" onclick="toggleAddon(this, 10, 'Longest Drive')">
           <div class="addon-left">
             <div class="addon-name">Longest drive</div>
-            <div class="addon-desc">Contest entry</div>
+            <div class="addon-desc">Entry for each team member</div>
           </div>
           <div class="addon-right">
             <div class="addon-price">$10</div>
@@ -425,7 +431,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="addon-item" onclick="toggleAddon(this, 25, 'Raffle Tickets')">
           <div class="addon-left">
             <div class="addon-name">Raffle tickets</div>
-            <div class="addon-desc">5 tickets</div>
+            <div class="addon-desc">5 tickets per team</div>
           </div>
           <div class="addon-right">
             <div class="addon-price">$25</div>
@@ -436,7 +442,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="addon-item" onclick="toggleAddon(this, 30, 'Awards Dinner Guest')">
           <div class="addon-left">
             <div class="addon-name">Awards dinner</div>
-            <div class="addon-desc">Additional guest ticket</div>
+            <div class="addon-desc">1 extra guest ticket for the team</div>
           </div>
           <div class="addon-right">
             <div class="addon-price">$30</div>
