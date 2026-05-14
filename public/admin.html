@@ -3,503 +3,834 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Golf Admin — Rough Riders</title>
+<title>Rough Riders Golf — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --green-dark: #1a3320; --green-mid: #2d5a3d; --green-light: #4a8c62;
-  --green-pale: #d4e8d8; --gold: #c9a84c; --gold-light: #f0d48a;
-  --bg: #f4f6f4; --white: #ffffff;
-  --text-dark: #1a1a18; --text-mid: #4a4a45; --text-light: #7a7a72;
-  --border: rgba(0,0,0,0.08); --red: #c0392b; --red-pale: #fdf0ef;
-  --shadow: 0 1px 4px rgba(0,0,0,0.08);
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gd:#0f2318;--gm:#1e4a2c;--gl:#2d7a4a;--gp:#c8e6d0;
+  --gold:#b8940e;--gold-l:#e8c040;
+  --bg:#f0f2f0;--white:#fff;
+  --td:#0a0a08;--tm:#2a2a26;--tl:#555550;
+  --border:rgba(0,0,0,0.1);--red:#b02020;--red-p:#fdf0ef;
+  --sh:0 1px 4px rgba(0,0,0,0.08);
 }
-html { font-size: 15px; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-dark); min-height: 100vh; }
+html{font-size:15px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--td);min-height:100vh}
 
-/* ── LOGIN ── */
-#login-screen {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: var(--green-dark);
-}
-.login-card { background: var(--white); border-radius: 8px; padding: 40px 36px; width: 100%; max-width: 380px; box-shadow: 0 8px 40px rgba(0,0,0,0.3); }
-.login-logo { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--green-dark); margin-bottom: 4px; }
-.login-sub { font-size: 13px; color: var(--text-light); margin-bottom: 28px; }
-.login-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
-.login-field label { font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-mid); }
-.login-field input { padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s; }
-.login-field input:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(74,140,98,0.1); }
-.login-btn { width: 100%; padding: 12px; border: none; border-radius: 4px; background: var(--green-dark); color: var(--white); font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 6px; transition: background 0.18s; }
-.login-btn:hover { background: var(--green-mid); }
-.login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.login-error { font-size: 12.5px; color: var(--red); background: var(--red-pale); border-radius: 4px; padding: 8px 12px; margin-bottom: 12px; display: none; }
+/* LOGIN */
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--gd)}
+.lc{background:var(--white);border-radius:10px;padding:44px 40px;width:100%;max-width:380px;box-shadow:0 16px 48px rgba(0,0,0,0.3)}
+.lc h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--gd);margin-bottom:4px}
+.lc p{font-size:13px;color:var(--tl);margin-bottom:28px}
+.fl{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.fl label{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tm)}
+.fi{width:100%;padding:11px 13px;border:2px solid rgba(0,0,0,.14);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(45,122,74,.12)}
+.lb{width:100%;padding:13px;border:none;border-radius:5px;background:var(--gd);color:var(--white);font-family:'Playfair Display',serif;font-size:16px;font-weight:700;cursor:pointer;transition:background .18s}
+.lb:hover{background:var(--gm)}
+.lb:disabled{opacity:.5;cursor:not-allowed}
+.le{font-size:12.5px;color:var(--red);background:var(--red-p);border-radius:4px;padding:8px 12px;margin-bottom:14px;display:none}
 
-/* ── APP SHELL ── */
-#app { display: none; min-height: 100vh; }
-.topbar { background: var(--green-dark); padding: 0 28px; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-.topbar-brand { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: var(--white); }
-.topbar-brand span { color: var(--gold); }
-.topbar-right { display: flex; align-items: center; gap: 16px; }
-.topbar-user { font-size: 12px; color: rgba(255,255,255,0.55); }
-.topbar-logout { background: none; border: 1px solid rgba(255,255,255,0.2); color: rgba(255,255,255,0.6); cursor: pointer; font-size: 12px; padding: 5px 12px; border-radius: 3px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
-.topbar-logout:hover { border-color: rgba(255,255,255,0.5); color: var(--white); }
+/* APP */
+#app{display:none}
+.tb{background:var(--gd);height:56px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.tb-brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;color:var(--white)}
+.tb-brand span{color:var(--gold-l)}
+.tb-r{display:flex;align-items:center;gap:10px}
+.tb-btn{background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.65);cursor:pointer;font-size:12px;padding:5px 12px;border-radius:3px;font-family:'DM Sans',sans-serif;transition:all .15s}
+.tb-btn:hover{border-color:rgba(255,255,255,.5);color:var(--white)}
 
-.app-body { max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px; }
+.wrap{max-width:1200px;margin:0 auto;padding:24px 20px 80px}
 
-/* ── TABS ── */
-.tab-nav { display: flex; gap: 2px; background: var(--white); border-radius: 6px; padding: 4px; box-shadow: var(--shadow); margin-bottom: 28px; width: fit-content; }
-.tab-btn { padding: 8px 20px; border: none; border-radius: 4px; background: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-light); transition: all 0.15s; }
-.tab-btn.active { background: var(--green-dark); color: var(--white); }
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.st{background:var(--white);border-radius:6px;padding:16px 18px;box-shadow:var(--sh);border-left:4px solid var(--gl)}
+.st.gld{border-left-color:var(--gold)}
+.st.blu{border-left-color:#1a4a8a}
+.st.drk{border-left-color:var(--gd)}
+.sv{font-family:'Playfair Display',serif;font-size:30px;font-weight:900;color:var(--gd);line-height:1}
+.sv.gld{color:var(--gold)}
+.sl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tl);margin-top:4px}
 
-/* ── STATS STRIP ── */
-.stats-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
-.stat-card { background: var(--white); border-radius: 6px; padding: 18px 20px; box-shadow: var(--shadow); border-left: 4px solid var(--green-light); }
-.stat-card.gold-border { border-left-color: var(--gold); }
-.stat-card.dark-border { border-left-color: var(--green-dark); }
-.stat-val { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 900; color: var(--green-dark); line-height: 1; }
-.stat-val.gold { color: var(--gold); }
-.stat-lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-light); margin-top: 4px; }
+/* TABS */
+.tnav{display:flex;gap:2px;background:var(--white);border-radius:6px;padding:4px;box-shadow:var(--sh);margin-bottom:20px;width:fit-content;flex-wrap:wrap}
+.tbtn{padding:8px 18px;border:none;border-radius:4px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--tl);transition:all .15s;white-space:nowrap}
+.tbtn.on{background:var(--gd);color:var(--white)}
 
-/* ── TOOLBAR ── */
-.toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
-.search-input { padding: 9px 14px; border: 1px solid var(--border); border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; width: 240px; transition: border-color 0.15s; }
-.search-input:focus { border-color: var(--green-light); }
-.filter-select { padding: 9px 12px; border: 1px solid var(--border); border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; background: var(--white); cursor: pointer; }
-.btn-refresh { padding: 9px 16px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
-.btn-refresh:hover { border-color: var(--green-light); color: var(--green-dark); }
-.btn-export { padding: 9px 16px; border: none; border-radius: 4px; background: var(--green-dark); color: var(--white); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s; margin-left: auto; }
-.btn-export:hover { background: var(--green-mid); }
+/* TOOLBAR */
+.tbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.si{padding:9px 13px;border:2px solid rgba(0,0,0,.1);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:220px;transition:border-color .15s}
+.si:focus{border-color:var(--gl)}
+.sel{padding:9px 12px;border:2px solid rgba(0,0,0,.1);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--white);cursor:pointer}
+.btn{padding:9px 16px;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-p{background:var(--gd);color:var(--white)}.btn-p:hover{background:var(--gm)}
+.btn-s{background:var(--white);color:var(--tm);border:2px solid rgba(0,0,0,.1)}.btn-s:hover{border-color:var(--gl);color:var(--gd)}
+.btn-d{background:var(--red-p);color:var(--red);border:2px solid rgba(176,32,32,.15)}.btn-d:hover{background:#fbe0e0}
+.btn-g{background:var(--gold);color:var(--white)}.btn-g:hover{background:#9a7a08}
+.sm{padding:5px 10px!important;font-size:12px!important}
+.ml{margin-left:auto}
 
-/* ── TABLE ── */
-.table-wrap { background: var(--white); border-radius: 6px; box-shadow: var(--shadow); overflow: hidden; }
-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-thead { background: #f9fafb; }
-th { padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-light); border-bottom: 1px solid var(--border); white-space: nowrap; }
-td { padding: 13px 16px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: top; }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: #f9fafe; }
-.badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
-.badge-complete { background: #d4edda; color: #1a5c2a; }
-.badge-open { background: #fff3cd; color: #856404; }
-.badge-title  { background: #d4e8d8; color: var(--green-dark); }
-.badge-gold   { background: #faeeda; color: #633806; }
-.badge-silver { background: #e8e9ea; color: #3a3b3c; }
-.badge-bronze { background: #f8e5d4; color: #7a3010; }
-.badge-alacarte { background: #e8f0fe; color: #1a4a9e; }
+/* TABLE */
+.tw{background:var(--white);border-radius:8px;box-shadow:var(--sh);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+thead{background:#f6faf6}
+th{padding:11px 14px;text-align:left;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tl);border-bottom:2px solid rgba(0,0,0,.06);white-space:nowrap}
+td{padding:12px 14px;border-bottom:1px solid rgba(0,0,0,.04);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f8fbf8}
+.ac{display:flex;gap:6px;flex-wrap:wrap}
 
-.expand-btn { background: none; border: none; cursor: pointer; color: var(--text-light); font-size: 16px; padding: 0; transition: transform 0.2s, color 0.15s; }
-.expand-btn:hover { color: var(--green-dark); }
-.expand-btn.open { transform: rotate(90deg); }
+/* BADGES */
+.bd{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.bd-paid{background:#d4edda;color:#145a24}
+.bd-inv{background:#fff3cd;color:#856404}
+.bd-comp{background:#d4e8d8;color:var(--gd)}
+.bd-pend{background:#e8e8e8;color:#555}
+.bd-title{background:#dce8fa;color:#1a4a8a}
+.bd-gold{background:#faeeda;color:#7a5000}
+.bd-silver{background:#e8e9ea;color:#3a4a50}
+.bd-bronze{background:#f8e5d4;color:#6a2800}
+.bd-hole{background:#d4e8d8;color:var(--gd)}
 
-.detail-row td { background: #fafbfa; padding: 16px 20px 16px 40px; }
-.detail-row { display: none; }
-.detail-row.open { display: table-row; }
+/* MODAL */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;overflow-y:auto}
+.mo.open{display:flex}
+.mc{background:var(--white);border-radius:10px;padding:32px;max-width:600px;width:92%;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto}
+.mc h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--gd);margin-bottom:20px}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.mg1{grid-template-columns:1fr}
+.mfl{display:flex;flex-direction:column;gap:5px}
+.mfl label{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tm)}
+.mfi,.mfs,.mft{padding:10px 12px;border:2px solid rgba(0,0,0,.12);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--td);background:var(--white);outline:none;transition:border-color .15s;width:100%}
+.mfi:focus,.mfs:focus,.mft:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(45,122,74,.12)}
+.mft{resize:vertical;min-height:70px}
+.mfoot{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06)}
 
-.golfer-list { display: flex; flex-direction: column; gap: 8px; }
-.golfer-item { background: var(--white); border: 1px solid var(--border); border-radius: 4px; padding: 10px 14px; display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; }
-.golfer-item-name { font-weight: 600; color: var(--text-dark); min-width: 140px; }
-.golfer-item-detail { color: var(--text-mid); }
-.golfer-item-badge { font-size: 11px; background: var(--green-pale); color: var(--green-dark); padding: 1px 7px; border-radius: 3px; }
+/* PLAYER ROWS */
+.prows{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.prow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;align-items:end;background:#f4f6f4;border-radius:5px;padding:8px}
+.prow-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tl);margin-bottom:3px}
+.prow-inp{width:100%;padding:6px 8px;border:1px solid rgba(0,0,0,.12);border-radius:4px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
+.prow-inp:focus{border-color:var(--gl)}
+.add-prow{border:2px dashed rgba(0,0,0,.1);border-radius:5px;padding:10px;text-align:center;cursor:pointer;font-size:13px;color:var(--tl);transition:all .15s;background:none;width:100%}
+.add-prow:hover{border-color:var(--gl);color:var(--gd)}
+.del-btn{padding:6px 10px;background:var(--red-p);border:none;border-radius:4px;color:var(--red);cursor:pointer;font-size:14px;line-height:1;align-self:end}
 
-.empty-state { text-align: center; padding: 60px 20px; color: var(--text-light); }
-.empty-icon { font-size: 40px; margin-bottom: 12px; }
-.empty-state p { font-size: 14px; }
+/* SETTINGS */
+.ss{background:var(--white);border-radius:8px;padding:24px;box-shadow:var(--sh);margin-bottom:16px}
+.ss h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--gd);margin-bottom:14px}
+.arow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.05)}
+.arow:last-child{border-bottom:none}
+.aname{font-weight:600;font-size:14px;min-width:150px}
+.aemail{font-size:13px;color:var(--tm);flex:1}
+.tog{position:relative;width:40px;height:22px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tsl{position:absolute;inset:0;background:rgba(0,0,0,.15);border-radius:22px;cursor:pointer;transition:background .2s}
+.tsl:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:white;border-radius:50%;transition:transform .2s}
+.tog input:checked+.tsl{background:var(--gl)}
+.tog input:checked+.tsl:before{transform:translateX(18px)}
 
-/* ── LOADING ── */
-.loading-row td { text-align: center; padding: 40px; color: var(--text-light); font-size: 13px; }
-.spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(0,0,0,0.1); border-top-color: var(--green-light); border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 8px; vertical-align: middle; }
-@keyframes spin { to { transform: rotate(360deg); } }
+/* SLOTS */
+.sbar{height:6px;background:rgba(0,0,0,.07);border-radius:3px;margin-top:4px;overflow:hidden}
+.sfill{height:100%;background:var(--gl);border-radius:3px;transition:width .3s}
+.sfill.full{background:var(--gold)}
 
-/* ── GOLFERS TAB ── */
-.golfer-full-card { background: var(--white); border-radius: 6px; padding: 18px; box-shadow: var(--shadow); display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
-.golfer-full-card .gfc-name { font-weight: 600; font-size: 15px; min-width: 180px; }
-.gfc-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; flex: 1; }
-.gfc-chip { font-size: 12px; background: #f1f3f4; border-radius: 3px; padding: 3px 9px; color: var(--text-mid); }
+.empty{text-align:center;padding:40px;color:var(--tl)}
+.empty-icon{font-size:32px;margin-bottom:8px}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.1);border-top-color:var(--gl);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-@media (max-width: 700px) {
-  .app-body { padding: 16px 14px 40px; }
-  .stats-strip { grid-template-columns: 1fr 1fr; }
-  th:nth-child(n+4), td:nth-child(n+4) { display: none; }
+.btags{display:flex;flex-wrap:wrap;gap:4px}
+.btag{font-size:11px;background:var(--gp);color:var(--gd);padding:2px 7px;border-radius:3px;font-weight:600}
+
+@media(max-width:680px){
+  .mg{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .prow{grid-template-columns:1fr 1fr}
+  th:nth-child(n+5),td:nth-child(n+5){display:none}
 }
 </style>
 </head>
 <body>
 
-<!-- ══════════ LOGIN ══════════ -->
-<div id="login-screen">
-  <div class="login-card">
-    <div class="login-logo">⛳ Rough Riders</div>
-    <div class="login-sub">Golf Tournament Admin</div>
-    <div class="login-error" id="login-error"></div>
-    <div class="login-field">
-      <label>Email</label>
-      <input type="email" id="login-email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <div class="login-field">
+<!-- LOGIN -->
+<div id="login">
+  <div class="lc">
+    <h2>⛳ Rough Riders Admin</h2>
+    <p>39th Annual Charity Golf Tournament</p>
+    <div class="le" id="lerr"></div>
+    <div class="fl">
       <label>Password</label>
-      <input type="password" id="login-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <input class="fi" id="lpw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+    <button class="lb" id="lbtn" onclick="doLogin()">Sign In →</button>
   </div>
 </div>
 
-<!-- ══════════ APP ══════════ -->
+<!-- APP -->
 <div id="app">
-  <div class="topbar">
-    <div class="topbar-brand">⛳ Rough Riders <span>Admin</span></div>
-    <div class="topbar-right">
-      <span class="topbar-user" id="topbar-user"></span>
-      <button class="topbar-logout" onclick="doLogout()">Sign Out</button>
+  <div class="tb">
+    <div class="tb-brand">⛳ Rough Riders <span>Admin</span></div>
+    <div class="tb-r">
+      <span style="font-size:11px;color:rgba(255,255,255,.45);" id="ts"></span>
+      <button class="tb-btn" onclick="loadAll()">↻ Refresh</button>
+      <button class="tb-btn" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
 
-  <div class="app-body">
-
-    <!-- Stats -->
-    <div class="stats-strip" id="stats-strip">
-      <div class="stat-card gold-border">
-        <div class="stat-val gold" id="stat-revenue">—</div>
-        <div class="stat-lbl">Total Revenue</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="stat-orders">—</div>
-        <div class="stat-lbl">Orders</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-val" id="stat-golfers">—</div>
-        <div class="stat-lbl">Golfers Registered</div>
-      </div>
-      <div class="stat-card dark-border">
-        <div class="stat-val" id="stat-completed">—</div>
-        <div class="stat-lbl">Payments Complete</div>
-      </div>
+  <div class="wrap">
+    <div class="stats">
+      <div class="st"><div class="sv" id="s-pl">—</div><div class="sl">Players</div></div>
+      <div class="st"><div class="sv" id="s-te">—</div><div class="sl">Teams</div></div>
+      <div class="st gld"><div class="sv gld" id="s-rv">—</div><div class="sl">Revenue</div></div>
+      <div class="st blu"><div class="sv" id="s-sp">—</div><div class="sl">Sponsors</div></div>
+      <div class="st drk"><div class="sv" id="s-co">—</div><div class="sl">Comp Players</div></div>
     </div>
 
-    <!-- Tabs -->
-    <div class="tab-nav">
-      <button class="tab-btn active" onclick="showTab('orders')">Orders</button>
-      <button class="tab-btn"        onclick="showTab('golfers')">Golfers</button>
-      <button class="tab-btn"        onclick="showTab('sponsors')">Sponsors</button>
+    <div class="tnav">
+      <button class="tbtn on" onclick="showTab('e')">📋 Entries</button>
+      <button class="tbtn" onclick="showTab('s')">🏆 Sponsors</button>
+      <button class="tbtn" onclick="showTab('c')">🎁 Complimentary</button>
+      <button class="tbtn" onclick="showTab('x')">⚙️ Settings</button>
     </div>
 
-    <!-- ── ORDERS TAB ── -->
-    <div id="tab-orders">
-      <div class="toolbar">
-        <input class="search-input" id="order-search" placeholder="Search name, email…" oninput="renderOrders()">
-        <select class="filter-select" id="order-filter" onchange="renderOrders()">
-          <option value="">All statuses</option>
-          <option value="COMPLETED">Completed</option>
-          <option value="OPEN">Open / Pending</option>
+    <!-- ENTRIES -->
+    <div id="te">
+      <div class="tbar">
+        <input class="si" id="esq" placeholder="Search name, email, team…" oninput="re()">
+        <select class="sel" id="esf" onchange="re()">
+          <option value="">All</option><option value="paid">Paid</option>
+          <option value="invoice">Invoice</option><option value="comp">Comp</option>
         </select>
-        <button class="btn-refresh" onclick="loadData()"><span id="refresh-spinner" style="display:none" class="spinner"></span>↻ Refresh</button>
-        <button class="btn-export" onclick="exportCSV('orders')">↓ Export CSV</button>
+        <button class="btn btn-p ml" onclick="openEM()">+ Entry</button>
+        <button class="btn btn-s" onclick="xcsv('e')">↓ CSV</button>
       </div>
-      <div class="table-wrap">
-        <table>
+      <div class="tw"><table>
+        <thead><tr>
+          <th>Team / Contact</th><th>Players</th><th>Add-ons</th>
+          <th>Amount</th><th>Status</th><th>Date</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="etb"><tr><td colspan="7" style="padding:30px;text-align:center;color:var(--tl)"><span class="spin"></span>Loading…</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <!-- SPONSORS -->
+    <div id="ts" style="display:none">
+      <div class="tbar">
+        <input class="si" id="ssq" placeholder="Search sponsor, company…" oninput="rs()">
+        <select class="sel" id="ssf" onchange="rs()">
+          <option value="">All Tiers</option><option>Title</option><option>Gold</option>
+          <option>Silver</option><option>Bronze</option><option>Hole</option><option>Alacarte</option>
+        </select>
+        <button class="btn btn-p ml" onclick="openSM()">+ Sponsor</button>
+        <button class="btn btn-s" onclick="xcsv('s')">↓ CSV</button>
+      </div>
+      <div class="tw"><table>
+        <thead><tr>
+          <th>Sponsor</th><th>Package</th><th>Benefits</th>
+          <th>Amount</th><th>Status</th><th>Comp</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="stb"><tr><td colspan="7" style="padding:30px;text-align:center;color:var(--tl)"><span class="spin"></span>Loading…</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <!-- COMP -->
+    <div id="tc" style="display:none">
+      <div class="tbar">
+        <p style="font-size:13px;color:var(--tm)">Assign complimentary teams based on sponsorship benefits.</p>
+        <button class="btn btn-g ml" onclick="openCM()">+ Comp Team</button>
+        <button class="btn btn-s" onclick="xcsv('c')">↓ CSV</button>
+      </div>
+      <div class="tw"><table>
+        <thead><tr>
+          <th>Sponsor</th><th>Team Name</th><th>Players</th><th>Slots</th><th>Notes</th><th>Actions</th>
+        </tr></thead>
+        <tbody id="ctb"><tr><td colspan="6" style="padding:30px;text-align:center;color:var(--tl)"><span class="spin"></span>Loading…</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tx" style="display:none">
+      <div class="ss">
+        <h3>Admin Notification Emails</h3>
+        <p style="font-size:13px;color:var(--tl);margin-bottom:14px">These people receive email notices for new registrations and sponsorships.</p>
+        <div id="ael"></div>
+        <button class="btn btn-p" style="margin-top:12px" onclick="openAEM()">+ Add Admin</button>
+      </div>
+      <div class="ss">
+        <h3>Notification Preferences</h3>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+            <label class="tog"><input type="checkbox" id="ne" onchange="saveSt()"><span class="tsl"></span></label>
+            <span style="font-size:14px;font-weight:500">Notify on new player registration</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
+            <label class="tog"><input type="checkbox" id="ns" onchange="saveSt()"><span class="tsl"></span></label>
+            <span style="font-size:14px;font-weight:500">Notify on new sponsorship</span>
+          </label>
+        </div>
+      </div>
+      <div class="ss">
+        <h3>Sponsorship Benefits Reference</h3>
+        <table style="width:100%;font-size:13px;border-collapse:collapse">
           <thead><tr>
-            <th style="width:28px;"></th>
-            <th>Contact</th>
-            <th>Sponsorships</th>
-            <th>Golfers</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Date</th>
+            <th style="padding:7px 0;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tl);text-align:left">Tier</th>
+            <th style="padding:7px 0;text-align:left">Teams</th><th style="padding:7px 0;text-align:left">Players</th>
+            <th style="padding:7px 0;text-align:left">Super Tickets</th><th style="padding:7px 0;text-align:left">Hole Signs</th>
           </tr></thead>
-          <tbody id="orders-tbody"></tbody>
+          <tbody>
+            <tr><td style="padding:6px 0"><span class="bd bd-title">Title</span></td><td>3</td><td>12</td><td>12</td><td>5</td></tr>
+            <tr><td style="padding:6px 0"><span class="bd bd-gold">Gold</span></td><td>2</td><td>8</td><td>8</td><td>3</td></tr>
+            <tr><td style="padding:6px 0"><span class="bd bd-silver">Silver</span></td><td>1</td><td>4</td><td>4</td><td>2</td></tr>
+            <tr><td style="padding:6px 0"><span class="bd bd-bronze">Bronze</span></td><td>1</td><td>4</td><td>0</td><td>1</td></tr>
+          </tbody>
         </table>
       </div>
-    </div>
-
-    <!-- ── GOLFERS TAB ── -->
-    <div id="tab-golfers" style="display:none;">
-      <div class="toolbar">
-        <input class="search-input" id="golfer-search" placeholder="Search name, company…" oninput="renderGolfers()">
-        <button class="btn-export" onclick="exportCSV('golfers')" style="margin-left:auto;">↓ Export CSV</button>
-      </div>
-      <div id="golfers-list"></div>
-    </div>
-
-    <!-- ── SPONSORS TAB ── -->
-    <div id="tab-sponsors" style="display:none;">
-      <div class="toolbar">
-        <button class="btn-export" onclick="exportCSV('sponsors')" style="margin-left:auto;">↓ Export CSV</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Sponsor / Contact</th>
-            <th>Packages</th>
-            <th>Total Paid</th>
-            <th>Status</th>
-            <th>Date</th>
-          </tr></thead>
-          <tbody id="sponsors-tbody"></tbody>
-        </table>
+      <div class="ss">
+        <h3>Export Data</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-s" onclick="xcsv('e')">↓ Entries</button>
+          <button class="btn btn-s" onclick="xcsv('s')">↓ Sponsors</button>
+          <button class="btn btn-s" onclick="xcsv('c')">↓ Comp Teams</button>
+        </div>
       </div>
     </div>
+  </div>
+</div>
 
+<!-- ENTRY MODAL -->
+<div class="mo" id="em">
+  <div class="mc">
+    <h3 id="em-t">New Entry</h3>
+    <input type="hidden" id="em-id">
+    <div class="mg">
+      <div class="mfl"><label>Team Name</label><input class="mfi" id="em-tn" placeholder="Rough Riders A"></div>
+      <div class="mfl"><label>Status</label><select class="mfs" id="em-st"><option value="paid">Paid</option><option value="invoice">Invoice Sent</option><option value="comp">Complimentary</option></select></div>
+    </div>
+    <div class="mg">
+      <div class="mfl"><label>First Name</label><input class="mfi" id="em-fn" placeholder="Theodore"></div>
+      <div class="mfl"><label>Last Name</label><input class="mfi" id="em-ln" placeholder="Roosevelt"></div>
+    </div>
+    <div class="mg">
+      <div class="mfl"><label>Email</label><input class="mfi" id="em-em" type="email" placeholder="you@example.com"></div>
+      <div class="mfl"><label>Phone</label><input class="mfi" id="em-ph" type="tel" placeholder="(813) 555-0100"></div>
+    </div>
+    <div class="mg">
+      <div class="mfl"><label>Company</label><input class="mfi" id="em-co" placeholder="Optional"></div>
+      <div class="mfl"><label>Amount Paid ($)</label><input class="mfi" id="em-am" type="number" placeholder="330"></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);margin-bottom:8px">Players</div>
+      <div class="prows" id="em-pl"></div>
+      <button class="add-prow" onclick="addPR('em-pl')">+ Add Player</button>
+    </div>
+    <div class="mg">
+      <div class="mfl"><label>Add-ons</label><input class="mfi" id="em-ao" placeholder="Super Ticket, Mulligans…"></div>
+      <div class="mfl"><label>Stripe Session ID</label><input class="mfi" id="em-si" placeholder="cs_live_…"></div>
+    </div>
+    <div class="mg mg1"><div class="mfl"><label>Notes</label><textarea class="mft" id="em-no"></textarea></div></div>
+    <div class="mfoot">
+      <button class="btn btn-s" onclick="closeM('em')">Cancel</button>
+      <button class="btn btn-p" onclick="saveE()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- SPONSOR MODAL -->
+<div class="mo" id="sm">
+  <div class="mc">
+    <h3 id="sm-t">New Sponsor</h3>
+    <input type="hidden" id="sm-id">
+    <div class="mg">
+      <div class="mfl"><label>Company / Org</label><input class="mfi" id="sm-co" placeholder="Acme Corp"></div>
+      <div class="mfl"><label>Package</label>
+        <select class="mfs" id="sm-ti" onchange="updateCompSlots()">
+          <option value="Title">Title — $7,500</option><option value="Gold">Gold — $5,000</option>
+          <option value="Silver">Silver — $2,500</option><option value="Bronze">Bronze — $1,000</option>
+          <option value="Hole">Hole Sponsor — $250</option><option value="Alacarte">À La Carte</option>
+        </select>
+      </div>
+    </div>
+    <div class="mg">
+      <div class="mfl"><label>Contact First</label><input class="mfi" id="sm-fn" placeholder="Theodore"></div>
+      <div class="mfl"><label>Contact Last</label><input class="mfi" id="sm-ln" placeholder="Roosevelt"></div>
+    </div>
+    <div class="mg">
+      <div class="mfl"><label>Email</label><input class="mfi" id="sm-em" type="email" placeholder="you@example.com"></div>
+      <div class="mfl"><label>Phone</label><input class="mfi" id="sm-ph" type="tel"></div>
+    </div>
+    <div class="mg">
+      <div class="mfl"><label>Amount ($)</label><input class="mfi" id="sm-am" type="number"></div>
+      <div class="mfl"><label>Status</label><select class="mfs" id="sm-st"><option value="paid">Paid</option><option value="invoice">Invoice Sent</option><option value="pending">Pending</option></select></div>
+    </div>
+    <div class="mg">
+      <div class="mfl"><label>Hole # (if applicable)</label><input class="mfi" id="sm-ho" placeholder="e.g. 7, 12"></div>
+      <div class="mfl"><label>Comp Team Slots</label><input class="mfi" id="sm-cs" type="number" placeholder="Auto from tier"></div>
+    </div>
+    <div class="mg mg1"><div class="mfl"><label>Notes</label><textarea class="mft" id="sm-no"></textarea></div></div>
+    <div class="mfoot">
+      <button class="btn btn-s" onclick="closeM('sm')">Cancel</button>
+      <button class="btn btn-p" onclick="saveSp()">Save Sponsor</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMP MODAL -->
+<div class="mo" id="cm">
+  <div class="mc">
+    <h3 id="cm-t">Assign Comp Team</h3>
+    <input type="hidden" id="cm-id">
+    <div class="mg">
+      <div class="mfl"><label>Sponsor</label><select class="mfs" id="cm-sp" onchange="showSlotInfo()"></select></div>
+      <div class="mfl"><label>Team Name</label><input class="mfi" id="cm-tn" placeholder="Gold Sponsor Team A"></div>
+    </div>
+    <div id="cm-slot-info" style="font-size:12px;color:var(--tl);margin-bottom:12px;padding:8px 12px;background:#f4f6f4;border-radius:5px;display:none"></div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);margin-bottom:8px">Players</div>
+      <div class="prows" id="cm-pl"></div>
+      <button class="add-prow" onclick="addPR('cm-pl')">+ Add Player</button>
+    </div>
+    <div class="mg mg1"><div class="mfl"><label>Notes</label><textarea class="mft" id="cm-no"></textarea></div></div>
+    <div class="mfoot">
+      <button class="btn btn-s" onclick="closeM('cm')">Cancel</button>
+      <button class="btn btn-g" onclick="saveC()">Assign Team</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN EMAIL MODAL -->
+<div class="mo" id="aem">
+  <div class="mc" style="max-width:400px">
+    <h3>Add Admin</h3>
+    <input type="hidden" id="aem-id">
+    <div class="mg mg1" style="margin-bottom:12px"><div class="mfl"><label>Name</label><input class="mfi" id="aem-n" placeholder="Robin Conn"></div></div>
+    <div class="mg mg1" style="margin-bottom:12px"><div class="mfl"><label>Email</label><input class="mfi" id="aem-e" type="email" placeholder="r.conn@tamparoughriders.org"></div></div>
+    <div class="mg mg1" style="margin-bottom:12px"><div class="mfl"><label>Role</label><select class="mfs" id="aem-r"><option value="admin">Admin (full access + notifications)</option><option value="notify">Notify only (email notices)</option></select></div></div>
+    <div class="mfoot">
+      <button class="btn btn-s" onclick="closeM('aem')">Cancel</button>
+      <button class="btn btn-p" onclick="saveAE()">Save</button>
+    </div>
   </div>
 </div>
 
 <script>
-// ════════════════════════════════
-// CONFIG
-// ════════════════════════════════
-const NETLIFY_BASE = 'https://YOUR-SITE.netlify.app';
+var BASE = 'https://rr-golf.netlify.app';
+var TK   = 'rr_adm_tk';
+var tok  = localStorage.getItem(TK);
+var D    = { e:[], s:[], c:[], x:{} };
 
-// ════════════════════════════════
-// AUTH
-// ════════════════════════════════
-let adminToken = localStorage.getItem('rr_admin_token') || null;
-let adminEmail = localStorage.getItem('rr_admin_email') || null;
-
+// ── AUTH ──
 async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const btn = document.getElementById('login-btn');
-  const errEl = document.getElementById('login-error');
-  errEl.style.display = 'none';
-  if (!email || !password) { errEl.textContent='Please enter email and password.'; errEl.style.display='block'; return; }
+  var pw = document.getElementById('lpw').value;
+  var btn = document.getElementById('lbtn');
+  var err = document.getElementById('lerr');
+  err.style.display = 'none';
+  if (!pw) { err.textContent = 'Enter password'; err.style.display = 'block'; return; }
   btn.disabled = true; btn.textContent = 'Signing in…';
   try {
-    const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/admin-auth`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+    var r = await fetch(BASE + '/.netlify/functions/admin-login', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pw})
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Login failed');
-    adminToken = data.token; adminEmail = data.email;
-    localStorage.setItem('rr_admin_token', adminToken);
-    localStorage.setItem('rr_admin_email', adminEmail);
-    showApp();
-  } catch (err) {
-    errEl.textContent = err.message; errEl.style.display = 'block';
-    btn.disabled = false; btn.textContent = 'Sign In';
-  }
+    var d = await r.json();
+    if (!r.ok || !d.token) throw new Error(d.error || 'Invalid password');
+    tok = d.token; localStorage.setItem(TK, tok); showApp();
+  } catch(e) { err.textContent = e.message; err.style.display='block'; btn.disabled=false; btn.textContent='Sign In →'; }
 }
+function doLogout() { localStorage.removeItem(TK); tok=null; document.getElementById('app').style.display='none'; document.getElementById('login').style.display='flex'; }
+function showApp() { document.getElementById('login').style.display='none'; document.getElementById('app').style.display='block'; loadAll(); setInterval(updateTS,60000); updateTS(); }
+if (tok) showApp();
 
-function doLogout() {
-  adminToken = null; adminEmail = null;
-  localStorage.removeItem('rr_admin_token'); localStorage.removeItem('rr_admin_email');
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('login-screen').style.display = 'flex';
+function updateTS() { var el=document.getElementById('ts'); if(el){ var n=new Date(); el.textContent=n.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' · ' + n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); } }
+
+// ── API ──
+async function call(method, fn, body) {
+  var opts = { method, headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok} };
+  if (body) opts.body = JSON.stringify(body);
+  var r = await fetch(BASE + '/.netlify/functions/' + fn, opts);
+  if (r.status === 401) { doLogout(); throw new Error('Unauthorized'); }
+  return r.json();
 }
+var get  = function(res) { return call('GET',  'admin-data?resource='+res); };
+var put  = function(res, d) { return call('PUT',  'admin-data?resource='+res, d); };
+var post = function(res, d) { return call('POST', 'admin-data?resource='+res, d); };
+var del  = function(res, id) { return call('DELETE', 'admin-data?resource='+res+'&id='+id); };
 
-function showApp() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('topbar-user').textContent = adminEmail;
-  loadData();
-}
-
-// Auto-login if token exists
-if (adminToken) showApp();
-
-// ════════════════════════════════
-// DATA
-// ════════════════════════════════
-let allOrders = [];
-
-async function loadData() {
-  const spinner = document.getElementById('refresh-spinner');
-  spinner.style.display = 'inline-block';
-  setLoadingState();
+// ── LOAD ──
+async function loadAll() {
   try {
-    const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/get-orders`, {
-      headers: { 'Authorization': `Bearer ${adminToken}` },
-    });
-    if (res.status === 401) { doLogout(); return; }
-    const data = await res.json();
-    allOrders = data.orders || [];
-    updateStats(data.stats || {});
-    renderOrders();
-    renderGolfers();
-    renderSponsors();
-  } catch (err) {
-    showError('Failed to load data: ' + err.message);
-  } finally {
-    spinner.style.display = 'none';
-  }
+    var results = await Promise.all([get('entries'), get('sponsors'), get('comp'), get('settings')]);
+    D.e = Array.isArray(results[0]) ? results[0] : [];
+    D.s = Array.isArray(results[1]) ? results[1] : [];
+    D.c = Array.isArray(results[2]) ? results[2] : [];
+    D.x = results[3] || {};
+    stats(); re(); rs(); rc(); rx();
+  } catch(e) { console.error(e); }
 }
 
-function setLoadingState() {
-  document.getElementById('orders-tbody').innerHTML = `<tr class="loading-row"><td colspan="7"><span class="spinner"></span>Loading orders from Square…</td></tr>`;
+function fmt(n) { return n ? '$'+parseFloat(n).toLocaleString('en-US') : '—'; }
+function fdate(d) { return d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'; }
+function bd(s, t) {
+  var map = {paid:'bd-paid',invoice:'bd-inv',comp:'bd-comp',pending:'bd-pend',Title:'bd-title',Gold:'bd-gold',Silver:'bd-silver',Bronze:'bd-bronze',Hole:'bd-hole',Alacarte:'bd-comp'};
+  return '<span class="bd '+(map[s]||'')+'">'+(t||s||'—')+'</span>';
 }
 
-function showError(msg) {
-  document.getElementById('orders-tbody').innerHTML = `<tr class="loading-row"><td colspan="7" style="color:var(--red)">${msg}</td></tr>`;
+function stats() {
+  var pl = D.e.reduce(function(s,e){return s+(e.players?e.players.length:0);},0);
+  var rv = [...D.e,...D.s].reduce(function(s,e){return s+(parseFloat(e.amount)||0);},0);
+  var cp = D.c.reduce(function(s,c){return s+(c.players?c.players.length:0);},0);
+  document.getElementById('s-pl').textContent = pl;
+  document.getElementById('s-te').textContent = D.e.length;
+  document.getElementById('s-rv').textContent = '$'+rv.toLocaleString('en-US');
+  document.getElementById('s-sp').textContent = D.s.length;
+  document.getElementById('s-co').textContent = cp;
 }
 
-function updateStats(s) {
-  document.getElementById('stat-revenue').textContent   = '$' + (s.totalRevenue||0).toLocaleString('en-US');
-  document.getElementById('stat-orders').textContent    = s.totalOrders||0;
-  document.getElementById('stat-golfers').textContent   = s.totalGolfers||0;
-  document.getElementById('stat-completed').textContent = s.completedOrders||0;
-}
-
-const fmt  = n => '$' + Number(n).toLocaleString('en-US');
-const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
-
-function sponsorBadge(name) {
-  const n = name.toLowerCase();
-  if (n.includes('title'))  return `<span class="badge badge-title">Title</span>`;
-  if (n.includes('gold'))   return `<span class="badge badge-gold">Gold</span>`;
-  if (n.includes('silver')) return `<span class="badge badge-silver">Silver</span>`;
-  if (n.includes('bronze')) return `<span class="badge badge-bronze">Bronze</span>`;
-  return `<span class="badge badge-alacarte">${name}</span>`;
-}
-
-// ════════════════════════════════
-// ORDERS TAB
-// ════════════════════════════════
-function renderOrders() {
-  const q = document.getElementById('order-search').value.toLowerCase();
-  const f = document.getElementById('order-filter').value;
-  const filtered = allOrders.filter(o => {
-    const matchQ = !q || o.primaryContact.toLowerCase().includes(q) ||
-      o.golfers.some(g => g.name.toLowerCase().includes(q));
-    const matchF = !f || o.state === f;
-    return matchQ && matchF;
+// ── ENTRIES ──
+function re() {
+  var q=(document.getElementById('esq').value||'').toLowerCase();
+  var f=document.getElementById('esf').value;
+  var rows=D.e.filter(function(e){
+    var mq=!q||(e.teamName||'').toLowerCase().includes(q)||(e.firstName||'').toLowerCase().includes(q)||(e.lastName||'').toLowerCase().includes(q)||(e.email||'').toLowerCase().includes(q);
+    return mq && (!f||e.status===f);
   });
-
-  if (!filtered.length) {
-    document.getElementById('orders-tbody').innerHTML = `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-light)">No orders found</td></tr>`;
-    return;
-  }
-
-  document.getElementById('orders-tbody').innerHTML = filtered.map((o, i) => `
-    <tr>
-      <td><button class="expand-btn" id="exp-${i}" onclick="toggleDetail(${i})">▶</button></td>
-      <td><strong>${o.primaryContact.split('<')[0].trim()}</strong><br><span style="font-size:12px;color:var(--text-light)">${o.orderId.slice(-8)}</span></td>
-      <td>${o.sponsorships.length ? o.sponsorships.map(s=>sponsorBadge(s.name)).join(' ') : '<span style="color:var(--text-light);font-size:12px">None</span>'}</td>
-      <td>${o.golferCount}</td>
-      <td><strong>${fmt(o.total)}</strong></td>
-      <td><span class="badge ${o.state==='COMPLETED'?'badge-complete':'badge-open'}">${o.state==='COMPLETED'?'Paid':'Pending'}</span></td>
-      <td>${fmtDate(o.createdAt)}</td>
-    </tr>
-    <tr class="detail-row" id="detail-${i}">
-      <td colspan="7">
-        <div class="golfer-list">
-          ${o.golfers.length ? o.golfers.map(g => `
-            <div class="golfer-item">
-              <span class="golfer-item-name">${g.name}</span>
-              ${g.company ? `<span class="golfer-item-detail">🏢 ${g.company}</span>` : ''}
-              ${g.phone   ? `<span class="golfer-item-detail">📞 ${g.phone}</span>` : ''}
-              ${g.shirt   ? `<span class="golfer-item-badge">👕 ${g.shirt}</span>` : ''}
-              ${g.handicap? `<span class="golfer-item-badge">HCP ${g.handicap}</span>` : ''}
-            </div>`).join('') : '<div style="color:var(--text-light);font-size:13px">No golfer details</div>'}
-        </div>
-      </td>
-    </tr>
-  `).join('');
+  var tb=document.getElementById('etb');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🏌️</div><p>No entries</p></div></td></tr>';return;}
+  tb.innerHTML=rows.map(function(e){
+    var pn=e.players?e.players.map(function(p){return (p.firstName||'')+(p.ln||p.lastName?' '+p.lastName:'');}).filter(Boolean).join(', '):'';
+    return '<tr>'+
+      '<td><strong>'+(e.teamName||(e.firstName+' '+e.lastName)||'Unnamed')+'</strong>'+(e.company?'<br><span style="font-size:11px;color:var(--tl)">'+e.company+'</span>':'')+'<br><span style="font-size:11px;color:var(--tl)">'+(e.email||'')+(e.phone?' · '+e.phone:'')+'</span></td>'+
+      '<td><strong>'+(e.players?e.players.length:0)+'</strong>'+(pn?'<br><span style="font-size:11px;color:var(--tl)">'+pn+'</span>':'')+'</td>'+
+      '<td style="font-size:12px">'+(e.addons||'—')+'</td>'+
+      '<td><strong>'+fmt(e.amount)+'</strong></td>'+
+      '<td>'+bd(e.status)+'</td>'+
+      '<td style="font-size:12px">'+fdate(e.createdAt)+'</td>'+
+      '<td><div class="ac">'+
+        '<button class="btn btn-s sm" onclick="openEM(\''+e.id+'\')">Edit</button>'+
+        '<button class="btn btn-d sm" onclick="delR(\'entries\',\''+e.id+'\')">Del</button>'+
+      '</div></td></tr>';
+  }).join('');
 }
 
-function toggleDetail(i) {
-  const row = document.getElementById(`detail-${i}`);
-  const btn = document.getElementById(`exp-${i}`);
-  row.classList.toggle('open');
-  btn.classList.toggle('open');
+function openEM(id) {
+  var e=id?D.e.find(function(x){return x.id===id;}):null;
+  document.getElementById('em-t').textContent = e?'Edit Entry':'New Entry';
+  document.getElementById('em-id').value  = e?e.id:'';
+  document.getElementById('em-tn').value  = e?e.teamName||'':'';
+  document.getElementById('em-fn').value  = e?e.firstName||'':'';
+  document.getElementById('em-ln').value  = e?e.lastName||'':'';
+  document.getElementById('em-em').value  = e?e.email||'':'';
+  document.getElementById('em-ph').value  = e?e.phone||'':'';
+  document.getElementById('em-co').value  = e?e.company||'':'';
+  document.getElementById('em-am').value  = e?e.amount||'':'';
+  document.getElementById('em-ao').value  = e?e.addons||'':'';
+  document.getElementById('em-si').value  = e?e.stripeSession||'':'';
+  document.getElementById('em-no').value  = e?e.notes||'':'';
+  document.getElementById('em-st').value  = e?e.status||'paid':'paid';
+  rProws('em-pl', e?e.players||[]:[{firstName:'',lastName:'',email:'',phone:''}]);
+  openM('em');
 }
 
-// ════════════════════════════════
-// GOLFERS TAB
-// ════════════════════════════════
-function renderGolfers() {
-  const q = document.getElementById('golfer-search')?.value.toLowerCase() || '';
-  const all = allOrders.flatMap(o => o.golfers.map(g => ({ ...g, orderId: o.orderId, orderDate: o.createdAt, orderState: o.state })));
-  const filtered = all.filter(g => !q || g.name.toLowerCase().includes(q) || (g.company||'').toLowerCase().includes(q));
-
-  if (!filtered.length) {
-    document.getElementById('golfers-list').innerHTML = `<div class="empty-state"><div class="empty-icon">🏌️</div><p>No golfers found</p></div>`;
-    return;
-  }
-
-  document.getElementById('golfers-list').innerHTML = filtered.map(g => `
-    <div class="golfer-full-card">
-      <div class="gfc-name">${g.name}</div>
-      <div class="gfc-meta">
-        ${g.company  ? `<span class="gfc-chip">🏢 ${g.company}</span>` : ''}
-        ${g.phone    ? `<span class="gfc-chip">📞 ${g.phone}</span>` : ''}
-        ${g.shirt    ? `<span class="gfc-chip">👕 ${g.shirt}</span>` : ''}
-        ${g.handicap ? `<span class="gfc-chip">HCP ${g.handicap}</span>` : ''}
-        <span class="gfc-chip" style="margin-left:auto;font-size:11px;color:var(--text-light)">${fmtDate(g.orderDate)}</span>
-        <span class="badge ${g.orderState==='COMPLETED'?'badge-complete':'badge-open'}">${g.orderState==='COMPLETED'?'Paid':'Pending'}</span>
-      </div>
-    </div>
-  `).join('');
-}
-
-// ════════════════════════════════
-// SPONSORS TAB
-// ════════════════════════════════
-function renderSponsors() {
-  const withSponsors = allOrders.filter(o => o.sponsorships.length > 0);
-  if (!withSponsors.length) {
-    document.getElementById('sponsors-tbody').innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-light)">No sponsorships yet</td></tr>`;
-    return;
-  }
-  document.getElementById('sponsors-tbody').innerHTML = withSponsors.map(o => `
-    <tr>
-      <td><strong>${o.primaryContact.split('<')[0].trim()}</strong><br>
-        <span style="font-size:12px;color:var(--text-light)">${(o.primaryContact.match(/<(.+)>/) || [])[1] || ''}</span>
-      </td>
-      <td>${o.sponsorships.map(s=>sponsorBadge(s.name)).join(' ')}</td>
-      <td><strong>${fmt(o.total)}</strong></td>
-      <td><span class="badge ${o.state==='COMPLETED'?'badge-complete':'badge-open'}">${o.state==='COMPLETED'?'Paid':'Pending'}</span></td>
-      <td>${fmtDate(o.createdAt)}</td>
-    </tr>
-  `).join('');
-}
-
-// ════════════════════════════════
-// TABS
-// ════════════════════════════════
-function showTab(name) {
-  ['orders','golfers','sponsors'].forEach(t => {
-    document.getElementById(`tab-${t}`).style.display = t===name ? 'block' : 'none';
-  });
-  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-    btn.classList.toggle('active', ['orders','golfers','sponsors'][i] === name);
-  });
-}
-
-// ════════════════════════════════
-// CSV EXPORT
-// ════════════════════════════════
-function exportCSV(type) {
-  let rows, filename;
-  if (type === 'orders') {
-    rows = [['Order ID','Contact','Sponsorships','Golfer Count','Total','Status','Date']];
-    allOrders.forEach(o => rows.push([
-      o.orderId, o.primaryContact,
-      o.sponsorships.map(s=>s.name).join('; '),
-      o.golferCount, o.total, o.state, fmtDate(o.createdAt)
-    ]));
-    filename = 'rr-golf-orders.csv';
-  } else if (type === 'golfers') {
-    rows = [['Name','Company','Phone','Shirt','Handicap','Order Date','Status']];
-    allOrders.flatMap(o => o.golfers.map(g => rows.push([
-      g.name, g.company||'', g.phone||'', g.shirt||'', g.handicap||'',
-      fmtDate(o.createdAt), o.state
-    ])));
-    filename = 'rr-golf-golfers.csv';
+async function saveE() {
+  var id=document.getElementById('em-id').value;
+  var d={
+    teamName:document.getElementById('em-tn').value.trim(),
+    firstName:document.getElementById('em-fn').value.trim(),
+    lastName:document.getElementById('em-ln').value.trim(),
+    email:document.getElementById('em-em').value.trim(),
+    phone:document.getElementById('em-ph').value.trim(),
+    company:document.getElementById('em-co').value.trim(),
+    amount:parseFloat(document.getElementById('em-am').value)||0,
+    addons:document.getElementById('em-ao').value.trim(),
+    stripeSession:document.getElementById('em-si').value.trim(),
+    notes:document.getElementById('em-no').value.trim(),
+    status:document.getElementById('em-st').value,
+    players:cProws('em-pl'),
+  };
+  if(id){
+    d.id=id; d.updatedAt=new Date().toISOString();
+    var i=D.e.findIndex(function(x){return x.id===id;});
+    if(i>=0) D.e[i]=Object.assign({},D.e[i],d);
+    await put('entries',D.e);
   } else {
-    rows = [['Contact','Sponsorships','Total','Status','Date']];
-    allOrders.filter(o=>o.sponsorships.length).forEach(o => rows.push([
-      o.primaryContact.split('<')[0].trim(),
-      o.sponsorships.map(s=>s.name).join('; '),
-      o.total, o.state, fmtDate(o.createdAt)
-    ]));
-    filename = 'rr-golf-sponsors.csv';
+    var rec=await post('entries',d); D.e.push(rec);
   }
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
+  closeM('em'); stats(); re();
+}
+
+// ── SPONSORS ──
+var TB={Title:{teams:3,players:12,tickets:12,holeSigns:5,banner:true,website:true},Gold:{teams:2,players:8,tickets:8,holeSigns:3,banner:true},Silver:{teams:1,players:4,tickets:4,holeSigns:2},Bronze:{teams:1,players:4,holeSigns:1}};
+
+function rs() {
+  var q=(document.getElementById('ssq').value||'').toLowerCase();
+  var f=document.getElementById('ssf').value;
+  var rows=D.s.filter(function(s){
+    var mq=!q||(s.company||'').toLowerCase().includes(q)||(s.firstName||'').toLowerCase().includes(q)||(s.email||'').toLowerCase().includes(q);
+    return mq && (!f||s.tier===f);
+  });
+  var tb=document.getElementById('stb');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🏆</div><p>No sponsors</p></div></td></tr>';return;}
+  tb.innerHTML=rows.map(function(s){
+    var b=TB[s.tier]||{};
+    var bts=[];
+    if(b.teams) bts.push(b.teams+' team'+(b.teams>1?'s':''));
+    if(b.players) bts.push(b.players+' players');
+    if(b.tickets) bts.push(b.tickets+' super tkts');
+    if(b.holeSigns) bts.push(b.holeSigns+' hole signs');
+    if(b.banner) bts.push('banner');
+    if(s.hole) bts.push('Hole #'+s.hole);
+    var bhtml=bts.length?'<div class="btags">'+bts.map(function(x){return '<span class="btag">'+x+'</span>';}).join('')+'</div>':'—';
+    var cu=D.c.filter(function(c){return c.sponsorId===s.id;}).length;
+    var cs=s.compSlots||b.teams||0;
+    var pct=cs>0?Math.min(100,Math.round(cu/cs*100)):0;
+    return '<tr>'+
+      '<td><strong>'+(s.company||(s.firstName+' '+s.lastName))+'</strong><br><span style="font-size:11px;color:var(--tl)">'+(s.firstName||'')+' '+(s.lastName||'')+' · '+(s.email||'')+'</span></td>'+
+      '<td>'+bd(s.tier,s.tier)+'</td>'+
+      '<td>'+bhtml+'</td>'+
+      '<td><strong>'+fmt(s.amount)+'</strong></td>'+
+      '<td>'+bd(s.status)+'</td>'+
+      '<td><div style="font-size:12px">'+cu+'/'+cs+' teams</div><div class="sbar"><div class="sfill'+(pct>=100?' full':'')+'" style="width:'+pct+'%"></div></div></td>'+
+      '<td><div class="ac">'+
+        '<button class="btn btn-s sm" onclick="openSM(\''+s.id+'\')">Edit</button>'+
+        '<button class="btn btn-g sm" onclick="openCM(null,\''+s.id+'\')">+Team</button>'+
+        '<button class="btn btn-d sm" onclick="delR(\'sponsors\',\''+s.id+'\')">Del</button>'+
+      '</div></td></tr>';
+  }).join('');
+}
+
+function updateCompSlots() {
+  var tier=document.getElementById('sm-ti').value;
+  var b=TB[tier]||{};
+  if(b.teams) document.getElementById('sm-cs').value=b.teams;
+}
+
+function openSM(id) {
+  var s=id?D.s.find(function(x){return x.id===id;}):null;
+  document.getElementById('sm-t').textContent=s?'Edit Sponsor':'New Sponsor';
+  document.getElementById('sm-id').value=s?s.id:'';
+  document.getElementById('sm-co').value=s?s.company||'':'';
+  document.getElementById('sm-ti').value=s?s.tier||'Gold':'Gold';
+  document.getElementById('sm-fn').value=s?s.firstName||'':'';
+  document.getElementById('sm-ln').value=s?s.lastName||'':'';
+  document.getElementById('sm-em').value=s?s.email||'':'';
+  document.getElementById('sm-ph').value=s?s.phone||'':'';
+  document.getElementById('sm-am').value=s?s.amount||'':'';
+  document.getElementById('sm-st').value=s?s.status||'paid':'paid';
+  document.getElementById('sm-ho').value=s?s.hole||'':'';
+  document.getElementById('sm-cs').value=s?s.compSlots||'':'';
+  document.getElementById('sm-no').value=s?s.notes||'':'';
+  if(!s) updateCompSlots();
+  openM('sm');
+}
+
+async function saveSp() {
+  var id=document.getElementById('sm-id').value;
+  var tier=document.getElementById('sm-ti').value;
+  var b=TB[tier]||{};
+  var d={
+    company:document.getElementById('sm-co').value.trim(),
+    tier,
+    firstName:document.getElementById('sm-fn').value.trim(),
+    lastName:document.getElementById('sm-ln').value.trim(),
+    email:document.getElementById('sm-em').value.trim(),
+    phone:document.getElementById('sm-ph').value.trim(),
+    amount:parseFloat(document.getElementById('sm-am').value)||0,
+    status:document.getElementById('sm-st').value,
+    hole:document.getElementById('sm-ho').value.trim(),
+    compSlots:parseInt(document.getElementById('sm-cs').value)||b.teams||0,
+    notes:document.getElementById('sm-no').value.trim(),
+  };
+  if(id){
+    d.id=id; d.updatedAt=new Date().toISOString();
+    var i=D.s.findIndex(function(x){return x.id===id;});
+    if(i>=0) D.s[i]=Object.assign({},D.s[i],d);
+    await put('sponsors',D.s);
+  } else { var rec=await post('sponsors',d); D.s.push(rec); }
+  closeM('sm'); stats(); rs();
+}
+
+// ── COMP ──
+function rc() {
+  var tb=document.getElementById('ctb');
+  if(!D.c.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">🎁</div><p>No comp teams yet</p></div></td></tr>';return;}
+  tb.innerHTML=D.c.map(function(c){
+    var sp=D.s.find(function(s){return s.id===c.sponsorId;});
+    var spn=sp?(sp.company||sp.firstName+' '+sp.lastName):'—';
+    var pc=c.players?c.players.length:0;
+    var cs=sp?(sp.compSlots||(TB[sp.tier]||{}).teams||0):0;
+    var cu=D.c.filter(function(x){return x.sponsorId===c.sponsorId;}).length;
+    return '<tr>'+
+      '<td><strong>'+spn+'</strong>'+(sp?'<br>'+bd(sp.tier,sp.tier):'')+'</td>'+
+      '<td><strong>'+(c.teamName||'Unnamed')+'</strong></td>'+
+      '<td style="font-size:12px">'+(c.players?c.players.map(function(p){return (p.firstName||'')+' '+(p.lastName||'');}).filter(Boolean).join(', '):'—')+'</td>'+
+      '<td style="font-size:12px"><strong>'+cu+'</strong>/'+cs+' slots</td>'+
+      '<td style="font-size:12px">'+(c.notes||'—')+'</td>'+
+      '<td><div class="ac">'+
+        '<button class="btn btn-s sm" onclick="openCM(\''+c.id+'\')">Edit</button>'+
+        '<button class="btn btn-d sm" onclick="delR(\'comp\',\''+c.id+'\')">Del</button>'+
+      '</div></td></tr>';
+  }).join('');
+}
+
+function showSlotInfo() {
+  var sid=document.getElementById('cm-sp').value;
+  var sp=D.s.find(function(s){return s.id===sid;});
+  var el=document.getElementById('cm-slot-info');
+  if(!sp){el.style.display='none';return;}
+  var b=TB[sp.tier]||{};
+  var cs=sp.compSlots||b.teams||0;
+  var cu=D.c.filter(function(c){return c.sponsorId===sid;}).length;
+  el.style.display='block';
+  el.textContent=(sp.company||sp.firstName+' '+sp.lastName)+' — '+sp.tier+' Sponsor · '+cu+'/'+cs+' comp teams used · '+b.players+' players per team';
+}
+
+function openCM(id, sponsorId) {
+  var c=id?D.c.find(function(x){return x.id===id;}):null;
+  document.getElementById('cm-t').textContent=c?'Edit Comp Team':'Assign Comp Team';
+  document.getElementById('cm-id').value=c?c.id:'';
+  document.getElementById('cm-tn').value=c?c.teamName||'':'';
+  document.getElementById('cm-no').value=c?c.notes||'':'';
+  var sel=document.getElementById('cm-sp');
+  sel.innerHTML=D.s.map(function(s){return '<option value="'+s.id+'">'+(s.company||s.firstName+' '+s.lastName)+' — '+(s.tier||'')+'</option>';}).join('');
+  if(c&&c.sponsorId) sel.value=c.sponsorId;
+  else if(sponsorId) sel.value=sponsorId;
+  showSlotInfo();
+  rProws('cm-pl', c?c.players||[]:[{firstName:'',lastName:'',email:'',phone:''}]);
+  openM('cm');
+}
+
+async function saveC() {
+  var id=document.getElementById('cm-id').value;
+  var d={
+    sponsorId:document.getElementById('cm-sp').value,
+    teamName:document.getElementById('cm-tn').value.trim(),
+    players:cProws('cm-pl'),
+    notes:document.getElementById('cm-no').value.trim(),
+  };
+  if(id){
+    d.id=id; d.updatedAt=new Date().toISOString();
+    var i=D.c.findIndex(function(x){return x.id===id;});
+    if(i>=0) D.c[i]=Object.assign({},D.c[i],d);
+    await put('comp',D.c);
+  } else { var rec=await post('comp',d); D.c.push(rec); }
+  closeM('cm'); stats(); rc(); rs();
+}
+
+// ── SETTINGS ──
+function rx() {
+  var x=D.x;
+  document.getElementById('ne').checked=x.notifyOnEntry!==false;
+  document.getElementById('ns').checked=x.notifyOnSponsor!==false;
+  var list=document.getElementById('ael');
+  var admins=x.adminEmails||[];
+  if(!admins.length){list.innerHTML='<p style="font-size:13px;color:var(--tl)">No admins added yet.</p>';return;}
+  list.innerHTML=admins.map(function(a,i){
+    return '<div class="arow">'+
+      '<div class="aname">'+(a.name||'Unnamed')+'</div>'+
+      '<div class="aemail">'+(a.email||'')+'</div>'+
+      '<span class="bd '+(a.role==='admin'?'bd-paid':'bd-comp')+'">'+(a.role||'notify')+'</span>'+
+      '<button class="btn btn-d sm" onclick="rmAE('+i+')">Remove</button>'+
+    '</div>';
+  }).join('');
+}
+
+async function saveSt() {
+  D.x.notifyOnEntry   = document.getElementById('ne').checked;
+  D.x.notifyOnSponsor = document.getElementById('ns').checked;
+  await put('settings', D.x);
+}
+
+function openAEM() {
+  document.getElementById('aem-id').value='';
+  document.getElementById('aem-n').value='';
+  document.getElementById('aem-e').value='';
+  document.getElementById('aem-r').value='admin';
+  openM('aem');
+}
+
+async function saveAE() {
+  var admins=D.x.adminEmails||[];
+  admins.push({ name:document.getElementById('aem-n').value.trim(), email:document.getElementById('aem-e').value.trim(), role:document.getElementById('aem-r').value });
+  D.x.adminEmails=admins;
+  await put('settings',D.x);
+  closeM('aem'); rx();
+}
+
+async function rmAE(i) {
+  if(!confirm('Remove this admin?')) return;
+  D.x.adminEmails.splice(i,1);
+  await put('settings',D.x); rx();
+}
+
+// ── PLAYER ROWS ──
+function rProws(cid, players) {
+  var c=document.getElementById(cid); c.innerHTML='';
+  (players||[]).forEach(function(p,i){ c.appendChild(mkProw(cid,p,i)); });
+}
+function mkProw(cid, p, i) {
+  var row=document.createElement('div'); row.className='prow'; row.id=cid+'-r'+i;
+  row.innerHTML=
+    '<div><div class="prow-lbl">First</div><input class="prow-inp" value="'+(p.firstName||'')+'" placeholder="First name"></div>'+
+    '<div><div class="prow-lbl">Last</div><input class="prow-inp" value="'+(p.lastName||'')+'" placeholder="Last name"></div>'+
+    '<div><div class="prow-lbl">Email / Phone</div><input class="prow-inp" value="'+(p.email||p.phone||'')+'" placeholder="email or phone"></div>'+
+    '<button class="del-btn" onclick="rmProw(\''+cid+'\',\''+cid+'-r'+i+'\')">×</button>';
+  return row;
+}
+function addPR(cid) { var c=document.getElementById(cid); c.appendChild(mkProw(cid,{},c.children.length)); }
+function rmProw(cid, rowId) { var r=document.getElementById(rowId); if(r) r.remove(); }
+function cProws(cid) {
+  var rows=document.getElementById(cid).querySelectorAll('.prow');
+  var out=[];
+  rows.forEach(function(row){
+    var ins=row.querySelectorAll('.prow-inp');
+    var fn=ins[0]?ins[0].value.trim():'', ln=ins[1]?ins[1].value.trim():'', em=ins[2]?ins[2].value.trim():'';
+    if(fn||ln||em) out.push({firstName:fn,lastName:ln,email:em});
+  });
+  return out;
+}
+
+// ── DELETE ──
+async function delR(res, id) {
+  if(!confirm('Delete this record? Cannot be undone.')) return;
+  await del(res, id);
+  var k=res==='comp'?'c':res==='entries'?'e':'s';
+  D[k]=D[k].filter(function(x){return x.id!==id;});
+  stats();
+  if(res==='entries') re();
+  if(res==='sponsors') rs();
+  if(res==='comp') rc();
+}
+
+// ── TABS ──
+function showTab(t) {
+  ['e','s','c','x'].forEach(function(n){document.getElementById('t'+n).style.display=n===t?'block':'none';});
+  document.querySelectorAll('.tbtn').forEach(function(b,i){b.classList.toggle('on',['e','s','c','x'][i]===t);});
+}
+
+// ── MODALS ──
+function openM(id) { document.getElementById(id).classList.add('open'); }
+function closeM(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.mo').forEach(function(el){ el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open');}); });
+
+// ── CSV EXPORT ──
+function xcsv(t) {
+  var rows, fn;
+  if(t==='e') {
+    rows=[['Team','Contact','Email','Phone','Company','# Players','Players','Amount','Status','Add-ons','Stripe Session','Notes','Date']];
+    D.e.forEach(function(e){rows.push([e.teamName||'',e.firstName+' '+e.lastName,e.email||'',e.phone||'',e.company||'',e.players?e.players.length:0,(e.players||[]).map(function(p){return p.firstName+' '+p.lastName;}).join('; '),e.amount||'',e.status||'',e.addons||'',e.stripeSession||'',e.notes||'',fdate(e.createdAt)]);});
+    fn='rr-golf-entries.csv';
+  } else if(t==='s') {
+    rows=[['Company','Tier','Contact','Email','Phone','Amount','Status','Hole','Comp Slots','Notes','Date']];
+    D.s.forEach(function(s){rows.push([s.company||'',s.tier||'',s.firstName+' '+s.lastName,s.email||'',s.phone||'',s.amount||'',s.status||'',s.hole||'',s.compSlots||'',s.notes||'',fdate(s.createdAt)]);});
+    fn='rr-golf-sponsors.csv';
+  } else {
+    rows=[['Sponsor','Team','Players','Notes','Date']];
+    D.c.forEach(function(c){var sp=D.s.find(function(s){return s.id===c.sponsorId;});rows.push([sp?(sp.company||sp.firstName+' '+sp.lastName):'—',c.teamName||'',(c.players||[]).map(function(p){return p.firstName+' '+p.lastName;}).join('; '),c.notes||'',fdate(c.createdAt)]);});
+    fn='rr-golf-comp.csv';
+  }
+  var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=fn; a.click();
 }
 </script>
 </body>
