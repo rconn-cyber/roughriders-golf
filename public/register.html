@@ -305,6 +305,12 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 </head>
 <body>
 
+<header style="text-align:center;padding:28px 20px 24px;border-bottom:1px solid rgba(0,0,0,0.07);margin-bottom:28px;">
+  <div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:#4a8c62;margin-bottom:6px;">1st U.S. Volunteer Cavalry Regiment — Rough Riders</div>
+  <h1 style="font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,34px);font-weight:900;color:#1a3320;line-height:1.15;margin-bottom:4px;">39th Annual Charity<br>Golf Tournament</h1>
+  <div style="font-size:13px;color:#7a7a72;margin-top:8px;">Hunter's Green Country Club · Tampa, FL · Monday, September 14, 2026</div>
+</header>
+
 <nav class="steps-nav" id="steps-nav">
   <button class="step-tab active" onclick="goPage(0)"><span class="step-num">1</span>Player Info</button>
   <button class="step-tab"        onclick="goPage(1)"><span class="step-num">2</span>Sponsorship</button>
@@ -382,7 +388,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         </div>
       </div>
 
-      <div class="addons-grid">
+      <div class="addons-grid" id="addons-grid">
         <div class="addon-item" onclick="toggleAddon(this, 20, 'Mulligan Pack')">
           <div class="addon-left">
             <div class="addon-name">Mulligan pack</div>
@@ -709,14 +715,17 @@ function toggleAddon(el, price, name) {
 
 function toggleSuperTicket(el) {
   const SUPER_NAMES = ['Mulligan Pack','Closest to Pin','Longest Drive','Raffle Tickets','Awards Dinner Guest'];
+  const grid = document.getElementById('addons-grid');
   if (el.classList.contains('checked')) {
     el.classList.remove('checked');
     delete addons['Super Ticket'];
+    grid.style.display = 'grid';
   } else {
     document.querySelectorAll('.addon-item:not(.addon-super)').forEach(a => a.classList.remove('checked'));
     SUPER_NAMES.forEach(n => delete addons[n]);
     el.classList.add('checked');
     addons['Super Ticket'] = 75;
+    grid.style.display = 'none';
   }
   updateRegTotal();
 }
