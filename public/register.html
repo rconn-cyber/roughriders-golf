@@ -1133,10 +1133,20 @@ async function handleSponsorPay() {
 // ════════════════════════════════
 function showInvoiceModal() {
   const sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
-  if (!sponsorships.length) {
-    const holeEl = document.querySelector('[data-id="hole"]');
-    if (holeEl) { holeEl.scrollIntoView({behavior:'smooth',block:'center'}); holeEl.classList.add('addon-highlight'); setTimeout(()=>holeEl.classList.remove('addon-highlight'),2000); }
-    document.getElementById('sponsor-modal').style.display = 'flex';
+  const total = sponsorships.reduce((s,v) => s + v.price, 0);
+
+  if (!sponsorships.length || total === 0) {
+    // Not on sponsorship page yet — take them there first
+    if (currentPage !== 1) {
+      goPage(1);
+      setTimeout(() => {
+        document.getElementById('sponsor-modal').style.display = 'flex';
+      }, 400);
+    } else {
+      const holeEl = document.querySelector('[data-id="hole"]');
+      if (holeEl) { holeEl.scrollIntoView({behavior:'smooth',block:'center'}); holeEl.classList.add('addon-highlight'); setTimeout(()=>holeEl.classList.remove('addon-highlight'),2000); }
+      document.getElementById('sponsor-modal').style.display = 'flex';
+    }
     return;
   }
   // Pre-fill from registration form if available
@@ -1174,10 +1184,23 @@ async function submitInvoice() {
   if (!fn || !ln) { errEl.textContent = 'Please enter your first and last name.'; errEl.style.display='block'; return; }
   if (!em || !/\S+@\S+\.\S+/.test(em)) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display='block'; return; }
 
+  const sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
+
+  // Guard: must have sponsorships with real prices
+  if (!sponsorships.length) {
+    errEl.textContent = 'No sponsorship selected. Please go back and choose a sponsorship package.';
+    errEl.style.display = 'block';
+    return;
+  }
+  const totalAmount = sponsorships.reduce((s,v) => s + v.price, 0);
+  if (totalAmount <= 0) {
+    errEl.textContent = 'Invoice total is $0. Please select a sponsorship package first.';
+    errEl.style.display = 'block';
+    return;
+  }
+
   btn.disabled = true;
   btn.textContent = 'Creating invoice…';
-
-  const sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
 
   try {
     const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-invoice`, {
