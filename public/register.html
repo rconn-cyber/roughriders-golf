@@ -343,15 +343,15 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
     <!-- Primary registrant -->
     <div class="reg-section">
-      <div class="reg-section-title">Player Information</div>
+      <div class="reg-section-title">Player Information <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional if sponsoring only</span></div>
       <div class="field-row">
         <div class="field" id="f-fn">
-          <label>First name *</label>
+          <label>First name</label>
           <input id="inp-fn" type="text" placeholder="Theodore">
           <span class="err-msg">Required</span>
         </div>
         <div class="field" id="f-ln">
-          <label>Last name *</label>
+          <label>Last name</label>
           <input id="inp-ln" type="text" placeholder="Roosevelt">
           <span class="err-msg">Required</span>
         </div>
@@ -781,18 +781,20 @@ function updateRegTotal() {
 }
 
 // ════════════════════════════════
-// VALIDATION — name/email only required if player count > 0
-// Registration OR sponsorship, not both required
+// VALIDATION
 // ════════════════════════════════
 function validateReg() {
-  // Only validate name+email if the user has entered anything in the player section
-  // If they jump straight to sponsorship, that's fine — email is enough
   let valid = true;
   const fn = document.getElementById('inp-fn').value.trim();
   const ln = document.getElementById('inp-ln').value.trim();
   const em = document.getElementById('inp-em').value.trim();
 
-  // At minimum we need an email to send a receipt
+  const anyFilled = fn || ln || em;
+
+  // If they haven't filled anything in, let them through to sponsorship
+  if (!anyFilled) return true;
+
+  // If they've started filling in the form, require all three
   if (!em || !/\S+@\S+\.\S+/.test(em)) {
     document.getElementById('f-em').classList.add('has-error');
     document.getElementById('inp-em').classList.add('error');
@@ -802,7 +804,6 @@ function validateReg() {
     document.getElementById('inp-em').classList.remove('error');
   }
 
-  // First + last name required only if they've started filling in the form
   ['fn','ln'].forEach(f => {
     const inp  = document.getElementById(`inp-${f}`);
     const wrap = document.getElementById(`f-${f}`);
