@@ -18,12 +18,20 @@ exports.handler = async (event) => {
   }
 
   async function blobSet(k, val) {
-    const r = await fetch('https://api.netlify.com/api/v1/blobs/' + siteID + '/golf-admin/' + k, {
+    const body = JSON.stringify(val);
+    const apiBase = 'https://api.netlify.com/api/v1/sites/' + siteID + '/blobs';
+    const authHdr = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+    // Get presigned upload URL
+    const metaR = await fetch(apiBase + '/' + encodeURIComponent('golf-admin/' + k), {
       method: 'PUT',
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-      body: JSON.stringify(val),
+      headers: { ...authHdr, 'Content-Length': Buffer.byteLength(body).toString() },
     });
-    if (!r.ok) throw new Error('Blob set failed for ' + k + ': ' + r.status + ' ' + await r.text());
+    if (!metaR.ok) throw new Error('Presign failed for ' + k + ': ' + metaR.status + ' ' + await metaR.text());
+    const meta = await metaR.json();
+    if (!meta.url) throw new Error('No presigned URL for ' + k);
+    // Upload content
+    const upR = await fetch(meta.url, { method: 'PUT', body, headers: { 'Content-Type': 'application/json' } });
+    if (!upR.ok) throw new Error('Upload failed for ' + k + ': ' + upR.status);
   }
 
   const d = function(n) { return new Date(Date.now() - n * 86400000).toISOString(); };
