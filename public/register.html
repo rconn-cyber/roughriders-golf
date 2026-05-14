@@ -296,6 +296,18 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 .success-screen h2 { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 900; color: var(--green-dark); margin-bottom: 10px; }
 .success-screen p { font-size: 15px; color: var(--text-mid); max-width: 460px; margin: 0 auto; }
 
+/* ── ADD-ON HIGHLIGHT (upsell pulse) ── */
+@keyframes rrPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(201,168,76,0.7); }
+  70%  { box-shadow: 0 0 0 10px rgba(201,168,76,0); }
+  100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+}
+.addon-highlight {
+  animation: rrPulse 0.7s ease 2;
+  border-color: var(--gold) !important;
+  background: linear-gradient(135deg,#fdf8ec,#fefaf0) !important;
+}
+
 @media (max-width: 600px) {
   .addons-grid { grid-template-columns: 1fr; }
   .field-row { grid-template-columns: 1fr; }
@@ -459,9 +471,14 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="total-bar-amount" id="reg-total">$165.00</div>
         <div class="total-bar-breakdown" id="reg-breakdown">1 player</div>
       </div>
-      <button class="btn-proceed" id="proceed-btn" onclick="handleProceed()">
-        Proceed to Payment →
-      </button>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+        <button class="btn-proceed" id="proceed-btn" onclick="handleProceed()">
+          Proceed to Payment →
+        </button>
+        <button onclick="handleViewSponsorship()" style="background:none;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);border-radius:5px;padding:7px 18px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.6)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,0.25)';this.style.color='rgba(255,255,255,0.7)'">
+          View Sponsorships →
+        </button>
+      </div>
     </div>
 
   </div>
@@ -805,6 +822,46 @@ function getAdditionalPlayers() {
 }
 
 // ════════════════════════════════
+// ADDON HIGHLIGHT — scroll to & pulse
+// ════════════════════════════════
+function highlightAddons() {
+  document.getElementById('addon-modal').style.display = 'none';
+  const addonsSection = document.querySelector('.addon-super');
+  if (addonsSection) {
+    addonsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    addonsSection.classList.add('addon-highlight');
+    setTimeout(() => addonsSection.classList.remove('addon-highlight'), 2000);
+  }
+}
+
+function selectSuperFromModal() {
+  document.getElementById('addon-modal').style.display = 'none';
+  const superEl = document.querySelector('.addon-super');
+  if (superEl && !superEl.classList.contains('checked')) {
+    toggleSuperTicket(superEl);
+  }
+  superEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function selectHoleSponsorFromModal() {
+  document.getElementById('sponsor-modal').style.display = 'none';
+  goPage(1);
+  // Select hole sponsor and scroll to it
+  setTimeout(() => {
+    const holeEl = document.querySelector('[data-id="hole"]');
+    if (holeEl && !holeEl.classList.contains('selected')) {
+      holeEl.click();
+    }
+    holeEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 300);
+}
+
+function proceedWithoutSponsor() {
+  document.getElementById('sponsor-modal').style.display = 'none';
+  doCheckout();
+}
+
+// ════════════════════════════════
 // PAY — REGISTRATION ONLY
 // ════════════════════════════════
 async function handleProceed() {
@@ -812,18 +869,41 @@ async function handleProceed() {
     document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth', block:'center'});
     return;
   }
-
-  // If no add-ons selected, show upsell modal
+  // No add-ons? Show upsell modal and highlight section
   if (Object.keys(addons).length === 0) {
     document.getElementById('addon-modal').style.display = 'flex';
+    highlightAddons();
     return;
   }
-
+  // No sponsorship? Show sponsor upsell modal
+  if (Object.keys(sponsorSelections).length === 0) {
+    document.getElementById('sponsor-modal').style.display = 'flex';
+    return;
+  }
   await doCheckout();
+}
+
+async function handleViewSponsorship() {
+  if (!validateReg()) {
+    document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  // No add-ons? Show upsell modal first before letting them go to sponsorships
+  if (Object.keys(addons).length === 0) {
+    document.getElementById('addon-modal').style.display = 'flex';
+    highlightAddons();
+    return;
+  }
+  goPage(1);
 }
 
 async function proceedWithoutAddons() {
   document.getElementById('addon-modal').style.display = 'none';
+  // Still check for sponsorship
+  if (Object.keys(sponsorSelections).length === 0) {
+    document.getElementById('sponsor-modal').style.display = 'flex';
+    return;
+  }
   await doCheckout();
 }
 
@@ -980,7 +1060,17 @@ document.querySelectorAll('.selectable').forEach(el=>{
 // ════════════════════════════════
 async function handleSponsorPay() {
   const sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
-  if(!sponsorships.length) { alert('Please select at least one sponsorship, or go back to complete registration.'); return; }
+  if (!sponsorships.length) {
+    // Highlight the hole sponsor card and show modal
+    const holeEl = document.querySelector('[data-id="hole"]');
+    if (holeEl) {
+      holeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      holeEl.classList.add('addon-highlight');
+      setTimeout(() => holeEl.classList.remove('addon-highlight'), 2000);
+    }
+    document.getElementById('sponsor-modal').style.display = 'flex';
+    return;
+  }
 
   const primary = getPrimaryGolfer();
   const golfers = primary.email ? [primary] : [];
@@ -1019,17 +1109,36 @@ function goPage(n) {
 if(window.location.search.includes('session_id')) goPage(2);
 </script>
 <!-- No add-ons modal -->
-<div id="addon-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
-  <div style="background:#fff;border-radius:8px;padding:32px 28px;max-width:380px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-    <div style="font-size:40px;margin-bottom:12px;">🎯</div>
-    <h3 style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#1a3320;margin-bottom:10px;">Don't miss out on add-ons!</h3>
-    <p style="font-size:14px;color:#4a4a45;margin-bottom:24px;line-height:1.6;">The <strong>Super Ticket ($75)</strong> includes mulligans, contest entries, raffle tickets, and an awards dinner guest — saving you $20 vs. buying separately.</p>
+<div id="addon-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:10px;padding:36px 32px;max-width:420px;width:92%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
+    <div style="font-size:44px;margin-bottom:14px;">🎯</div>
+    <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#1a3320;margin-bottom:10px;">Are you sure you don't want any add-ons?</h3>
+    <p style="font-size:14px;color:#4a4a45;margin-bottom:8px;line-height:1.6;">The <strong>Super Ticket ($75)</strong> gets your whole team mulligans, contest entries, raffle tickets, and an awards dinner guest — saving $20 vs. buying separately.</p>
+    <p style="font-size:13px;color:#7a7a72;margin-bottom:26px;">Add-ons apply to everyone on your team.</p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-      <button onclick="document.getElementById('addon-modal').style.display='none'" style="padding:11px 22px;background:#1a3320;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">
-        Add Super Ticket
+      <button onclick="selectSuperFromModal()" style="padding:12px 24px;background:#1a3320;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.04em;">
+        ⭐ Add Super Ticket — $75
       </button>
-      <button onclick="proceedWithoutAddons()" style="padding:11px 22px;background:none;border:1px solid rgba(0,0,0,0.15);color:#4a4a45;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">
+      <button onclick="proceedWithoutAddons()" style="padding:12px 22px;background:none;border:1px solid rgba(0,0,0,0.15);color:#4a4a45;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">
         No thanks, continue
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- No sponsorship modal -->
+<div id="sponsor-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:10px;padding:36px 32px;max-width:440px;width:92%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
+    <div style="font-size:44px;margin-bottom:14px;">🏌️</div>
+    <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#1a3320;margin-bottom:10px;">Are you sure you don't want a sponsorship?</h3>
+    <p style="font-size:14px;color:#4a4a45;margin-bottom:8px;line-height:1.6;">Sponsorships put your brand in front of every golfer all day. Even a <strong>Hole Sponsor at $250</strong> gets you a custom tee sign, on-course visibility, and website listing.</p>
+    <p style="font-size:13px;color:#7a7a72;margin-bottom:26px;">Great for businesses, teams, and community supporters.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button onclick="selectHoleSponsorFromModal()" style="padding:12px 24px;background:#1a3320;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.04em;">
+        ⛳ Add Hole Sponsor — $250
+      </button>
+      <button onclick="proceedWithoutSponsor()" style="padding:12px 22px;background:none;border:1px solid rgba(0,0,0,0.15);color:#4a4a45;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">
+        No thanks, pay now
       </button>
     </div>
   </div>
