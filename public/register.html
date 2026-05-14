@@ -839,6 +839,33 @@ function highlightAddons() {
   if (superEl) superEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
+function selectMulligansFromModal() {
+  document.getElementById('addon-modal').style.display = 'none';
+  // Find and select the Mulligan Pack addon
+  document.querySelectorAll('.addon-item:not(.addon-super)').forEach(el => {
+    if (el.getAttribute('onclick')?.includes('Mulligan')) {
+      if (!el.classList.contains('checked')) toggleAddon(el, 20, 'Mulligan Pack');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+}
+
+function closeAddonModalAndScroll() {
+  document.getElementById('addon-modal').style.display = 'none';
+  // Scroll to add-ons section and highlight all items
+  highlightAddons();
+}
+
+function viewAllSponsorshipsFromModal() {
+  document.getElementById('sponsor-modal').style.display = 'none';
+  goPage(1);
+  // Scroll to top of sponsorship page and highlight the tiers
+  setTimeout(() => {
+    const tiersEl = document.querySelector('.tiers');
+    if (tiersEl) tiersEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 300);
+}
+
 function selectSuperFromModal() {
   document.getElementById('addon-modal').style.display = 'none';
   const superEl = document.querySelector('.addon-super');
@@ -1117,13 +1144,19 @@ if(window.location.search.includes('session_id')) goPage(2);
     <div style="font-size:44px;margin-bottom:14px;">🎯</div>
     <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#1a3320;margin-bottom:10px;">Are you sure you don't want any add-ons?</h3>
     <p style="font-size:14px;color:#4a4a45;margin-bottom:8px;line-height:1.6;">The <strong>Super Ticket ($75)</strong> gets your whole team mulligans, contest entries, raffle tickets, and an awards dinner guest — saving $20 vs. buying separately.</p>
-    <p style="font-size:13px;color:#7a7a72;margin-bottom:26px;">Add-ons apply to everyone on your team.</p>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-      <button onclick="selectSuperFromModal()" style="padding:12px 24px;background:#1a3320;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.04em;">
+    <p style="font-size:13px;color:#7a7a72;margin-bottom:22px;">Add-ons apply to everyone on your team.</p>
+    <div style="display:flex;flex-direction:column;gap:9px;align-items:stretch;">
+      <button onclick="selectSuperFromModal()" style="padding:13px 24px;background:#1a3320;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.04em;">
         ⭐ Add Super Ticket — $75
       </button>
-      <button onclick="proceedWithoutAddons()" style="padding:12px 22px;background:none;border:1px solid rgba(0,0,0,0.15);color:#4a4a45;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">
-        No thanks, continue
+      <button onclick="selectMulligansFromModal()" style="padding:13px 24px;background:#2d5a3d;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">
+        Just Mulligans — $20
+      </button>
+      <button onclick="closeAddonModalAndScroll()" style="padding:11px 22px;background:#f4f6f4;border:1px solid rgba(0,0,0,0.12);color:#1a3320;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">
+        ← See all add-on choices
+      </button>
+      <button onclick="proceedWithoutAddons()" style="padding:10px 22px;background:none;border:none;color:#7a7a72;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;text-decoration:underline;">
+        No thanks, continue without add-ons
       </button>
     </div>
   </div>
@@ -1135,12 +1168,15 @@ if(window.location.search.includes('session_id')) goPage(2);
     <div style="font-size:44px;margin-bottom:14px;">🏌️</div>
     <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#1a3320;margin-bottom:10px;">Are you sure you don't want a sponsorship?</h3>
     <p style="font-size:14px;color:#4a4a45;margin-bottom:8px;line-height:1.6;">Sponsorships put your brand in front of every golfer all day. Even a <strong>Hole Sponsor at $250</strong> gets you a custom tee sign, on-course visibility, and website listing.</p>
-    <p style="font-size:13px;color:#7a7a72;margin-bottom:26px;">Great for businesses, teams, and community supporters.</p>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-      <button onclick="selectHoleSponsorFromModal()" style="padding:12px 24px;background:#1a3320;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.04em;">
+    <p style="font-size:13px;color:#7a7a72;margin-bottom:22px;">Great for businesses, teams, and community supporters.</p>
+    <div style="display:flex;flex-direction:column;gap:9px;align-items:stretch;">
+      <button onclick="selectHoleSponsorFromModal()" style="padding:13px 24px;background:#1a3320;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.04em;">
         ⛳ Add Hole Sponsor — $250
       </button>
-      <button onclick="proceedWithoutSponsor()" style="padding:12px 22px;background:none;border:1px solid rgba(0,0,0,0.15);color:#4a4a45;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">
+      <button onclick="viewAllSponsorshipsFromModal()" style="padding:11px 22px;background:#f4f6f4;border:1px solid rgba(0,0,0,0.12);color:#1a3320;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">
+        ← See all sponsorship options
+      </button>
+      <button onclick="proceedWithoutSponsor()" style="padding:10px 22px;background:none;border:none;color:#7a7a72;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;text-decoration:underline;">
         No thanks, pay now
       </button>
     </div>
