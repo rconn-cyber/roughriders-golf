@@ -80,13 +80,6 @@ exports.handler = async (event) => {
       // Where to go after payment
       success_url: process.env.SUCCESS_URL + '?session_id={CHECKOUT_SESSION_ID}',
       cancel_url:  process.env.CANCEL_URL,
-
-      // Enable Apple Pay / Google Pay automatically
-      payment_method_options: {
-        card: {
-          setup_future_usage: null,
-        },
-      },
     });
 
     return {
