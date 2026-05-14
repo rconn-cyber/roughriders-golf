@@ -717,6 +717,7 @@ function changePlayerCount(delta) {
   document.getElementById('player-minus').disabled = playerCount <= 0;
   document.getElementById('player-plus').disabled  = playerCount >= MAX_PLAYERS;
   renderAdditionalPlayers();
+  updateAddonPrices();
   updateRegTotal();
   updatePayButton();
 }
@@ -762,14 +763,36 @@ function updatePayButton() {
   }
 }
 
-function toggleAddon(el, price, name) {
+// Base prices per player for per-player addons
+var ADDON_BASE_PRICES = {
+  'Mulligan Pack': 20,
+  'Closest to Pin': 10,
+  'Longest Drive': 10,
+  'Raffle Tickets': 25,
+  'Awards Dinner Guest': 30,
+  'Super Ticket': 75
+};
+
+function addonEffectivePrice(name) {
+  var base = ADDON_BASE_PRICES[name];
+  if (!base) return 0;
+  // All add-ons are per player
+  return base * Math.max(1, playerCount);
+}
+
+function toggleAddon(el, basePrice, name) {
   var superEl = document.querySelector('.addon-super');
   if (superEl && superEl.classList.contains('checked')) {
     superEl.classList.remove('checked');
     delete addons['Super Ticket'];
   }
   el.classList.toggle('checked');
-  if (el.classList.contains('checked')) { addons[name] = price; } else { delete addons[name]; }
+  if (el.classList.contains('checked')) {
+    addons[name] = addonEffectivePrice(name);
+  } else {
+    delete addons[name];
+  }
+  updateAddonPrices();
   updateRegTotal();
   updatePayButton();
 }
@@ -782,14 +805,58 @@ function toggleSuperTicket(el) {
     delete addons['Super Ticket'];
     grid.style.display = 'grid';
   } else {
-    document.querySelectorAll('.addon-item:not(.addon-super)').forEach(a => a.classList.remove('checked'));
-    SUPER_NAMES.forEach(n => delete addons[n]);
+    document.querySelectorAll('.addon-item:not(.addon-super)').forEach(function(a) { a.classList.remove('checked'); });
+    SUPER_NAMES.forEach(function(n) { delete addons[n]; });
     el.classList.add('checked');
-    addons['Super Ticket'] = 75;
+    addons['Super Ticket'] = addonEffectivePrice('Super Ticket');
     grid.style.display = 'none';
   }
+  updateAddonPrices();
   updateRegTotal();
   updatePayButton();
+}
+
+function updateAddonPrices() {
+  var origDescs = {
+    'Mulligan Pack': '3 mulligans per player',
+    'Closest to Pin': 'Contest entry per player',
+    'Longest Drive': 'Contest entry per player',
+    'Raffle Tickets': '5 tickets per player',
+    'Awards Dinner Guest': '1 extra guest ticket per player'
+  };
+  // Update all individual add-ons
+  document.querySelectorAll('.addon-item:not(.addon-super)').forEach(function(el) {
+    var onclick = el.getAttribute('onclick') || '';
+    var nameMatch = onclick.match(/'([^']+)'\s*\)$/);
+    if (!nameMatch) return;
+    var name = nameMatch[1];
+    var base = ADDON_BASE_PRICES[name];
+    if (!base) return;
+    var priceEl = el.querySelector('.addon-price');
+    var descEl  = el.querySelector('.addon-desc');
+    var effective = base * Math.max(1, playerCount);
+    if (priceEl) priceEl.textContent = '$' + effective;
+    if (descEl) {
+      descEl.textContent = playerCount > 1
+        ? '$' + base + ' \u00d7 ' + playerCount + ' players'
+        : (origDescs[name] || '');
+    }
+    if (el.classList.contains('checked')) addons[name] = effective;
+  });
+  // Update Super Ticket card price too
+  var superEl = document.querySelector('.addon-super');
+  if (superEl) {
+    var superPrice = ADDON_BASE_PRICES['Super Ticket'] * Math.max(1, playerCount);
+    var superPriceEl = superEl.querySelector('.addon-price');
+    if (superPriceEl) superPriceEl.textContent = '$' + superPrice;
+    var superDescEl = superEl.querySelector('.addon-desc');
+    if (superDescEl) {
+      superDescEl.textContent = playerCount > 1
+        ? 'Everything for your team — $75 \u00d7 ' + playerCount + ' players'
+        : 'Includes everything for your whole team: Mulligan pack \u00b7 Closest to pin \u00b7 Longest drive \u00b7 Raffle tickets (5) \u00b7 Awards dinner guest';
+    }
+    if (superEl.classList.contains('checked')) addons['Super Ticket'] = superPrice;
+  }
 }
 
 function updateRegTotal() {
@@ -883,13 +950,18 @@ function highlightAddons() {
 
 function selectMulligansFromModal() {
   document.getElementById('addon-modal').style.display = 'none';
-  // Find and select the Mulligan Pack addon
-  document.querySelectorAll('.addon-item:not(.addon-super)').forEach(el => {
-    if (el.getAttribute('onclick')?.includes('Mulligan')) {
-      if (!el.classList.contains('checked')) toggleAddon(el, 20, 'Mulligan Pack');
+  document.querySelectorAll('.addon-item:not(.addon-super)').forEach(function(el) {
+    var onclick = el.getAttribute('onclick') || '';
+    if (onclick.indexOf('Mulligan') !== -1) {
+      if (!el.classList.contains('checked')) {
+        el.classList.add('checked');
+        addons['Mulligan Pack'] = addonEffectivePrice('Mulligan Pack');
+      }
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   });
+  updateRegTotal();
+  updatePayButton();
 }
 
 function closeAddonModalAndScroll() {
