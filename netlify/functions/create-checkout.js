@@ -31,7 +31,7 @@ exports.handler = async (event) => {
       currency: 'usd',
       product_data: {
         name: s.name,
-        description: `Rough Riders Golf Tournament Sponsorship`,
+        description: `39th Annual Charity Golf Tournament · Hunter's Green Country Club, Tampa FL · Sept 14, 2026`,
       },
       unit_amount: Math.round(s.price * 100), // Stripe uses cents
     },
