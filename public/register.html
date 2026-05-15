@@ -655,16 +655,85 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
     </div>
   </div>
 
-  <div class="nav-btns">
-    <button class="btn-secondary" onclick="goPage(0)">← Back</button>
-    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
-      <button class="btn-primary" onclick="handleSponsorPay()">Pay by Card →</button>
-      <button onclick="showInvoiceModal()" style="background:none;border:1px solid rgba(0,0,0,0.18);color:var(--text-mid);border-radius:5px;padding:9px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#4a8c62';this.style.color='#1a3320'" onmouseout="this.style.borderColor='rgba(0,0,0,0.18)';this.style.color='var(--text-mid)'">
-        📄 Request an Invoice
-      </button>
+  <!-- ── SPONSOR CONTACT INFO + PAYMENT ── -->
+  <div id="sponsor-contact-section" style="display:none;margin-top:32px;">
+    <div class="reg-card">
+      <div class="reg-section">
+        <div class="reg-section-title">Your Contact Information</div>
+        <div id="sp-order-summary" style="background:#f4f6f4;border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:13px;"></div>
+        <div class="field-row">
+          <div class="field" id="spf-fn">
+            <label>First Name *</label>
+            <input id="sp-fn" type="text" placeholder="Theodore">
+            <span class="err-msg">Required</span>
+          </div>
+          <div class="field" id="spf-ln">
+            <label>Last Name *</label>
+            <input id="sp-ln" type="text" placeholder="Roosevelt">
+            <span class="err-msg">Required</span>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field" id="spf-em">
+            <label>Email Address *</label>
+            <input id="sp-em" type="email" placeholder="you@example.com">
+            <span class="err-msg">Valid email required</span>
+          </div>
+          <div class="field">
+            <label>Phone</label>
+            <input id="sp-ph" type="tel" placeholder="(813) 555-0100">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Company / Organization *</label>
+            <input id="sp-co" type="text" placeholder="Acme Corp">
+          </div>
+          <div class="field">
+            <label>Website <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input id="sp-web" type="text" placeholder="https://example.com">
+          </div>
+        </div>
+        <div class="field-row single">
+          <div class="field">
+            <label>Mailing Address <span style="font-weight:400;text-transform:none;letter-spacing:0">(for invoice / correspondence)</span></label>
+            <input id="sp-addr" type="text" placeholder="123 Main St, Tampa FL 33601">
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment options -->
+      <div class="reg-section" style="background:#f8faf8;">
+        <div class="reg-section-title">Payment</div>
+        <div id="sp-pay-error" style="display:none;font-size:13px;color:#b02020;background:#fdf0ef;border-radius:4px;padding:9px 12px;border-left:3px solid #b02020;margin-bottom:14px;"></div>
+
+        <!-- Order total -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(0,0,0,0.07);">
+          <div style="font-size:14px;font-weight:600;color:var(--text-mid);" id="sp-total-label">Total</div>
+          <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#b8940e;" id="sp-total-display">$0</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button id="sp-card-btn" onclick="handleSponsorPay()" style="width:100%;padding:15px;background:#0f2318;color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#1e4a2c'" onmouseout="this.style.background='#0f2318'">
+            💳 Pay by Card →
+          </button>
+          <button id="sp-invoice-btn" onclick="handleSponsorInvoice()" style="width:100%;padding:14px;background:#fff;color:#0f2318;border:2px solid rgba(0,0,0,0.15);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#2d7a4a';this.style.color='#1e4a2c'" onmouseout="this.style.borderColor='rgba(0,0,0,0.15)';this.style.color='#0f2318'">
+            📄 Request an Invoice
+          </button>
+          <p style="font-size:11px;color:var(--text-light);text-align:center;margin-top:4px;">
+            Invoice includes check payment instructions · Net 30 terms ·
+            Mail to: 601 N. 19th St, Tampa FL 33605
+          </p>
+        </div>
+      </div>
+
+      <div class="reg-section" style="padding:14px 32px;">
+        <button class="btn-secondary" onclick="goPage(0)" style="font-size:13px;">← Back to Registration</button>
+      </div>
     </div>
   </div>
-</div>
+
+</div><!-- end page-1 -->
 
 <!-- ══════════ PAGE 3: SUCCESS ══════════ -->
 <div class="page" id="page-2">
@@ -676,30 +745,6 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 </div>
 
 </main>
-
-<!-- Sticky sponsor bar (page 2 only) -->
-<div id="total-bar">
-  <div class="benefits-row" id="benefits-row">
-    <span class="benefits-heading">What you get:</span>
-    <div class="bstats" id="bstats"></div>
-  </div>
-  <div class="total-bar-inner">
-    <div class="total-chips" id="total-chips"></div>
-    <div class="total-right">
-      <div>
-        <div class="total-label-sm">Sponsorship</div>
-        <div class="total-figure" id="total-figure">$0</div>
-      </div>
-      <button class="btn-bar-clear" onclick="clearAll()">Clear</button>
-      <div style="display:flex;flex-direction:column;gap:5px;align-items:stretch;">
-        <button class="btn-bar-continue" onclick="handleSponsorPay()">Pay Now →</button>
-        <button onclick="showInvoiceModal()" style="background:none;border:1px solid rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);border-radius:3px;padding:5px 12px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;letter-spacing:0.03em;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.6)'" onmouseout="this.style.color='rgba(255,255,255,0.8)';this.style.borderColor='rgba(255,255,255,0.3)'">
-          📄 Invoice Me
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script>
 // ════════════════════════════════
@@ -1206,75 +1251,102 @@ function computeBenefits() {
 }
 
 function updateSponsorTotal() {
-  var total=0; var chips=[];
-  for(const [id,item] of Object.entries(sponsorSelections)) {
-    total+=item.price; chips.push({id,name:item.name,price:item.price});
-  }
-  document.getElementById('total-figure').textContent = fmt(total);
-  document.getElementById('total-chips').innerHTML = chips.map(c=>
-    `<span class="chip">${c.name}<span class="chip-price"> ${fmt(c.price)}</span><button class="chip-x" onclick="removeSponsor('${c.id}')">×</button></span>`
-  ).join('');
+  var items = Object.values(sponsorSelections);
+  var total = items.reduce(function(s,v){return s+v.price;},0);
+  var hasSponsor = items.length > 0;
 
-  var b=computeBenefits();
-  var hasSponsor=Object.keys(sponsorSelections).length>0;
-  var brow=document.getElementById('benefits-row');
-  var bstats=document.getElementById('bstats');
-  if(hasSponsor) {
-    brow.classList.add('show');
-    var html='';
-    if(b.golfers)   html+=`<div class="bstat-big"><span class="bval">${b.golfers}</span><span class="blbl">Golfers</span></div>`;
-    if(b.tickets)   html+=`<div class="bstat-big"><span class="bval">${b.tickets}</span><span class="blbl">Super Tickets</span></div>`;
-    if(b.holeSigns) html+=`<div class="bstat-big"><span class="bval">${b.holeSigns}</span><span class="blbl">Hole Signs</span></div>`;
-    if(b.banner)    html+=`<div class="bstat-pill">Sponsor Banner</div>`;
-    if(b.website)   html+=`<div class="bstat-pill">Website Listing</div>`;
-    b.perks.forEach(p=>{html+=`<div class="bstat-pill">${p}</div>`;});
-    bstats.innerHTML=html;
-  } else { brow.classList.remove('show'); }
-  document.getElementById('total-bar').classList.toggle('visible', total>0);
-  // Keep page-1 total bar and button in sync
+  // Show/hide inline contact section
+  var section = document.getElementById('sponsor-contact-section');
+  if (section) {
+    var wasHidden = section.style.display === 'none' || section.style.display === '';
+    section.style.display = hasSponsor ? 'block' : 'none';
+    if (hasSponsor && wasHidden) {
+      setTimeout(function(){ section.scrollIntoView({behavior:'smooth',block:'start'}); }, 150);
+    }
+  }
+
+  // Order summary
+  var summary = document.getElementById('sp-order-summary');
+  if (summary && hasSponsor) {
+    var html = '<div style="font-weight:700;color:#0f2318;margin-bottom:8px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;">Your Sponsorship Order</div>';
+    items.forEach(function(s){
+      html += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.06);"><span style="color:#2a2a26;">'+s.name+'</span><span style="font-weight:700;color:#0f2318;">'+fmt(s.price)+'</span></div>';
+    });
+    html += '<div style="display:flex;justify-content:space-between;padding:8px 0 0;font-weight:700;font-size:14px;"><span>Total</span><span style="color:#b8940e;font-family:\'Playfair Display\',serif;font-size:18px;">'+fmt(total)+'</span></div>';
+    summary.innerHTML = html;
+    prefillSponsorContact();
+  }
+
+  var td = document.getElementById('sp-total-display');
+  if (td) td.textContent = fmt(total);
+
+  // Keep page-1 total bar in sync
   updateRegTotal();
   updatePayButton();
 }
 
+function prefillSponsorContact() {
+  var fields = [['inp-fn','sp-fn'],['inp-ln','sp-ln'],['inp-em','sp-em'],['inp-ph','sp-ph'],['inp-co','sp-co']];
+  fields.forEach(function(p){
+    var src = document.getElementById(p[0]);
+    var dst = document.getElementById(p[1]);
+    if (src && dst && src.value.trim() && !dst.value.trim()) dst.value = src.value.trim();
+  });
+}
+
+function validateSponsorContact() {
+  var valid = true;
+  [['sp-fn','spf-fn'],['sp-ln','spf-ln'],['sp-em','spf-em']].forEach(function(pair){
+    var inp  = document.getElementById(pair[0]);
+    var wrap = document.getElementById(pair[1]);
+    if (!inp || !wrap) return;
+    var ok = pair[0]==='sp-em' ? /\S+@\S+\.\S+/.test(inp.value) : inp.value.trim().length>0;
+    wrap.classList.toggle('has-error', !ok);
+    inp.classList.toggle('error', !ok);
+    if (!ok) valid = false;
+  });
+  if (!valid) document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth',block:'center'});
+  return valid;
+}
+
 function removeSponsor(id) {
-  document.querySelector(`[data-id="${id}"]`)?.classList.remove('selected');
-  if(id==='hole'){holeQty=1;document.getElementById('hole-qty').textContent='1';}
-  delete sponsorSelections[id]; updateSponsorTotal();
+  var el = document.querySelector('[data-id="'+id+'"]');
+  if (el) el.classList.remove('selected');
+  if(id==='hole'){holeQty=1;var hq=document.getElementById('hole-qty');if(hq)hq.textContent='1';}
+  delete sponsorSelections[id];
+  updateSponsorTotal();
 }
 
 function clearAll() {
-  document.querySelectorAll('.selectable.selected').forEach(el=>el.classList.remove('selected'));
+  document.querySelectorAll('.selectable.selected').forEach(function(el){el.classList.remove('selected');});
   holeQty=1; var hq=document.getElementById('hole-qty'); if(hq) hq.textContent='1';
   for(var k in sponsorSelections) delete sponsorSelections[k];
   updateSponsorTotal();
 }
 
 // ════════════════════════════════
-// PAGE NAV
-// ════════════════════════════════
-
-// ════════════════════════════════
-// PAY — SPONSORSHIP
+// PAY — SPONSORSHIP (card)
 // ════════════════════════════════
 async function handleSponsorPay() {
-  var sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
-  if (!sponsorships.length) {
-    // Highlight the hole sponsor card and show modal
-    var holeEl = document.querySelector('[data-id="hole"]');
-    if (holeEl) {
-      holeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      holeEl.classList.add('addon-highlight');
-      setTimeout(() => holeEl.classList.remove('addon-highlight'), 2000);
-    }
-    document.getElementById('sponsor-modal').style.display = 'flex';
-    return;
-  }
+  var sponsorships = Object.values(sponsorSelections).map(function(s){return{name:s.name,price:s.price};});
+  if (!sponsorships.length) { document.getElementById('sponsor-modal').style.display='flex'; return; }
+  if (!validateSponsorContact()) return;
 
-  var primary = getPrimaryGolfer();
-  var golfers = primary.email ? [primary] : [];
+  var btn   = document.getElementById('sp-card-btn');
+  var errEl = document.getElementById('sp-pay-error');
+  errEl.style.display='none';
+  btn.disabled=true; btn.textContent='Creating checkout…';
+
+  var golfers = [{
+    firstName: document.getElementById('sp-fn').value.trim(),
+    lastName:  document.getElementById('sp-ln').value.trim(),
+    email:     document.getElementById('sp-em').value.trim(),
+    phone:     document.getElementById('sp-ph').value.trim(),
+    company:   document.getElementById('sp-co').value.trim(),
+  }];
 
   try {
-    var res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-checkout`, {
+    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/create-checkout',{
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({golfers, sponsorships}),
     });
@@ -1282,16 +1354,56 @@ async function handleSponsorPay() {
     if(!res.ok||!data.url) throw new Error(data.error||'Could not create checkout');
     window.location.href = data.url;
   } catch(err) {
-    alert(`Error: ${err.message}`);
+    errEl.textContent='Error: '+err.message+'. Please try again or contact us.';
+    errEl.style.display='block';
+    btn.disabled=false; btn.textContent='💳 Pay by Card →';
   }
 }
 
 // ════════════════════════════════
-// INVOICE ME
+// INVOICE — SPONSORSHIP
+// ════════════════════════════════
+async function handleSponsorInvoice() {
+  var sponsorships = Object.values(sponsorSelections).map(function(s){return{name:s.name,price:s.price};});
+  if (!sponsorships.length) return;
+  if (!validateSponsorContact()) return;
+
+  var btn   = document.getElementById('sp-invoice-btn');
+  var errEl = document.getElementById('sp-pay-error');
+  errEl.style.display='none';
+  btn.disabled=true; btn.textContent='Creating invoice…';
+
+  try {
+    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/create-invoice',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        firstName: document.getElementById('sp-fn').value.trim(),
+        lastName:  document.getElementById('sp-ln').value.trim(),
+        email:     document.getElementById('sp-em').value.trim(),
+        phone:     document.getElementById('sp-ph').value.trim(),
+        company:   document.getElementById('sp-co').value.trim(),
+        sponsorships,
+      }),
+    });
+    var data = await res.json();
+    if(!res.ok||!data.success) throw new Error(data.error||'Could not create invoice');
+    unlockConfirmation();
+    goPage(2);
+    document.querySelector('.success-screen h2').textContent='Invoice on its way!';
+    document.querySelector('.success-screen p').textContent='A Stripe invoice has been sent to '+document.getElementById('sp-em').value.trim()+' with a secure Pay Now link. Net 30 payment terms. Questions? Email golf@tamparoughriders.org';
+  } catch(err) {
+    errEl.textContent='Error: '+err.message+'. Please try again or contact us.';
+    errEl.style.display='block';
+    btn.disabled=false; btn.textContent='📄 Request an Invoice';
+  }
+}
+
+// ════════════════════════════════
+// INVOICE ME (page 1 registration path)
 // ════════════════════════════════
 function showInvoiceModal() {
-  var sponsorships = Object.values(sponsorSelections).map(s=>({name:s.name,price:s.price}));
-  var total = sponsorships.reduce((s,v) => s + v.price, 0);
+  var sponsorships = Object.values(sponsorSelections).map(function(s){return{name:s.name,price:s.price};});
+  var total = sponsorships.reduce(function(s,v){return s+v.price;},0);
 
   if (!sponsorships.length || total === 0) {
     // Not on sponsorship page yet — take them there first
