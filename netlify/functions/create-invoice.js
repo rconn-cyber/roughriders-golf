@@ -57,7 +57,7 @@ exports.handler = async (event) => {
       collection_method: 'send_invoice',
       due_date: dueDate,
       description: 'Rough Riders 39th Annual Charity Golf Tournament — Sponsorship',
-      footer: 'Thank you for supporting the Rough Riders!\n\nTo pay by check, make payable to:\n"1st U.S. Volunteer Cavalry Regiment Rough Riders Inc"\nMail to: 601 N. 19th St, Tampa FL 33605\nInclude invoice number on your check.\n\nQuestions? golf@tamparoughriders.org · (813) 248-1898',
+      footer: 'PAY WITH CREDIT CARD: Click the "Pay this invoice" button above to pay securely online.\n\nOR SEND A CHECK:\nMake check payable to: "1st U.S. Volunteer Cavalry Regiment Rough Riders Inc"\nMail to: 601 N. 19th St, Tampa FL 33605\nPlease include your invoice number on your check.\n\nQuestions? golf@tamparoughriders.org · (813) 248-1898\nThank you for supporting the Rough Riders!',
       metadata: {
         source: 'rough-riders-golf',
         company: company || '',
