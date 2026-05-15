@@ -610,7 +610,7 @@ function rs() {
     var websiteDisplay = s.website ? s.website.replace('https://','').replace('http://','').split('?')[0] : '';
     return '<tr>'+
       '<td>'+
-        (s.logoData ? '<img src="'+s.logoData+'" style="max-height:36px;max-width:80px;display:block;margin-bottom:5px;border-radius:3px;object-fit:contain;background:#fff;border:1px solid rgba(0,0,0,0.08);padding:2px;">' : '') +
+        (s.logoData ? '<img src="'+s.logoData+'" style="max-height:36px;max-width:80px;display:block;margin-bottom:5px;border-radius:3px;object-fit:contain;background:#fff;border:1px solid rgba(0,0,0,0.08);padding:2px;" onerror="this.style.display=\'none\'">' : '') +
         '<strong>'+(s.company||(s.firstName+' '+s.lastName))+'</strong>'+
         '<br><span style="font-size:11px;color:var(--tl)">'+(s.firstName||'')+' '+(s.lastName||'')+' · '+(s.email||'')+'</span>'+
         (s.phone ? '<br><span style="font-size:11px;color:var(--tl)">'+s.phone+'</span>' : '')+
