@@ -8,38 +8,82 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 async function saveSponsorRecord(sponsorData) {
   const siteID = process.env.NETLIFY_SITE_ID;
   const token  = process.env.NETLIFY_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
-  if (!siteID || !token) return; // silently skip if not configured
+  if (!siteID || !token) {
+    console.log('WARN: Missing NETLIFY_SITE_ID or NETLIFY_TOKEN — sponsor not saved');
+    return;
+  }
 
   const apiBase = `https://api.netlify.com/api/v1/sites/${siteID}/blobs`;
-  const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+  const authHeaders = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+
+  // Strip logoData from the main record to keep blob small — save logo separately
+  const logoData = sponsorData.logoData;
+  const recordWithoutLogo = Object.assign({}, sponsorData, { logoData: logoData ? '[stored]' : null });
 
   // Get existing sponsors
   let sponsors = [];
   try {
-    const metaR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/sponsors')}`, { headers });
+    const metaR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/sponsors')}`, { headers: authHeaders });
     if (metaR.ok) {
       const meta = await metaR.json();
       if (meta.url) {
         const dataR = await fetch(meta.url);
-        if (dataR.ok) sponsors = JSON.parse(await dataR.text());
+        if (dataR.ok) {
+          sponsors = JSON.parse(await dataR.text());
+          if (!Array.isArray(sponsors)) sponsors = [];
+        }
       }
     }
-  } catch(e) { console.log('Could not read existing sponsors:', e.message); }
+  } catch(e) { console.log('Could not read sponsors:', e.message); }
 
-  // Append new sponsor record
-  sponsors.push(sponsorData);
+  // Save logo separately if provided
+  if (logoData && logoData.length > 10) {
+    try {
+      const logoBody = JSON.stringify({ logoData });
+      const logoKey  = encodeURIComponent('golf-admin/logo_' + sponsorData.id);
+      const lputR = await fetch(`${apiBase}/${logoKey}`, {
+        method: 'PUT', headers: { ...authHeaders, 'Content-Length': Buffer.byteLength(logoBody).toString() },
+      });
+      if (lputR.ok) {
+        const lmeta = await lputR.json();
+        if (lmeta.url) {
+          await fetch(lmeta.url, { method: 'PUT', body: logoBody, headers: { 'Content-Type': 'application/json' } });
+          recordWithoutLogo.logoData = logoData; // restore after separate save succeeds
+          console.log('Logo saved separately for', sponsorData.id);
+        }
+      }
+    } catch(e) { console.log('Logo save failed (non-fatal):', e.message); }
+  }
 
-  // Save back
+  // Append new sponsor
+  sponsors.push(recordWithoutLogo);
+
+  // Save sponsors list
   const body = JSON.stringify(sponsors);
+  console.log('Saving sponsors, count:', sponsors.length, 'body size:', body.length);
+
   const putR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/sponsors')}`, {
     method: 'PUT',
-    headers: { ...headers, 'Content-Length': Buffer.byteLength(body).toString() },
+    headers: { ...authHeaders, 'Content-Length': Buffer.byteLength(body).toString() },
   });
-  if (putR.ok) {
-    const putMeta = await putR.json();
-    if (putMeta.url) {
-      await fetch(putMeta.url, { method: 'PUT', body, headers: { 'Content-Type': 'application/json' } });
-    }
+
+  if (!putR.ok) {
+    const errText = await putR.text();
+    console.error('Blob PUT presign failed:', putR.status, errText);
+    return;
+  }
+
+  const putMeta = await putR.json();
+  if (!putMeta.url) { console.error('No presigned URL returned'); return; }
+
+  const uploadR = await fetch(putMeta.url, {
+    method: 'PUT', body, headers: { 'Content-Type': 'application/json' },
+  });
+
+  if (!uploadR.ok) {
+    console.error('Blob upload failed:', uploadR.status);
+  } else {
+    console.log('Sponsor saved successfully:', sponsorData.company || sponsorData.email);
   }
 }
 
