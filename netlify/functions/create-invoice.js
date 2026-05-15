@@ -139,7 +139,7 @@ exports.handler = async (event) => {
       collection_method: 'send_invoice',
       due_date: dueDate,
       description: 'Rough Riders 39th Annual Charity Golf Tournament — Sponsorship',
-      footer: 'PAY WITH CREDIT CARD: Click the "Pay this invoice" button above to pay securely online.\n\nOR SEND A CHECK:\nMake check payable to: "1st U.S. Volunteer Cavalry Regiment Rough Riders Inc"\nMail to: 601 N. 19th St, Tampa FL 33605\nPlease include your invoice number on your check.\n\nQuestions? golf@tamparoughriders.org · (813) 248-1898\nThank you for supporting the Rough Riders!',
+      footer: 'PAY WITH CREDIT CARD: Click the "Pay this invoice" button above to pay securely online.\n\nOR SEND A CHECK:\nMake check payable to:\n"1st U.S. Volunteer Cavalry Regiment Rough Riders Inc"\nMail check to Admin Office at:\n601 N. 19th St, Tampa FL 33605\nPlease write your invoice number on the check.\n\nQuestions? golf@tamparoughriders.org · (813) 248-1898\nThank you for supporting the Rough Riders!',
       metadata: {
         source: 'rough-riders-golf',
         company: company || '',
@@ -200,112 +200,6 @@ exports.handler = async (event) => {
       notes:     'Invoice sent ' + new Date().toLocaleDateString('en-US') + '. Awaiting payment.',
       packages:  tierName,
     });
-
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        success: true,
-        invoiceId: invoice.id,
-        customerEmail: email,
-      }),
-    };
-
-  } catch (err) {
-    console.error('Stripe invoice error:', err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: 'Failed to create invoice',
-        detail: err.message,
-      }),
-    };
-  }
-};
-
-exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
-  }
-
-  let body;
-  try {
-    body = JSON.parse(event.body);
-  } catch {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) };
-  }
-
-  const { firstName, lastName, email, company, phone, sponsorships = [] } = body;
-
-  if (!email || !firstName || !lastName) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Name and email are required' }) };
-  }
-
-  if (!sponsorships.length) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'No sponsorship items provided' }) };
-  }
-
-  try {
-    // 1. Create or retrieve a Stripe customer
-    const existingCustomers = await stripe.customers.list({ email, limit: 1 });
-    let customer;
-    if (existingCustomers.data.length > 0) {
-      customer = existingCustomers.data[0];
-      // Update with latest info
-      await stripe.customers.update(customer.id, {
-        name: `${firstName} ${lastName}`,
-        ...(company && { description: company }),
-        ...(phone && { phone }),
-        metadata: { source: 'rough-riders-golf-invoice', company: company || '' },
-      });
-    } else {
-      customer = await stripe.customers.create({
-        email,
-        name: `${firstName} ${lastName}`,
-        ...(company && { description: company }),
-        ...(phone && { phone }),
-        metadata: { source: 'rough-riders-golf-invoice', company: company || '' },
-      });
-    }
-
-    // 2. Create the invoice FIRST, then attach items to it
-    const dueDate = Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60);
-
-    const invoice = await stripe.invoices.create({
-      customer: customer.id,
-      collection_method: 'send_invoice',
-      due_date: dueDate,
-      description: 'Rough Riders 39th Annual Charity Golf Tournament — Sponsorship',
-      footer: 'PAY WITH CREDIT CARD: Click the "Pay this invoice" button above to pay securely online.\n\nOR SEND A CHECK:\nMake check payable to: "1st U.S. Volunteer Cavalry Regiment Rough Riders Inc"\nMail to: 601 N. 19th St, Tampa FL 33605\nPlease include your invoice number on your check.\n\nQuestions? golf@tamparoughriders.org · (813) 248-1898\nThank you for supporting the Rough Riders!',
-      metadata: {
-        source: 'rough-riders-golf',
-        company: company || '',
-        contact: `${firstName} ${lastName}`,
-      },
-      custom_fields: [
-        { name: 'Event', value: '39th Annual Charity Golf Tournament' },
-        { name: 'Event Date', value: 'Monday, September 14, 2026' },
-        { name: 'Venue', value: "Hunter's Green Country Club, Tampa FL" },
-        ...(company ? [{ name: 'Company', value: company }] : []),
-      ],
-    });
-
-    // 3. Create invoice items attached directly to this specific invoice
-    for (const item of sponsorships) {
-      await stripe.invoiceItems.create({
-        customer: customer.id,
-        invoice: invoice.id,          // ← attach to THIS invoice explicitly
-        amount: Math.round(item.price * 100),
-        currency: 'usd',
-        description: item.name,
-      });
-    }
-
-    // 4. Finalize and send
-    await stripe.invoices.finalizeInvoice(invoice.id);
-    await stripe.invoices.sendInvoice(invoice.id);
-
-    console.log(`Invoice ${invoice.id} sent to ${email} for ${firstName} ${lastName}`);
 
     return {
       statusCode: 200,
