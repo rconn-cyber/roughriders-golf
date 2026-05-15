@@ -959,13 +959,22 @@ function toggleSuperTicket(el) {
   if (el.classList.contains('checked')) {
     el.classList.remove('checked');
     delete addons['Super Ticket'];
-    grid.style.display = 'grid';
+    // Show all individual addons including hole sponsor
+    document.querySelectorAll('#addons-grid .addon-item').forEach(function(a) { a.style.display = ''; });
   } else {
-    document.querySelectorAll('.addon-item:not(.addon-super)').forEach(function(a) { a.classList.remove('checked'); });
+    // Deselect individual addons (but not hole sponsor)
+    document.querySelectorAll('.addon-item:not(.addon-super)').forEach(function(a) {
+      var onclick = a.getAttribute('onclick') || '';
+      if (onclick.indexOf('Hole Sponsor') === -1) a.classList.remove('checked');
+    });
     SUPER_NAMES.forEach(function(n) { delete addons[n]; });
     el.classList.add('checked');
     addons['Super Ticket'] = addonEffectivePrice('Super Ticket');
-    grid.style.display = 'none';
+    // Hide individual addons but keep hole sponsor visible
+    document.querySelectorAll('#addons-grid .addon-item').forEach(function(a) {
+      var onclick = a.getAttribute('onclick') || '';
+      if (onclick.indexOf('Hole Sponsor') === -1) a.style.display = 'none';
+    });
   }
   updateAddonPrices();
   updateRegTotal();
