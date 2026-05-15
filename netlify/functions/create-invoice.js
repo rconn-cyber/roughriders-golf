@@ -222,4 +222,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
