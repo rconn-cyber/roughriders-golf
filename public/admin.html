@@ -362,6 +362,10 @@ tr:hover td{background:#f8fbf8}
       <div class="mfl"><label>Phone</label><input class="mfi" id="sm-ph" type="tel"></div>
     </div>
     <div class="mg">
+      <div class="mfl"><label>Mailing Address</label><input class="mfi" id="sm-addr" placeholder="123 Main St, Tampa FL 33601"></div>
+      <div class="mfl"><label>Website</label><input class="mfi" id="sm-web" placeholder="https://example.com"></div>
+    </div>
+    <div class="mg">
       <div class="mfl"><label>Amount ($)</label><input class="mfi" id="sm-am" type="number"></div>
       <div class="mfl"><label>Status</label><select class="mfs" id="sm-st"><option value="paid">Paid</option><option value="invoice">Invoice Sent</option><option value="pending">Pending</option></select></div>
     </div>
@@ -369,10 +373,27 @@ tr:hover td{background:#f8fbf8}
       <div class="mfl"><label>Hole # (if applicable)</label><input class="mfi" id="sm-ho" placeholder="e.g. 7, 12"></div>
       <div class="mfl"><label>Comp Team Slots</label><input class="mfi" id="sm-cs" type="number" placeholder="Auto from tier"></div>
     </div>
+
+    <!-- Logo Upload -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);margin-bottom:8px;">Logo</div>
+      <div id="sm-logo-preview" style="display:none;margin-bottom:10px;">
+        <img id="sm-logo-img" style="max-height:60px;max-width:200px;border:1px solid rgba(0,0,0,0.1);border-radius:4px;padding:4px;background:#fff;" src="" alt="Logo">
+        <button onclick="clearLogo()" style="margin-left:10px;font-size:12px;background:var(--red-p);border:1px solid rgba(176,32,32,0.2);color:var(--red);border-radius:4px;padding:3px 10px;cursor:pointer;">Remove</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <div style="padding:9px 16px;background:#f4f6f4;border:2px dashed rgba(0,0,0,0.15);border-radius:5px;font-size:13px;color:var(--tl);transition:all 0.15s;" id="sm-logo-lbl">📎 Click to upload logo (PNG, JPG, SVG)</div>
+        <input type="file" id="sm-logo-file" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)">
+      </label>
+      <div style="font-size:11px;color:var(--tl);margin-top:5px;">Recommended: PNG or SVG, transparent background, min 300px wide</div>
+      <input type="hidden" id="sm-logo-data">
+      <input type="hidden" id="sm-logo-name">
+    </div>
+
     <div class="mg mg1"><div class="mfl"><label>Notes</label><textarea class="mft" id="sm-no"></textarea></div></div>
     <div class="mfoot">
       <button class="btn btn-s" onclick="closeM('sm')">Cancel</button>
-      <button class="btn btn-p" onclick="saveSp()">Save Sponsor</button>
+      <button class="btn btn-p" id="sm-save-btn" onclick="saveSp()">Save Sponsor</button>
     </div>
   </div>
 </div>
@@ -585,7 +606,14 @@ function rs() {
     var cs=s.compSlots||b.teams||0;
     var pct=cs>0?Math.min(100,Math.round(cu/cs*100)):0;
     return '<tr>'+
-      '<td><strong>'+(s.company||(s.firstName+' '+s.lastName))+'</strong><br><span style="font-size:11px;color:var(--tl)">'+(s.firstName||'')+' '+(s.lastName||'')+' · '+(s.email||'')+'</span></td>'+
+      '<td>'+
+        (s.logoData ? '<img src="'+s.logoData+'" style="max-height:36px;max-width:80px;display:block;margin-bottom:5px;border-radius:3px;object-fit:contain;background:#fff;border:1px solid rgba(0,0,0,0.08);padding:2px;">' : '') +
+        '<strong>'+(s.company||(s.firstName+' '+s.lastName))+'</strong>'+
+        '<br><span style="font-size:11px;color:var(--tl)">'+(s.firstName||'')+' '+(s.lastName||'')+' · '+(s.email||'')+'</span>'+
+        (s.phone ? '<br><span style="font-size:11px;color:var(--tl)">'+s.phone+'</span>' : '')+
+        (s.address ? '<br><span style="font-size:11px;color:var(--tl)">'+s.address+'</span>' : '')+
+        (s.website ? '<br><a href="'+s.website+'" target="_blank" style="font-size:11px;color:var(--gl)">'+s.website.replace('https://','')+'</a>' : '')+
+      '</td>'+
       '<td>'+bd(s.tier,s.tier)+'</td>'+
       '<td>'+bhtml+'</td>'+
       '<td><strong>'+fmt(s.amount)+'</strong></td>'+
@@ -605,6 +633,37 @@ function updateCompSlots() {
   if(b.teams) document.getElementById('sm-cs').value=b.teams;
 }
 
+// ── LOGO UPLOAD ──
+function handleLogoUpload(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { alert('Logo must be under 2MB'); input.value=''; return; }
+  var lbl = document.getElementById('sm-logo-lbl');
+  lbl.textContent = '⏳ Reading…';
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('sm-logo-data').value = e.target.result; // base64 data URL
+    document.getElementById('sm-logo-name').value = file.name;
+    document.getElementById('sm-logo-img').src    = e.target.result;
+    document.getElementById('sm-logo-preview').style.display = 'block';
+    lbl.textContent = '✓ ' + file.name + ' (' + Math.round(file.size/1024) + 'KB)';
+    lbl.style.borderColor = 'var(--gl)';
+    lbl.style.color = 'var(--gl)';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearLogo() {
+  document.getElementById('sm-logo-data').value = '';
+  document.getElementById('sm-logo-name').value = '';
+  document.getElementById('sm-logo-img').src    = '';
+  document.getElementById('sm-logo-preview').style.display = 'none';
+  document.getElementById('sm-logo-file').value = '';
+  document.getElementById('sm-logo-lbl').textContent = '📎 Click to upload logo (PNG, JPG, SVG)';
+  document.getElementById('sm-logo-lbl').style.borderColor = '';
+  document.getElementById('sm-logo-lbl').style.color = '';
+}
+
 function openSM(id) {
   var s=id?D.s.find(function(x){return x.id===id;}):null;
   document.getElementById('sm-t').textContent=s?'Edit Sponsor':'New Sponsor';
@@ -615,11 +674,24 @@ function openSM(id) {
   document.getElementById('sm-ln').value=s?s.lastName||'':'';
   document.getElementById('sm-em').value=s?s.email||'':'';
   document.getElementById('sm-ph').value=s?s.phone||'':'';
+  document.getElementById('sm-addr').value=s?s.address||'':'';
+  document.getElementById('sm-web').value=s?s.website||'':'';
   document.getElementById('sm-am').value=s?s.amount||'':'';
   document.getElementById('sm-st').value=s?s.status||'paid':'paid';
   document.getElementById('sm-ho').value=s?s.hole||'':'';
   document.getElementById('sm-cs').value=s?s.compSlots||'':'';
   document.getElementById('sm-no').value=s?s.notes||'':'';
+  // Logo
+  clearLogo();
+  if (s && s.logoData) {
+    document.getElementById('sm-logo-data').value = s.logoData;
+    document.getElementById('sm-logo-name').value = s.logoName || '';
+    document.getElementById('sm-logo-img').src    = s.logoData;
+    document.getElementById('sm-logo-preview').style.display = 'block';
+    document.getElementById('sm-logo-lbl').textContent = '✓ ' + (s.logoName || 'Logo on file');
+    document.getElementById('sm-logo-lbl').style.borderColor = 'var(--gl)';
+    document.getElementById('sm-logo-lbl').style.color = 'var(--gl)';
+  }
   if(!s) updateCompSlots();
   openM('sm');
 }
@@ -628,18 +700,24 @@ async function saveSp() {
   var id=document.getElementById('sm-id').value;
   var tier=document.getElementById('sm-ti').value;
   var b=TB[tier]||{};
+  var btn=document.getElementById('sm-save-btn');
+  btn.disabled=true; btn.textContent='Saving…';
   var d={
-    company:document.getElementById('sm-co').value.trim(),
+    company:   document.getElementById('sm-co').value.trim(),
     tier,
-    firstName:document.getElementById('sm-fn').value.trim(),
-    lastName:document.getElementById('sm-ln').value.trim(),
-    email:document.getElementById('sm-em').value.trim(),
-    phone:document.getElementById('sm-ph').value.trim(),
-    amount:parseFloat(document.getElementById('sm-am').value)||0,
-    status:document.getElementById('sm-st').value,
-    hole:document.getElementById('sm-ho').value.trim(),
-    compSlots:parseInt(document.getElementById('sm-cs').value)||b.teams||0,
-    notes:document.getElementById('sm-no').value.trim(),
+    firstName: document.getElementById('sm-fn').value.trim(),
+    lastName:  document.getElementById('sm-ln').value.trim(),
+    email:     document.getElementById('sm-em').value.trim(),
+    phone:     document.getElementById('sm-ph').value.trim(),
+    address:   document.getElementById('sm-addr').value.trim(),
+    website:   document.getElementById('sm-web').value.trim(),
+    amount:    parseFloat(document.getElementById('sm-am').value)||0,
+    status:    document.getElementById('sm-st').value,
+    hole:      document.getElementById('sm-ho').value.trim(),
+    compSlots: parseInt(document.getElementById('sm-cs').value)||b.teams||0,
+    notes:     document.getElementById('sm-no').value.trim(),
+    logoData:  document.getElementById('sm-logo-data').value || null,
+    logoName:  document.getElementById('sm-logo-name').value || null,
   };
   if(id){
     d.id=id; d.updatedAt=new Date().toISOString();
@@ -647,6 +725,7 @@ async function saveSp() {
     if(i>=0) D.s[i]=Object.assign({},D.s[i],d);
     await put('sponsors',D.s);
   } else { var rec=await post('sponsors',d); D.s.push(rec); }
+  btn.disabled=false; btn.textContent='Save Sponsor';
   closeM('sm'); stats(); rs();
 }
 
