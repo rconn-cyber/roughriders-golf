@@ -606,6 +606,8 @@ function rs() {
     var cu=D.c.filter(function(c){return c.sponsorId===s.id;}).length;
     var cs=s.compSlots||b.teams||0;
     var pct=cs>0?Math.min(100,Math.round(cu/cs*100)):0;
+    var websiteUrl = s.website ? s.website.replace(/&/g,'&amp;') : '';
+    var websiteDisplay = s.website ? s.website.replace('https://','').replace('http://','').split('?')[0] : '';
     return '<tr>'+
       '<td>'+
         (s.logoData ? '<img src="'+s.logoData+'" style="max-height:36px;max-width:80px;display:block;margin-bottom:5px;border-radius:3px;object-fit:contain;background:#fff;border:1px solid rgba(0,0,0,0.08);padding:2px;">' : '') +
@@ -613,7 +615,7 @@ function rs() {
         '<br><span style="font-size:11px;color:var(--tl)">'+(s.firstName||'')+' '+(s.lastName||'')+' · '+(s.email||'')+'</span>'+
         (s.phone ? '<br><span style="font-size:11px;color:var(--tl)">'+s.phone+'</span>' : '')+
         (s.address ? '<br><span style="font-size:11px;color:var(--tl)">'+s.address+'</span>' : '')+
-        (s.website ? '<br><a href="'+s.website+'" target="_blank" style="font-size:11px;color:var(--gl)">'+s.website.replace('https://','')+'</a>' : '')+
+        (websiteUrl ? '<br><a href="'+websiteUrl+'" target="_blank" style="font-size:11px;color:var(--gl)">'+websiteDisplay+'</a>' : '')+
       '</td>'+
       '<td>'+bd(s.tier,s.tier)+'</td>'+
       '<td>'+bhtml+'</td>'+
