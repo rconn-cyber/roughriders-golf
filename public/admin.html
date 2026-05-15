@@ -3,914 +3,1688 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rough Riders Golf — Admin</title>
+<title>Golf Tournament — Register & Sponsor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --gd:#0f2318;--gm:#1e4a2c;--gl:#2d7a4a;--gp:#c8e6d0;
-  --gold:#b8940e;--gold-l:#e8c040;
-  --bg:#f0f2f0;--white:#fff;
-  --td:#0a0a08;--tm:#2a2a26;--tl:#555550;
-  --border:rgba(0,0,0,0.1);--red:#b02020;--red-p:#fdf0ef;
-  --sh:0 1px 4px rgba(0,0,0,0.08);
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green-dark: #0f2318; --green-mid: #1e4a2c; --green-light: #2d7a4a;
+  --green-pale: #c8e6d0; --gold: #b8940e; --gold-light: #e8c040;
+  --cream: #f8f4ed; --white: #ffffff;
+  --text-dark: #0a0a08; --text-mid: #2a2a26; --text-light: #555550;
+  --silver: #6a7478; --bronze: #8a5520; --red: #b02020;
+  --border: rgba(0,0,0,0.18);
 }
-html{font-size:15px}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--td);min-height:100vh}
+html { font-size: 16px; }
+body { font-family: 'DM Sans', sans-serif; background: transparent; color: var(--text-dark); line-height: 1.6; }
 
-/* LOGIN */
-#login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--gd)}
-.lc{background:var(--white);border-radius:10px;padding:44px 40px;width:100%;max-width:380px;box-shadow:0 16px 48px rgba(0,0,0,0.3)}
-.lc h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--gd);margin-bottom:4px}
-.lc p{font-size:13px;color:var(--tl);margin-bottom:28px}
-.fl{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
-.fl label{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tm)}
-.fi{width:100%;padding:11px 13px;border:2px solid rgba(0,0,0,.14);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .15s}
-.fi:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(45,122,74,.12)}
-.lb{width:100%;padding:13px;border:none;border-radius:5px;background:var(--gd);color:var(--white);font-family:'Playfair Display',serif;font-size:16px;font-weight:700;cursor:pointer;transition:background .18s}
-.lb:hover{background:var(--gm)}
-.lb:disabled{opacity:.5;cursor:not-allowed}
-.le{font-size:12.5px;color:var(--red);background:var(--red-p);border-radius:4px;padding:8px 12px;margin-bottom:14px;display:none}
-
-/* APP */
-#app{display:none}
-.tb{background:var(--gd);height:56px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.tb-brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;color:var(--white)}
-.tb-brand span{color:var(--gold-l)}
-.tb-r{display:flex;align-items:center;gap:10px}
-.tb-btn{background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.65);cursor:pointer;font-size:12px;padding:5px 12px;border-radius:3px;font-family:'DM Sans',sans-serif;transition:all .15s}
-.tb-btn:hover{border-color:rgba(255,255,255,.5);color:var(--white)}
-
-.wrap{max-width:1200px;margin:0 auto;padding:24px 20px 80px}
-
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
-.st{background:var(--white);border-radius:6px;padding:16px 18px;box-shadow:var(--sh);border-left:4px solid var(--gl)}
-.st.gld{border-left-color:var(--gold)}
-.st.blu{border-left-color:#1a4a8a}
-.st.drk{border-left-color:var(--gd)}
-.sv{font-family:'Playfair Display',serif;font-size:30px;font-weight:900;color:var(--gd);line-height:1}
-.sv.gld{color:var(--gold)}
-.sl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tl);margin-top:4px}
-
-/* TABS */
-.tnav{display:flex;gap:2px;background:var(--white);border-radius:6px;padding:4px;box-shadow:var(--sh);margin-bottom:20px;width:fit-content;flex-wrap:wrap}
-.tbtn{padding:8px 18px;border:none;border-radius:4px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--tl);transition:all .15s;white-space:nowrap}
-.tbtn.on{background:var(--gd);color:var(--white)}
-
-/* TOOLBAR */
-.tbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-.si{padding:9px 13px;border:2px solid rgba(0,0,0,.1);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:220px;transition:border-color .15s}
-.si:focus{border-color:var(--gl)}
-.sel{padding:9px 12px;border:2px solid rgba(0,0,0,.1);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--white);cursor:pointer}
-.btn{padding:9px 16px;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
-.btn-p{background:var(--gd);color:var(--white)}.btn-p:hover{background:var(--gm)}
-.btn-s{background:var(--white);color:var(--tm);border:2px solid rgba(0,0,0,.1)}.btn-s:hover{border-color:var(--gl);color:var(--gd)}
-.btn-d{background:var(--red-p);color:var(--red);border:2px solid rgba(176,32,32,.15)}.btn-d:hover{background:#fbe0e0}
-.btn-g{background:var(--gold);color:var(--white)}.btn-g:hover{background:#9a7a08}
-.sm{padding:5px 10px!important;font-size:12px!important}
-.ml{margin-left:auto}
-
-/* TABLE */
-.tw{background:var(--white);border-radius:8px;box-shadow:var(--sh);overflow:hidden}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-thead{background:#f6faf6}
-th{padding:11px 14px;text-align:left;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tl);border-bottom:2px solid rgba(0,0,0,.06);white-space:nowrap}
-td{padding:12px 14px;border-bottom:1px solid rgba(0,0,0,.04);vertical-align:top}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:#f8fbf8}
-.ac{display:flex;gap:6px;flex-wrap:wrap}
-
-/* BADGES */
-.bd{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
-.bd-paid{background:#d4edda;color:#145a24}
-.bd-inv{background:#fff3cd;color:#856404}
-.bd-comp{background:#d4e8d8;color:var(--gd)}
-.bd-pend{background:#e8e8e8;color:#555}
-.bd-title{background:#dce8fa;color:#1a4a8a}
-.bd-gold{background:#faeeda;color:#7a5000}
-.bd-silver{background:#e8e9ea;color:#3a4a50}
-.bd-bronze{background:#f8e5d4;color:#6a2800}
-.bd-hole{background:#d4e8d8;color:var(--gd)}
-
-/* MODAL */
-.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;overflow-y:auto}
-.mo.open{display:flex}
-.mc{background:var(--white);border-radius:10px;padding:32px;max-width:600px;width:92%;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto}
-.mc h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--gd);margin-bottom:20px}
-.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.mg1{grid-template-columns:1fr}
-.mfl{display:flex;flex-direction:column;gap:5px}
-.mfl label{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tm)}
-.mfi,.mfs,.mft{padding:10px 12px;border:2px solid rgba(0,0,0,.12);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--td);background:var(--white);outline:none;transition:border-color .15s;width:100%}
-.mfi:focus,.mfs:focus,.mft:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(45,122,74,.12)}
-.mft{resize:vertical;min-height:70px}
-.mfoot{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06)}
-
-/* PLAYER ROWS */
-.prows{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-.prow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;align-items:end;background:#f4f6f4;border-radius:5px;padding:8px}
-.prow-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tl);margin-bottom:3px}
-.prow-inp{width:100%;padding:6px 8px;border:1px solid rgba(0,0,0,.12);border-radius:4px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
-.prow-inp:focus{border-color:var(--gl)}
-.add-prow{border:2px dashed rgba(0,0,0,.1);border-radius:5px;padding:10px;text-align:center;cursor:pointer;font-size:13px;color:var(--tl);transition:all .15s;background:none;width:100%}
-.add-prow:hover{border-color:var(--gl);color:var(--gd)}
-.del-btn{padding:6px 10px;background:var(--red-p);border:none;border-radius:4px;color:var(--red);cursor:pointer;font-size:14px;line-height:1;align-self:end}
-
-/* SETTINGS */
-.ss{background:var(--white);border-radius:8px;padding:24px;box-shadow:var(--sh);margin-bottom:16px}
-.ss h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--gd);margin-bottom:14px}
-.arow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.05)}
-.arow:last-child{border-bottom:none}
-.aname{font-weight:600;font-size:14px;min-width:150px}
-.aemail{font-size:13px;color:var(--tm);flex:1}
-.tog{position:relative;width:40px;height:22px;flex-shrink:0}
-.tog input{opacity:0;width:0;height:0}
-.tsl{position:absolute;inset:0;background:rgba(0,0,0,.15);border-radius:22px;cursor:pointer;transition:background .2s}
-.tsl:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:white;border-radius:50%;transition:transform .2s}
-.tog input:checked+.tsl{background:var(--gl)}
-.tog input:checked+.tsl:before{transform:translateX(18px)}
-
-/* SLOTS */
-.sbar{height:6px;background:rgba(0,0,0,.07);border-radius:3px;margin-top:4px;overflow:hidden}
-.sfill{height:100%;background:var(--gl);border-radius:3px;transition:width .3s}
-.sfill.full{background:var(--gold)}
-
-.empty{text-align:center;padding:40px;color:var(--tl)}
-.empty-icon{font-size:32px;margin-bottom:8px}
-.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.1);border-top-color:var(--gl);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-.btags{display:flex;flex-wrap:wrap;gap:4px}
-.btag{font-size:11px;background:var(--gp);color:var(--gd);padding:2px 7px;border-radius:3px;font-weight:600}
-
-@media(max-width:680px){
-  .mg{grid-template-columns:1fr}
-  .stats{grid-template-columns:1fr 1fr}
-  .prow{grid-template-columns:1fr 1fr}
-  th:nth-child(n+5),td:nth-child(n+5){display:none}
+/* ── STEP NAV ── */
+.steps-nav {
+  display: flex; margin-bottom: 32px;
+  border-bottom: 2px solid rgba(0,0,0,0.12);
 }
+.step-tab {
+  flex: 1; padding: 14px 8px; text-align: center;
+  font-size: 13px; font-weight: 600; color: var(--text-light);
+  background: none; border: none; border-bottom: 3px solid transparent;
+  cursor: pointer; transition: all 0.18s; margin-bottom: -2px;
+}
+.step-tab.active { color: var(--green-dark); border-bottom-color: var(--gold); }
+.step-tab.done { color: var(--green-light); }
+.step-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%; font-size: 11px;
+  font-weight: 700; background: rgba(0,0,0,0.1); color: var(--text-mid);
+  margin-right: 7px; transition: all 0.18s;
+}
+.step-tab.active .step-num { background: var(--gold); color: #fff; }
+.step-tab.done .step-num { background: var(--green-light); color: white; }
+
+/* ── LAYOUT ── */
+main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── REGISTRATION CARD ── */
+.reg-card {
+  background: var(--white);
+  border: 2px solid rgba(0,0,0,0.12);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.reg-section {
+  padding: 28px 32px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.reg-section:last-child { border-bottom: none; }
+
+.reg-section-title {
+  font-size: 11px; font-weight: 800;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--green-dark); margin-bottom: 20px;
+}
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.field-row.single { grid-template-columns: 1fr; }
+.field-row:last-child { margin-bottom: 0; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-dark); }
+.field input, .field select {
+  padding: 11px 13px; border: 2px solid rgba(0,0,0,0.18); border-radius: 5px;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text-dark);
+  background: var(--white); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.field input::placeholder { color: rgba(0,0,0,0.35); }
+.field input:focus, .field select:focus {
+  border-color: var(--green-light);
+  box-shadow: 0 0 0 3px rgba(45,122,74,0.15);
+}
+.field input.error { border-color: var(--red); }
+.err-msg { font-size: 11px; color: var(--red); display: none; font-weight: 600; }
+.has-error .err-msg { display: block; }
+
+/* ── PLAYER COUNT ── */
+.player-count-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 0;
+}
+.player-count-label { font-size: 15px; font-weight: 600; color: var(--text-dark); }
+.player-count-label span { font-size: 12px; color: var(--text-light); font-weight: 400; display: block; margin-top: 2px; }
+.qty-controls { display: flex; align-items: center; gap: 0; border: 2px solid rgba(0,0,0,0.18); border-radius: 5px; overflow: hidden; }
+.qty-btn {
+  width: 38px; height: 38px; border: none; background: #f4f4f2;
+  cursor: pointer; font-size: 20px; font-weight: 400; color: var(--text-dark);
+  transition: background 0.12s; display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.qty-btn:hover { background: var(--green-pale); color: var(--green-dark); }
+.qty-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.qty-display {
+  width: 44px; text-align: center; font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700; color: var(--green-dark);
+  border-left: 2px solid rgba(0,0,0,0.12); border-right: 2px solid rgba(0,0,0,0.12);
+}
+
+/* ── ADDITIONAL PLAYERS ── */
+.additional-players { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+.add-player-block {
+  background: #f4f6f4; border: 2px solid rgba(0,0,0,0.1);
+  border-radius: 6px; padding: 16px 18px;
+}
+.add-player-title {
+  font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-mid); margin-bottom: 12px;
+}
+.add-player-note {
+  font-size: 12px; color: var(--text-light); margin-top: 8px; font-style: italic;
+}
+
+/* ── ADD-ONS ── */
+.addons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.addon-item {
+  display: flex; align-items: center; justify-content: space-between;
+  border: 2px solid rgba(0,0,0,0.14); border-radius: 6px;
+  padding: 14px 16px; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.addon-item:hover { border-color: var(--green-light); background: #f0faf4; }
+.addon-item.checked { border-color: var(--green-dark); background: #e8f5ee; }
+.addon-item input[type="checkbox"] { display: none; }
+.addon-left { flex: 1; }
+.addon-name { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+.addon-desc { font-size: 12px; color: var(--text-mid); margin-top: 2px; }
+.addon-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-left: 10px; }
+.addon-price { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--green-dark); }
+.addon-check {
+  width: 22px; height: 22px; border-radius: 4px;
+  border: 2px solid rgba(0,0,0,0.25); background: white;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.addon-item.checked .addon-check {
+  background: var(--green-dark); border-color: var(--green-dark);
+}
+.addon-check svg { opacity: 0; transform: scale(0.5); transition: all 0.15s; }
+.addon-item.checked .addon-check svg { opacity: 1; transform: scale(1); }
+
+/* ── TOTAL BAR ── */
+.total-bar {
+  background: var(--green-dark); border-radius: 0 0 8px 8px;
+  padding: 20px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.total-bar-left { font-size: 13px; }
+.total-bar-amount {
+  font-family: 'Playfair Display', serif;
+  font-size: 30px; font-weight: 900; color: #f5d840;
+}
+.total-bar-breakdown {
+  font-size: 14px; font-weight: 600;
+  color: rgba(255,255,255,0.9); margin-top: 3px;
+  letter-spacing: 0.02em;
+}
+
+.btn-proceed {
+  background: var(--gold); color: #fff;
+  border: none; border-radius: 5px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 800;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 14px 28px; cursor: pointer; transition: background 0.15s;
+  white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.btn-proceed:hover { background: #9a7a08; }
+.btn-proceed:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.secure-note {
+  text-align: center; font-size: 12px; color: var(--text-light);
+  margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.secure-note a { color: var(--green-light); text-decoration: none; font-weight: 600; }
+
+/* ── PAY ERROR ── */
+#pay-error {
+  display: none; margin: 0 32px 16px;
+  font-size: 13px; color: var(--red);
+  background: #fdf0ef; border-radius: 5px;
+  padding: 10px 14px; border-left: 3px solid var(--red);
+}
+
+/* ── SPONSORSHIP (PAGE 2) — reuse existing styles ── */
+.section-heading { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--green-dark); margin-bottom: 6px; }
+.section-sub { font-size: 14px; color: var(--text-light); margin-bottom: 32px; }
+.divider { border: none; border-top: 1px solid rgba(0,0,0,0.06); margin: 40px 0; }
+.nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
+.btn-primary { padding: 13px 32px; border: none; border-radius: 5px; background: var(--green-dark); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; transition: background 0.18s; }
+.btn-primary:hover { background: var(--green-mid); }
+.btn-secondary { padding: 11px 22px; border: 1px solid rgba(0,0,0,0.15); border-radius: 5px; background: var(--white); color: var(--text-mid); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
+.btn-secondary:hover { border-color: var(--green-light); color: var(--green-dark); }
+
+/* TIERS */
+.tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 48px; }
+.tier { border-radius: 5px; overflow: hidden; display: flex; flex-direction: column; background: var(--white); border: 2px solid transparent; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s, border-color 0.18s; cursor: pointer; user-select: none; position: relative; }
+.tier:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.12); }
+.tier.selected { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.22); }
+.tier-header { padding: 22px 20px 18px; position: relative; }
+.tier.title-tier .tier-header { background: var(--green-dark); }
+.tier.gold-tier  .tier-header { background: linear-gradient(135deg, #3d2e0a, #6b4f16); }
+.tier.silver-tier .tier-header { background: linear-gradient(135deg, #2a2e30, #4a5255); }
+.tier.bronze-tier .tier-header { background: linear-gradient(135deg, #3d1e0a, #6b3316); }
+.tier-label { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px; }
+.tier.title-tier .tier-label { color: var(--gold-light); }
+.tier.gold-tier  .tier-label { color: var(--gold-light); }
+.tier.silver-tier .tier-label { color: #c8d0d4; }
+.tier.bronze-tier .tier-label { color: #e8c4a0; }
+.tier-price { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 900; color: var(--white); line-height: 1; }
+.tier-price sup { font-size: 15px; vertical-align: super; font-weight: 400; opacity: 0.7; }
+.featured-pill { position: absolute; top: 10px; right: 36px; background: var(--gold); color: var(--green-dark); font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; }
+.tier-body { padding: 18px; flex: 1; }
+.perk { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 9px; font-size: 13px; color: var(--text-mid); }
+.perk:last-child { margin-bottom: 0; }
+.perk-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.tier.title-tier  .perk-dot { background: var(--gold); }
+.tier.gold-tier   .perk-dot { background: #c9a84c; }
+.tier.silver-tier .perk-dot { background: var(--silver); }
+.tier.bronze-tier .perk-dot { background: var(--bronze); }
+.perk strong { color: var(--text-dark); font-weight: 500; }
+.check-badge { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); background: transparent; display: flex; align-items: center; justify-content: center; transition: all 0.18s; z-index: 2; }
+.check-badge svg { opacity: 0; transform: scale(0.5); transition: all 0.18s; }
+.selectable { cursor: pointer; user-select: none; position: relative; }
+.selectable.selected .check-badge { background: var(--gold); border-color: var(--gold); }
+.selectable.selected .check-badge svg { opacity: 1; transform: scale(1); }
+
+/* HOLE SPONSOR */
+.hole-sponsor { background: var(--white); border: 2px solid transparent; border-left: 4px solid var(--green-light); border-radius: 5px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.07); padding: 24px 28px; display: flex; align-items: flex-start; gap: 28px; margin-bottom: 48px; flex-wrap: wrap; transition: border-color 0.18s, box-shadow 0.18s; cursor: pointer; user-select: none; position: relative; }
+.hole-sponsor.selected { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.2); }
+.hole-sponsor .check-badge { border-color: rgba(0,0,0,0.2); }
+.hole-sponsor.selected .check-badge { background: var(--gold); border-color: var(--gold); }
+.hole-sponsor .check-badge svg path { stroke: var(--green-dark); }
+.hole-price-block { flex-shrink: 0; }
+.hole-label { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--green-light); font-weight: 600; margin-bottom: 4px; }
+.hole-price { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 900; color: var(--green-dark); line-height: 1; }
+.hole-perks { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding-top: 4px; }
+.perk-tag { font-size: 12px; background: var(--green-pale); padding: 4px 10px; border-radius: 3px; color: var(--green-dark); }
+.hole-qty-row { display: none; align-items: center; gap: 10px; margin-top: 4px; width: 100%; flex-basis: 100%; }
+.hole-sponsor.selected .hole-qty-row { display: flex; }
+.hole-qty-label { font-size: 13px; color: var(--text-mid); }
+
+/* ALACARTE */
+.alacarte-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; align-items: start; }
+.alacarte-card { background: var(--white); border: 2px solid transparent; border-radius: 5px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.07); padding: 16px; display: flex; flex-direction: column; gap: 10px; transition: border-color 0.18s, box-shadow 0.18s; }
+.alacarte-card:hover { box-shadow: inset 0 0 0 1px var(--green-light), 0 4px 14px rgba(0,0,0,0.06); }
+.alacarte-card.selected { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.2); }
+.alacarte-card .check-badge { border-color: rgba(0,0,0,0.18); }
+.alacarte-card .check-badge svg path { stroke: var(--green-dark); }
+.alacarte-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding-right: 28px; }
+.alacarte-name { font-size: 13.5px; color: var(--text-dark); font-weight: 500; }
+.alacarte-price { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--green-dark); white-space: nowrap; }
+.alacarte-benefits { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 5px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px; }
+.alacarte-benefits li { font-size: 12px; color: var(--text-mid); display: flex; align-items: flex-start; gap: 6px; }
+.alacarte-benefits li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--green-light); flex-shrink: 0; margin-top: 4px; }
+
+/* STICKY SPONSOR BAR */
+#total-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--green-dark); z-index: 100; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1); box-shadow: 0 -4px 24px rgba(0,0,0,0.3); }
+#total-bar.visible { transform: translateY(0); }
+.benefits-row { max-width: 680px; margin: 0 auto; padding: 10px 24px 8px; border-bottom: 1px solid rgba(255,255,255,0.09); display: none; flex-wrap: wrap; align-items: flex-start; gap: 10px; }
+.benefits-row.show { display: flex; }
+.benefits-heading { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.4); flex-shrink: 0; padding-top: 6px; }
+.bstats { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+.bstat-big { display: flex; flex-direction: column; align-items: center; background: rgba(255,255,255,0.12); border-radius: 5px; padding: 6px 14px; min-width: 64px; border: 1px solid rgba(255,255,255,0.08); }
+.bstat-big .bval { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--gold-light); line-height: 1; }
+.bstat-big .blbl { font-size: 9px; color: rgba(255,255,255,0.55); margin-top: 2px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.06em; }
+.bstat-pill { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 4px 10px; font-size: 11.5px; color: rgba(255,255,255,0.7); white-space: nowrap; }
+.bstat-pill::before { content: '✓'; color: var(--gold); font-size: 10px; font-weight: 700; }
+.total-bar-inner { max-width: 680px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.total-chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; }
+.chip { font-size: 11.5px; color: var(--white); background: rgba(255,255,255,0.1); border-radius: 3px; padding: 3px 8px 3px 10px; white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+.chip-price { opacity: 0.5; font-size: 10.5px; }
+.chip-x { background: none; border: none; color: rgba(255,255,255,0.35); cursor: pointer; font-size: 15px; line-height: 1; padding: 0; transition: color 0.12s; }
+.chip-x:hover { color: var(--white); }
+.total-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.total-label-sm { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
+.total-figure { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--gold-light); line-height: 1; }
+.btn-bar-clear { background: none; border: 1px solid rgba(255,255,255,0.18); color: rgba(255,255,255,0.5); cursor: pointer; font-size: 11px; padding: 6px 12px; border-radius: 3px; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.btn-bar-clear:hover { border-color: rgba(255,255,255,0.45); color: var(--white); }
+.btn-bar-continue { background: var(--gold); color: var(--green-dark); border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 10px 20px; border-radius: 4px; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+.btn-bar-continue:hover { background: var(--gold-light); }
+
+/* SUCCESS */
+.success-screen { text-align: center; padding: 64px 20px; }
+.success-icon { font-size: 64px; margin-bottom: 16px; }
+.success-screen h2 { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 900; color: var(--green-dark); margin-bottom: 10px; }
+.success-screen p { font-size: 15px; color: var(--text-mid); max-width: 460px; margin: 0 auto; }
+
+/* ── ADD-ON HIGHLIGHT (upsell pulse) ── */
+@keyframes rrPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(201,168,76,0.7); }
+  70%  { box-shadow: 0 0 0 10px rgba(201,168,76,0); }
+  100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
+}
+.addon-highlight {
+  animation: rrPulse 0.7s ease 2;
+  border-color: var(--gold) !important;
+  background: linear-gradient(135deg,#fdf8ec,#fefaf0) !important;
+}
+
+@media (max-width: 600px) {
+  .addons-grid { grid-template-columns: 1fr; }
+  .field-row { grid-template-columns: 1fr; }
+  .reg-section { padding: 20px; }
+  .total-bar { padding: 14px 20px; }
+  .tiers { grid-template-columns: 1fr 1fr; }
+  .total-chips { display: none; }
+}
+@media (max-width: 400px) { .tiers { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-  <div class="lc">
-    <h2>⛳ Rough Riders Admin</h2>
-    <p>39th Annual Charity Golf Tournament</p>
-    <div class="le" id="lerr"></div>
-    <div class="fl">
-      <label>Password</label>
-      <input class="fi" id="lpw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button class="lb" id="lbtn" onclick="doLogin()">Sign In →</button>
+<header style="text-align:center;padding:28px 20px 24px;background:linear-gradient(135deg,#0d2d5c,#1a4a8a);margin-bottom:28px;position:relative;">
+  <a href="/admin.html" title="Admin" style="position:absolute;top:12px;left:16px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+  </a>
+  <div style="position:absolute;top:12px;right:16px;font-size:11px;color:rgba(255,255,255,0.45);font-family:'DM Sans',sans-serif;" id="rr-timestamp"></div>
+  <div style="font-size:11px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:8px;">1st U.S. Volunteer Cavalry Regiment — Rough Riders</div>
+  <h1 style="font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,36px);font-weight:900;color:#ffffff;line-height:1.15;margin-bottom:8px;">39th Annual Charity<br>Golf Tournament</h1>
+  <div style="display:inline-block;background:rgba(255,255,255,0.12);border-radius:20px;padding:5px 16px;">
+    <span style="font-size:13px;color:rgba(255,255,255,0.8);">Hunter's Green Country Club · Tampa, FL · Monday, September 14, 2026</span>
   </div>
-</div>
+</header>
 
-<!-- APP -->
-<div id="app">
-  <div class="tb">
-    <div class="tb-brand">⛳ Rough Riders <span>Admin</span></div>
-    <div class="tb-r">
-      <span style="font-size:11px;color:rgba(255,255,255,.45);" id="topbar-ts"></span>
-      <button class="tb-btn" onclick="loadAll()">↻ Refresh</button>
-      <button class="tb-btn" onclick="doLogout()">Sign Out</button>
-    </div>
-  </div>
+<nav class="steps-nav" id="steps-nav">
+  <button class="step-tab active" onclick="goPage(0)"><span class="step-num">1</span>Player Info</button>
+  <button class="step-tab"        onclick="goPage(1)"><span class="step-num">2</span>Sponsorship</button>
+  <button class="step-tab"        id="confirm-tab" onclick="return false;" style="opacity:0.4;cursor:not-allowed;"><span class="step-num">3</span>Confirmation</button>
+</nav>
 
-  <div class="wrap">
-    <div class="stats">
-      <div class="st"><div class="sv" id="s-pl">—</div><div class="sl">Players</div></div>
-      <div class="st"><div class="sv" id="s-te">—</div><div class="sl">Teams</div></div>
-      <div class="st gld"><div class="sv gld" id="s-rv">—</div><div class="sl">Revenue</div></div>
-      <div class="st blu"><div class="sv" id="s-sp">—</div><div class="sl">Sponsors</div></div>
-      <div class="st drk"><div class="sv" id="s-co">—</div><div class="sl">Comp Players</div></div>
-    </div>
+<main>
 
-    <div class="tnav">
-      <button class="tbtn on" onclick="showTab('e')">📋 Entries</button>
-      <button class="tbtn" onclick="showTab('s')">🏆 Sponsors</button>
-      <button class="tbtn" onclick="showTab('c')">🎁 Complimentary</button>
-      <button class="tbtn" onclick="showTab('x')">⚙️ Settings</button>
-    </div>
+<!-- ══════════ PAGE 1: REGISTRATION ══════════ -->
+<div class="page active" id="page-0">
+  <div class="reg-card">
 
-    <!-- ENTRIES -->
-    <div id="te">
-      <div class="tbar">
-        <input class="si" id="esq" placeholder="Search name, email, team…" oninput="re()">
-        <select class="sel" id="esf" onchange="re()">
-          <option value="">All</option><option value="paid">Paid</option>
-          <option value="invoice">Invoice</option><option value="comp">Comp</option>
-        </select>
-        <button class="btn btn-p ml" onclick="openEM()">+ Entry</button>
-        <button class="btn btn-s" onclick="xcsv('e')">↓ CSV</button>
-      </div>
-      <div class="tw"><table>
-        <thead><tr>
-          <th>Team / Contact</th><th>Players</th><th>Add-ons</th>
-          <th>Amount</th><th>Status</th><th>Date</th><th>Actions</th>
-        </tr></thead>
-        <tbody id="etb"><tr><td colspan="7" style="padding:30px;text-align:center;color:var(--tl)"><span class="spin"></span>Loading…</td></tr></tbody>
-      </table></div>
-    </div>
-
-    <!-- SPONSORS -->
-    <div id="ts" style="display:none">
-      <div class="tbar">
-        <input class="si" id="ssq" placeholder="Search sponsor, company…" oninput="rs()">
-        <select class="sel" id="ssf" onchange="rs()">
-          <option value="">All Tiers</option><option>Title</option><option>Gold</option>
-          <option>Silver</option><option>Bronze</option><option>Hole</option><option>Alacarte</option>
-        </select>
-        <button class="btn btn-p ml" onclick="openSM()">+ Sponsor</button>
-        <button class="btn btn-s" onclick="xcsv('s')">↓ CSV</button>
-      </div>
-      <div class="tw"><table>
-        <thead><tr>
-          <th>Sponsor</th><th>Package</th><th>Benefits</th>
-          <th>Amount</th><th>Status</th><th>Comp</th><th>Actions</th>
-        </tr></thead>
-        <tbody id="stb"><tr><td colspan="7" style="padding:30px;text-align:center;color:var(--tl)"><span class="spin"></span>Loading…</td></tr></tbody>
-      </table></div>
-    </div>
-
-    <!-- COMP -->
-    <div id="tc" style="display:none">
-      <div class="tbar">
-        <p style="font-size:13px;color:var(--tm)">Assign complimentary teams based on sponsorship benefits.</p>
-        <button class="btn btn-g ml" onclick="openCM()">+ Comp Team</button>
-        <button class="btn btn-s" onclick="xcsv('c')">↓ CSV</button>
-      </div>
-      <div class="tw"><table>
-        <thead><tr>
-          <th>Sponsor</th><th>Team Name</th><th>Players</th><th>Slots</th><th>Notes</th><th>Actions</th>
-        </tr></thead>
-        <tbody id="ctb"><tr><td colspan="6" style="padding:30px;text-align:center;color:var(--tl)"><span class="spin"></span>Loading…</td></tr></tbody>
-      </table></div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div id="tx" style="display:none">
-      <div class="ss">
-        <h3>Admin Notification Emails</h3>
-        <p style="font-size:13px;color:var(--tl);margin-bottom:14px">These people receive email notices for new registrations and sponsorships.</p>
-        <div id="ael"></div>
-        <button class="btn btn-p" style="margin-top:12px" onclick="openAEM()">+ Add Admin</button>
-      </div>
-      <div class="ss">
-        <h3>Notification Preferences</h3>
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
-            <label class="tog"><input type="checkbox" id="ne" onchange="saveSt()"><span class="tsl"></span></label>
-            <span style="font-size:14px;font-weight:500">Notify on new player registration</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
-            <label class="tog"><input type="checkbox" id="ns" onchange="saveSt()"><span class="tsl"></span></label>
-            <span style="font-size:14px;font-weight:500">Notify on new sponsorship</span>
-          </label>
+    <!-- Primary registrant -->
+    <div class="reg-section">
+      <div class="reg-section-title">Player Information <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional if sponsoring only</span></div>
+      <div class="field-row">
+        <div class="field" id="f-fn">
+          <label>First name</label>
+          <input id="inp-fn" type="text" placeholder="Theodore">
+          <span class="err-msg">Required</span>
+        </div>
+        <div class="field" id="f-ln">
+          <label>Last name</label>
+          <input id="inp-ln" type="text" placeholder="Roosevelt">
+          <span class="err-msg">Required</span>
         </div>
       </div>
-      <div class="ss">
-        <h3>Sponsorship Benefits Reference</h3>
-        <table style="width:100%;font-size:13px;border-collapse:collapse">
-          <thead><tr>
-            <th style="padding:7px 0;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tl);text-align:left">Tier</th>
-            <th style="padding:7px 0;text-align:left">Teams</th><th style="padding:7px 0;text-align:left">Players</th>
-            <th style="padding:7px 0;text-align:left">Super Tickets</th><th style="padding:7px 0;text-align:left">Hole Signs</th>
-          </tr></thead>
-          <tbody>
-            <tr><td style="padding:6px 0"><span class="bd bd-title">Title</span></td><td>3</td><td>12</td><td>12</td><td>5</td></tr>
-            <tr><td style="padding:6px 0"><span class="bd bd-gold">Gold</span></td><td>2</td><td>8</td><td>8</td><td>3</td></tr>
-            <tr><td style="padding:6px 0"><span class="bd bd-silver">Silver</span></td><td>1</td><td>4</td><td>4</td><td>2</td></tr>
-            <tr><td style="padding:6px 0"><span class="bd bd-bronze">Bronze</span></td><td>1</td><td>4</td><td>0</td><td>1</td></tr>
-          </tbody>
-        </table>
+      <div class="field-row">
+        <div class="field" id="f-em">
+          <label>Email address</label>
+          <input id="inp-em" type="email" placeholder="you@example.com">
+          <span class="err-msg">Valid email required</span>
+        </div>
+        <div class="field" id="f-ph">
+          <label>Phone number</label>
+          <input id="inp-ph" type="tel" placeholder="(813) 555-0100">
+        </div>
       </div>
-      <div class="ss">
-        <h3>Export Data</h3>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-s" onclick="xcsv('e')">↓ Entries</button>
-          <button class="btn btn-s" onclick="xcsv('s')">↓ Sponsors</button>
-          <button class="btn btn-s" onclick="xcsv('c')">↓ Comp Teams</button>
+      <div class="field-row single">
+        <div class="field">
+          <label>Company / Organization <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="inp-co" type="text" placeholder="Acme Corp">
         </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- ENTRY MODAL -->
-<div class="mo" id="em">
-  <div class="mc">
-    <h3 id="em-t">New Entry</h3>
-    <input type="hidden" id="em-id">
-    <div class="mg">
-      <div class="mfl"><label>Team Name</label><input class="mfi" id="em-tn" placeholder="Rough Riders A"></div>
-      <div class="mfl"><label>Status</label><select class="mfs" id="em-st"><option value="paid">Paid</option><option value="invoice">Invoice Sent</option><option value="comp">Complimentary</option></select></div>
+    <!-- Player count -->
+    <div class="reg-section">
+      <div class="reg-section-title">Players in Your Group</div>
+      <div class="player-count-row">
+        <div class="player-count-label">
+          Number of players
+          <span>Max 4 per team · $165 per player · 0 if sponsoring only</span>
+        </div>
+        <div class="qty-controls">
+          <button class="qty-btn" id="player-minus" onclick="changePlayerCount(-1)" disabled>−</button>
+          <div class="qty-display" id="player-count">0</div>
+          <button class="qty-btn" id="player-plus" onclick="changePlayerCount(1)">+</button>
+        </div>
+      </div>
+      <!-- Additional player name fields -->
+      <div class="additional-players" id="additional-players"></div>
     </div>
-    <div class="mg">
-      <div class="mfl"><label>First Name</label><input class="mfi" id="em-fn" placeholder="Theodore"></div>
-      <div class="mfl"><label>Last Name</label><input class="mfi" id="em-ln" placeholder="Roosevelt"></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Email</label><input class="mfi" id="em-em" type="email" placeholder="you@example.com"></div>
-      <div class="mfl"><label>Phone</label><input class="mfi" id="em-ph" type="tel" placeholder="(813) 555-0100"></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Company</label><input class="mfi" id="em-co" placeholder="Optional"></div>
-      <div class="mfl"><label>Amount Paid ($)</label><input class="mfi" id="em-am" type="number" placeholder="330"></div>
-    </div>
-    <div style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);margin-bottom:8px">Players</div>
-      <div class="prows" id="em-pl"></div>
-      <button class="add-prow" onclick="addPR('em-pl')">+ Add Player</button>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Add-ons</label><input class="mfi" id="em-ao" placeholder="Super Ticket, Mulligans…"></div>
-      <div class="mfl"><label>Stripe Session ID</label><input class="mfi" id="em-si" placeholder="cs_live_…"></div>
-    </div>
-    <div class="mg mg1"><div class="mfl"><label>Notes</label><textarea class="mft" id="em-no"></textarea></div></div>
-    <div class="mfoot">
-      <button class="btn btn-s" onclick="closeM('em')">Cancel</button>
-      <button class="btn btn-p" onclick="saveE()">Save Entry</button>
-    </div>
-  </div>
-</div>
 
-<!-- SPONSOR MODAL -->
-<div class="mo" id="sm">
-  <div class="mc">
-    <h3 id="sm-t">New Sponsor</h3>
-    <input type="hidden" id="sm-id">
-    <div class="mg">
-      <div class="mfl"><label>Company / Org</label><input class="mfi" id="sm-co" placeholder="Acme Corp"></div>
-      <div class="mfl"><label>Package</label>
-        <select class="mfs" id="sm-ti" onchange="updateCompSlots()">
-          <option value="Title">Title — $7,500</option><option value="Gold">Gold — $5,000</option>
-          <option value="Silver">Silver — $2,500</option><option value="Bronze">Bronze — $1,000</option>
-          <option value="Hole">Hole Sponsor — $250</option><option value="Alacarte">À La Carte</option>
-        </select>
+    <!-- Add-ons -->
+    <div class="reg-section">
+      <div class="reg-section-title">Add-ons <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional · applies to all players on your team</span></div>
+
+      <!-- Super Ticket — full width -->
+      <div class="addon-item addon-super" onclick="toggleSuperTicket(this)" style="margin-bottom:10px;border-color:#c9a84c;background:linear-gradient(135deg,#fdf8ec,#fefaf0);display:flex;gap:14px;">
+        <div class="addon-left">
+          <div class="addon-name" style="color:#1a3320;font-size:14px;">⭐ Super Ticket — Best Value</div>
+          <div class="addon-desc">Includes everything for your whole team: Mulligan pack · Closest to pin · Longest drive · Raffle tickets (5) · Awards dinner guest</div>
+        </div>
+        <div class="addon-right">
+          <div style="text-align:right;">
+            <div class="addon-price" style="font-size:18px;">$75</div>
+            <div style="font-size:10px;color:var(--text-light);text-decoration:line-through;">$95 separately</div>
+          </div>
+          <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+      </div>
+
+      <div class="addons-grid" id="addons-grid">
+        <div class="addon-item" onclick="toggleAddon(this, 20, 'Mulligan Pack')">
+          <div class="addon-left">
+            <div class="addon-name">Mulligan pack</div>
+            <div class="addon-desc">3 mulligans per player, whole team</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$20</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+
+        <div class="addon-item" onclick="toggleAddon(this, 10, 'Closest to Pin')">
+          <div class="addon-left">
+            <div class="addon-name">Closest to pin</div>
+            <div class="addon-desc">Entry for each team member</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$10</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+
+        <div class="addon-item" onclick="toggleAddon(this, 10, 'Longest Drive')">
+          <div class="addon-left">
+            <div class="addon-name">Longest drive</div>
+            <div class="addon-desc">Entry for each team member</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$10</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+
+        <div class="addon-item" onclick="toggleAddon(this, 25, 'Raffle Tickets')">
+          <div class="addon-left">
+            <div class="addon-name">Raffle tickets</div>
+            <div class="addon-desc">5 tickets per team</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$25</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+
+        <div class="addon-item" onclick="toggleAddon(this, 30, 'Awards Dinner Guest')">
+          <div class="addon-left">
+            <div class="addon-name">Awards dinner</div>
+            <div class="addon-desc">1 extra guest ticket for the team</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$30</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="mg">
-      <div class="mfl"><label>Contact First</label><input class="mfi" id="sm-fn" placeholder="Theodore"></div>
-      <div class="mfl"><label>Contact Last</label><input class="mfi" id="sm-ln" placeholder="Roosevelt"></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Email</label><input class="mfi" id="sm-em" type="email" placeholder="you@example.com"></div>
-      <div class="mfl"><label>Phone</label><input class="mfi" id="sm-ph" type="tel"></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Mailing Address</label><input class="mfi" id="sm-addr" placeholder="123 Main St, Tampa FL 33601"></div>
-      <div class="mfl"><label>Website</label><input class="mfi" id="sm-web" placeholder="https://example.com"></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Amount ($)</label><input class="mfi" id="sm-am" type="number"></div>
-      <div class="mfl"><label>Status</label><select class="mfs" id="sm-st"><option value="paid">Paid</option><option value="invoice">Invoice Sent</option><option value="pending">Pending</option></select></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Hole # (if applicable)</label><input class="mfi" id="sm-ho" placeholder="e.g. 7, 12"></div>
-      <div class="mfl"><label>Comp Team Slots</label><input class="mfi" id="sm-cs" type="number" placeholder="Auto from tier"></div>
-    </div>
 
-    <!-- Logo Upload -->
-    <div style="margin-bottom:14px;">
-      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);margin-bottom:8px;">Logo</div>
-      <div id="sm-logo-preview" style="display:none;margin-bottom:10px;">
-        <img id="sm-logo-img" style="max-height:60px;max-width:200px;border:1px solid rgba(0,0,0,0.1);border-radius:4px;padding:4px;background:#fff;" src="" alt="Logo">
-        <button onclick="clearLogo()" style="margin-left:10px;font-size:12px;background:var(--red-p);border:1px solid rgba(176,32,32,0.2);color:var(--red);border-radius:4px;padding:3px 10px;cursor:pointer;">Remove</button>
+    <!-- Total + proceed -->
+    <div id="pay-error"></div>
+    <div class="total-bar">
+      <div class="total-bar-left">
+        <div class="total-bar-amount" id="reg-total">$0.00</div>
+        <div class="total-bar-breakdown" id="reg-breakdown">Nothing selected yet</div>
       </div>
-      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-        <div style="padding:9px 16px;background:#f4f6f4;border:2px dashed rgba(0,0,0,0.15);border-radius:5px;font-size:13px;color:var(--tl);transition:all 0.15s;" id="sm-logo-lbl">📎 Click to upload logo (PNG, JPG, SVG)</div>
-        <input type="file" id="sm-logo-file" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)">
-      </label>
-      <div style="font-size:11px;color:var(--tl);margin-top:5px;">Recommended: PNG or SVG, transparent background, min 300px wide</div>
-      <input type="hidden" id="sm-logo-data">
-      <input type="hidden" id="sm-logo-name">
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+        <button class="btn-proceed" id="proceed-btn" onclick="handleProceed()" style="display:none;">
+          Pay by Card →
+        </button>
+        <button id="invoice-reg-btn" onclick="showInvoiceModalForReg()" style="display:none;background:none;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);border-radius:5px;padding:7px 18px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;">
+          📄 Invoice Me
+        </button>
+        <button onclick="handleViewSponsorship()" style="background:none;border:1px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);border-radius:5px;padding:7px 18px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.6)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,0.25)';this.style.color='rgba(255,255,255,0.7)'">
+          View Sponsorships →
+        </button>
+      </div>
     </div>
 
-    <div class="mg mg1"><div class="mfl"><label>Notes</label><textarea class="mft" id="sm-no"></textarea></div></div>
-    <div class="mfoot">
-      <button class="btn btn-s" onclick="closeM('sm')">Cancel</button>
-      <button class="btn btn-p" id="sm-save-btn" onclick="saveSp()">Save Sponsor</button>
-    </div>
+  </div>
+  <div class="secure-note">
+    <svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M6 1L1 3.5V7c0 2.76 2.14 5.34 5 6 2.86-.66 5-3.24 5-6V3.5L6 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+    Secure payment processed by Stripe
+    · Questions? <a href="mailto:golf@tamparoughriders.org">golf@tamparoughriders.org</a>
   </div>
 </div>
 
-<!-- COMP MODAL -->
-<div class="mo" id="cm">
-  <div class="mc">
-    <h3 id="cm-t">Assign Comp Team</h3>
-    <input type="hidden" id="cm-id">
-    <div class="mg">
-      <div class="mfl"><label>Sponsor</label><select class="mfs" id="cm-sp" onchange="showSlotInfo()"></select></div>
-      <div class="mfl"><label>Team Name</label><input class="mfi" id="cm-tn" placeholder="Gold Sponsor Team A"></div>
+<!-- ══════════ PAGE 2: SPONSORSHIP ══════════ -->
+<div class="page" id="page-1">
+  <p class="section-heading">Presenting Sponsorships</p>
+  <p class="section-sub">Full tournament packages — click any card to select. Sponsorship is optional, skip to pay registration only.</p>
+
+  <div class="tiers">
+    <div class="tier title-tier selectable" data-id="title" data-name="Title Sponsor" data-price="7500">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="tier-header">
+        <div class="tier-label">Title Sponsor</div>
+        <div class="tier-price"><sup>$</sup>7,500</div>
+        <div class="featured-pill">Top Tier</div>
+      </div>
+      <div class="tier-body">
+        <div class="perk"><span class="perk-dot"></span><span><strong>3 teams</strong> — 12 golfers</span></div>
+        <div class="perk"><span class="perk-dot"></span><span><strong>12</strong> super tickets</span></div>
+        <div class="perk"><span class="perk-dot"></span><span><strong>5</strong> hole sponsor signs</span></div>
+        <div class="perk"><span class="perk-dot"></span><span>Logo on sponsor banner</span></div>
+        <div class="perk"><span class="perk-dot"></span><span>Website listing</span></div>
+      </div>
     </div>
-    <div id="cm-slot-info" style="font-size:12px;color:var(--tl);margin-bottom:12px;padding:8px 12px;background:#f4f6f4;border-radius:5px;display:none"></div>
-    <div style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);margin-bottom:8px">Players</div>
-      <div class="prows" id="cm-pl"></div>
-      <button class="add-prow" onclick="addPR('cm-pl')">+ Add Player</button>
+    <div class="tier gold-tier selectable" data-id="gold" data-name="Gold Sponsor" data-price="5000">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="tier-header">
+        <div class="tier-label">Gold Sponsor</div>
+        <div class="tier-price"><sup>$</sup>5,000</div>
+      </div>
+      <div class="tier-body">
+        <div class="perk"><span class="perk-dot"></span><span><strong>2 teams</strong> — 8 golfers</span></div>
+        <div class="perk"><span class="perk-dot"></span><span><strong>8</strong> super tickets</span></div>
+        <div class="perk"><span class="perk-dot"></span><span><strong>3</strong> hole sponsor signs</span></div>
+        <div class="perk"><span class="perk-dot"></span><span>Logo on materials &amp; banner</span></div>
+      </div>
     </div>
-    <div class="mg mg1"><div class="mfl"><label>Notes</label><textarea class="mft" id="cm-no"></textarea></div></div>
-    <div class="mfoot">
-      <button class="btn btn-s" onclick="closeM('cm')">Cancel</button>
-      <button class="btn btn-g" onclick="saveC()">Assign Team</button>
+    <div class="tier silver-tier selectable" data-id="silver" data-name="Silver Sponsor" data-price="2500">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="tier-header">
+        <div class="tier-label">Silver Sponsor</div>
+        <div class="tier-price"><sup>$</sup>2,500</div>
+      </div>
+      <div class="tier-body">
+        <div class="perk"><span class="perk-dot"></span><span><strong>1 team</strong> — 4 golfers</span></div>
+        <div class="perk"><span class="perk-dot"></span><span><strong>4</strong> super tickets</span></div>
+        <div class="perk"><span class="perk-dot"></span><span><strong>2</strong> hole sponsor signs</span></div>
+        <div class="perk"><span class="perk-dot"></span><span>Logo on tournament materials</span></div>
+      </div>
     </div>
+    <div class="tier bronze-tier selectable" data-id="bronze" data-name="Bronze Sponsor" data-price="1000">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="tier-header">
+        <div class="tier-label">Bronze Sponsor</div>
+        <div class="tier-price"><sup>$</sup>1,000</div>
+      </div>
+      <div class="tier-body">
+        <div class="perk"><span class="perk-dot"></span><span><strong>1 team</strong> — 4 golfers</span></div>
+        <div class="perk"><span class="perk-dot"></span><span><strong>1</strong> hole sponsor sign</span></div>
+        <div class="perk"><span class="perk-dot"></span><span>Logo on tournament materials</span></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-heading">Hole Sponsor</p>
+  <p class="section-sub">On-course visibility without a full package</p>
+  <div class="hole-sponsor selectable" data-id="hole" data-name="Hole Sponsor" data-price="250">
+    <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="hole-price-block"><div class="hole-label">Per hole</div><div class="hole-price">$250</div></div>
+    <div class="hole-perks">
+      <span class="perk-tag">Custom tee sign</span><span class="perk-tag">Name &amp; logo on-course</span>
+      <span class="perk-tag">Sponsor board</span><span class="perk-tag">Website listing</span>
+    </div>
+    <div class="hole-qty-row">
+      <span class="hole-qty-label">Number of holes:</span>
+      <div class="qty-controls">
+        <button class="qty-btn" id="hole-minus">−</button>
+        <div class="qty-display" id="hole-qty">1</div>
+        <button class="qty-btn" id="hole-plus">+</button>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <p class="section-heading">À La Carte &amp; Specialty</p>
+  <p class="section-sub">Add individual opportunities to your package</p>
+  <div class="alacarte-grid">
+    <div class="alacarte-card selectable" data-id="bev-cart" data-name="Beverage Cart" data-price="750">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Beverage Cart</span><span class="alacarte-price">$750</span></div>
+      <ul class="alacarte-benefits"><li>Logo on cart signage seen by all golfers all day</li><li>Brand mention at player check-in</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="cigar" data-name="Cigar Sponsor" data-price="500">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Cigar Sponsor</span><span class="alacarte-price">$500</span></div>
+      <ul class="alacarte-benefits"><li>Branded signage at cigar station</li><li>Optional product sampling / brand rep on-site</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="breakfast" data-name="Breakfast" data-price="750">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Breakfast</span><span class="alacarte-price">$750</span></div>
+      <ul class="alacarte-benefits"><li>Branded table signage at breakfast station</li><li>Verbal recognition during morning announcements</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="lunch" data-name="Lunch / Dinner" data-price="1250">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Lunch / Dinner</span><span class="alacarte-price">$1,250</span></div>
+      <ul class="alacarte-benefits"><li>Prominent branded signage at meal service</li><li>Verbal recognition &amp; thank-you during awards</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="long-drive-sp" data-name="Longest Drive Sponsor" data-price="400">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Longest Drive</span><span class="alacarte-price">$400</span></div>
+      <ul class="alacarte-benefits"><li>Branded tee sign at contest hole</li><li>Name announced when winner is presented</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="close-pin-sp" data-name="Closest to the Pin Sponsor" data-price="400">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Closest to the Pin</span><span class="alacarte-price">$400</span></div>
+      <ul class="alacarte-benefits"><li>Branded tee sign at contest hole</li><li>Name announced when winner is presented</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="putting" data-name="Putting Contest" data-price="500">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Putting Contest</span><span class="alacarte-price">$500</span></div>
+      <ul class="alacarte-benefits"><li>Branded signage at putting green</li><li>High-traffic area — visible to all participants</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="cooler" data-name="Cooler Bag" data-price="600">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Cooler Bag</span><span class="alacarte-price">$600</span></div>
+      <ul class="alacarte-benefits"><li>Logo imprinted on every player's cooler bag</li><li>Bags go home with golfers</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="tee-gift" data-name="Tee Gift" data-price="500">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Tee Gift</span><span class="alacarte-price">$500</span></div>
+      <ul class="alacarte-benefits"><li>Brand on item in every player's gift bag</li><li>Tangible takeaway extending reach beyond event day</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="range" data-name="Driving Range" data-price="500">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Driving Range</span><span class="alacarte-price">$500</span></div>
+      <ul class="alacarte-benefits"><li>Branded signage at warm-up range</li><li>First brand seen by every golfer before teeing off</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="golf-ball" data-name="Golf Ball Sponsor" data-price="500">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Golf Ball Sponsor</span><span class="alacarte-price">$500</span></div>
+      <ul class="alacarte-benefits"><li>Logo or name on branded balls given to all players</li><li>In-hand brand exposure every shot of the round</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="scorecard" data-name="Scorecard" data-price="350">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">Scorecard</span><span class="alacarte-price">$350</span></div>
+      <ul class="alacarte-benefits"><li>Logo printed on every player's scorecard</li><li>Handled repeatedly throughout the entire round</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+    <div class="alacarte-card selectable" data-id="vip-tent" data-name="VIP Tent" data-price="1500">
+      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="alacarte-card-top"><span class="alacarte-name">VIP Tent</span><span class="alacarte-price">$1,500</span></div>
+      <ul class="alacarte-benefits"><li>Branded signage &amp; banner at VIP hospitality area</li><li>Premium visibility — high-traffic gathering spot</li><li>Recognition at awards ceremony</li><li>Logo on tournament materials &amp; website</li></ul>
+    </div>
+  </div>
+
+  <!-- ── SPONSOR CONTACT INFO + PAYMENT ── -->
+  <div id="sponsor-contact-section" style="display:none;margin-top:32px;">
+    <div class="reg-card">
+      <div class="reg-section">
+        <div class="reg-section-title">Your Contact Information</div>
+        <div id="sp-order-summary" style="background:#f4f6f4;border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:13px;"></div>
+        <div class="field-row">
+          <div class="field" id="spf-fn">
+            <label>First Name *</label>
+            <input id="sp-fn" type="text" placeholder="Theodore">
+            <span class="err-msg">Required</span>
+          </div>
+          <div class="field" id="spf-ln">
+            <label>Last Name *</label>
+            <input id="sp-ln" type="text" placeholder="Roosevelt">
+            <span class="err-msg">Required</span>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field" id="spf-em">
+            <label>Email Address *</label>
+            <input id="sp-em" type="email" placeholder="you@example.com">
+            <span class="err-msg">Valid email required</span>
+          </div>
+          <div class="field">
+            <label>Phone</label>
+            <input id="sp-ph" type="tel" placeholder="(813) 555-0100">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Company / Organization *</label>
+            <input id="sp-co" type="text" placeholder="Acme Corp">
+          </div>
+          <div class="field">
+            <label>Website <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <input id="sp-web" type="text" placeholder="https://example.com">
+          </div>
+        </div>
+        <div class="field-row single">
+          <div class="field">
+            <label>Mailing Address <span style="font-weight:400;text-transform:none;letter-spacing:0">(for invoice / correspondence)</span></label>
+            <input id="sp-addr" type="text" placeholder="123 Main St, Tampa FL 33601">
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment options -->
+      <div class="reg-section" style="background:#f8faf8;">
+        <div class="reg-section-title">Payment</div>
+        <div id="sp-pay-error" style="display:none;font-size:13px;color:#b02020;background:#fdf0ef;border-radius:4px;padding:9px 12px;border-left:3px solid #b02020;margin-bottom:14px;"></div>
+
+        <!-- Order total -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(0,0,0,0.07);">
+          <div style="font-size:14px;font-weight:600;color:var(--text-mid);" id="sp-total-label">Total</div>
+          <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:900;color:#b8940e;" id="sp-total-display">$0</div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button id="sp-card-btn" onclick="handleSponsorPay()" style="width:100%;padding:15px;background:#0f2318;color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#1e4a2c'" onmouseout="this.style.background='#0f2318'">
+            💳 Pay by Card →
+          </button>
+          <button id="sp-invoice-btn" onclick="handleSponsorInvoice()" style="width:100%;padding:14px;background:#fff;color:#0f2318;border:2px solid rgba(0,0,0,0.15);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#2d7a4a';this.style.color='#1e4a2c'" onmouseout="this.style.borderColor='rgba(0,0,0,0.15)';this.style.color='#0f2318'">
+            📄 Request an Invoice
+          </button>
+          <p style="font-size:11px;color:var(--text-light);text-align:center;margin-top:4px;">
+            Invoice includes check payment instructions · Net 30 terms ·
+            Mail to: 601 N. 19th St, Tampa FL 33605
+          </p>
+        </div>
+      </div>
+
+      <div class="reg-section" style="padding:14px 32px;">
+        <button class="btn-secondary" onclick="goPage(0)" style="font-size:13px;">← Back to Registration</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end page-1 -->
+
+<!-- ══════════ PAGE 3: SUCCESS ══════════ -->
+<div class="page" id="page-2">
+  <div class="success-screen">
+    <div class="success-icon">🏌️</div>
+    <h2>You're on the course!</h2>
+    <p>Your registration is confirmed. Check your email for a receipt from Stripe. We'll be in touch with all event details — see you on the green!</p>
   </div>
 </div>
 
-<!-- ADMIN EMAIL MODAL -->
-<div class="mo" id="aem">
-  <div class="mc" style="max-width:400px">
-    <h3>Add Admin</h3>
-    <input type="hidden" id="aem-id">
-    <div class="mg mg1" style="margin-bottom:12px"><div class="mfl"><label>Name</label><input class="mfi" id="aem-n" placeholder="Robin Conn"></div></div>
-    <div class="mg mg1" style="margin-bottom:12px"><div class="mfl"><label>Email</label><input class="mfi" id="aem-e" type="email" placeholder="r.conn@tamparoughriders.org"></div></div>
-    <div class="mg mg1" style="margin-bottom:12px"><div class="mfl"><label>Role</label><select class="mfs" id="aem-r"><option value="admin">Admin (full access + notifications)</option><option value="notify">Notify only (email notices)</option></select></div></div>
-    <div class="mfoot">
-      <button class="btn btn-s" onclick="closeM('aem')">Cancel</button>
-      <button class="btn btn-p" onclick="saveAE()">Save</button>
-    </div>
-  </div>
-</div>
+</main>
 
 <script>
-var BASE = 'https://rr-golf.netlify.app';
-var TK   = 'rr_adm_tk';
-var tok  = localStorage.getItem(TK);
-var D    = { e:[], s:[], c:[], x:{} };
+// ════════════════════════════════
+// CONFIG
+// ════════════════════════════════
+var NETLIFY_BASE = 'https://rr-golf.netlify.app';
+var PLAYER_PRICE = 165;
+var MAX_PLAYERS  = 4;
 
-// ── AUTH ──
-async function doLogin() {
-  var pw = document.getElementById('lpw').value;
-  var btn = document.getElementById('lbtn');
-  var err = document.getElementById('lerr');
-  err.style.display = 'none';
-  if (!pw) { err.textContent = 'Enter password'; err.style.display = 'block'; return; }
-  btn.disabled = true; btn.textContent = 'Signing in…';
+// ════════════════════════════════
+// REGISTRATION STATE
+// ════════════════════════════════
+var playerCount = 0;
+var addons = {}; // { name: price }
+var sponsorSelections = {}; // declared here so hasAnythingOrdered() can reference it
+var holeQty = 1;
+
+function changePlayerCount(delta) {
+  playerCount = Math.min(MAX_PLAYERS, Math.max(0, playerCount + delta));
+  document.getElementById('player-count').textContent = playerCount;
+  document.getElementById('player-minus').disabled = playerCount <= 0;
+  document.getElementById('player-plus').disabled  = playerCount >= MAX_PLAYERS;
+  renderAdditionalPlayers();
+  updateAddonPrices();
+  updateRegTotal();
+  updatePayButton();
+}
+
+function renderAdditionalPlayers() {
+  var container = document.getElementById('additional-players');
+  container.innerHTML = '';
+  if (playerCount === 0) return;
+  for (var i = 2; i <= playerCount; i++) {
+    var div = document.createElement('div');
+    div.className = 'add-player-block';
+    div.innerHTML = `
+      <div class="add-player-title">Player ${i}</div>
+      <div class="field-row">
+        <div class="field">
+          <label>First name</label>
+          <input id="p${i}-fn" type="text" placeholder="First name (optional)">
+        </div>
+        <div class="field">
+          <label>Last name</label>
+          <input id="p${i}-ln" type="text" placeholder="Last name (optional)">
+        </div>
+      </div>
+      <div class="add-player-note">Names can be added later if not known yet</div>
+    `;
+    container.appendChild(div);
+  }
+}
+
+function hasAnythingOrdered() {
+  if (playerCount > 0) return true;
+  if (Object.keys(addons).length > 0) return true;
+  if (Object.keys(sponsorSelections).length > 0) return true;
+  return false;
+}
+
+function updatePayButton() {
+  var btn        = document.getElementById('proceed-btn');
+  var invoiceBtn = document.getElementById('invoice-reg-btn');
+  var hasOrder   = hasAnythingOrdered();
+  if (btn)        btn.style.display        = hasOrder ? 'block' : 'none';
+  if (invoiceBtn) invoiceBtn.style.display = hasOrder ? 'block' : 'none';
+}
+
+function unlockConfirmation() {
+  var tab = document.getElementById('confirm-tab');
+  if (tab) {
+    tab.style.opacity = '1';
+    tab.style.cursor  = 'pointer';
+    tab.setAttribute('onclick', 'goPage(2)');
+  }
+}
+
+// ════════════════════════════════
+// INVOICE ME — REGISTRATION (page 1)
+// ════════════════════════════════
+function showInvoiceModalForReg() {
+  // Build combined line items: registration + add-ons
+  var items = [];
+  var primary = getPrimaryGolfer();
+
+  if (playerCount > 0) {
+    items.push({ name: 'Golf Registration — ' + playerCount + ' Player' + (playerCount > 1 ? 's' : ''), price: playerCount * PLAYER_PRICE });
+  }
+  Object.entries(addons).forEach(function(e) { items.push({ name: e[0], price: e[1] }); });
+  // Also include any sponsorships already selected
+  Object.values(sponsorSelections).forEach(function(s) { items.push({ name: s.name, price: s.price }); });
+
+  if (!items.length) return;
+
+  // Pre-fill invoice modal fields
+  if (primary.firstName) document.getElementById('inv-fn').value = primary.firstName;
+  if (primary.lastName)  document.getElementById('inv-ln').value = primary.lastName;
+  if (primary.email)     document.getElementById('inv-em').value = primary.email;
+  if (primary.phone)     document.getElementById('inv-ph').value = primary.phone;
+  if (primary.company)   document.getElementById('inv-co').value = primary.company;
+
+  // Build summary for the modal
+  var fmt = function(n) { return '$' + Number(n).toLocaleString('en-US'); };
+  var total = items.reduce(function(s, v) { return s + v.price; }, 0);
+  var html = '<div style="font-weight:700;color:#1a3320;margin-bottom:8px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;">Your Order</div>';
+  items.forEach(function(s) {
+    html += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.06);"><span style="color:#4a4a45;">' + s.name + '</span><span style="font-weight:600;color:#1a3320;">' + fmt(s.price) + '</span></div>';
+  });
+  html += '<div style="display:flex;justify-content:space-between;padding:8px 0 0;font-weight:700;font-size:14px;"><span style="color:#1a3320;">Total</span><span style="color:#c9a84c;font-family:\'Playfair Display\',serif;font-size:18px;">' + fmt(total) + '</span></div>';
+  document.getElementById('invoice-summary').innerHTML = html;
+
+  // Store items for submitInvoice to use
+  window._invoiceItems = items;
+  document.getElementById('invoice-modal').style.display = 'flex';
+}
+
+// Base prices per player for per-player addons
+var ADDON_BASE_PRICES = {
+  'Mulligan Pack': 20,
+  'Closest to Pin': 10,
+  'Longest Drive': 10,
+  'Raffle Tickets': 25,
+  'Awards Dinner Guest': 30,
+  'Super Ticket': 75
+};
+
+function addonEffectivePrice(name) {
+  var base = ADDON_BASE_PRICES[name];
+  if (!base) return 0;
+  // All add-ons are per player
+  return base * Math.max(1, playerCount);
+}
+
+function toggleAddon(el, basePrice, name) {
+  var superEl = document.querySelector('.addon-super');
+  if (superEl && superEl.classList.contains('checked')) {
+    superEl.classList.remove('checked');
+    delete addons['Super Ticket'];
+  }
+  el.classList.toggle('checked');
+  if (el.classList.contains('checked')) {
+    addons[name] = addonEffectivePrice(name);
+  } else {
+    delete addons[name];
+  }
+  updateAddonPrices();
+  updateRegTotal();
+  updatePayButton();
+}
+
+function toggleSuperTicket(el) {
+  var SUPER_NAMES = ['Mulligan Pack','Closest to Pin','Longest Drive','Raffle Tickets','Awards Dinner Guest'];
+  var grid = document.getElementById('addons-grid');
+  if (el.classList.contains('checked')) {
+    el.classList.remove('checked');
+    delete addons['Super Ticket'];
+    grid.style.display = 'grid';
+  } else {
+    document.querySelectorAll('.addon-item:not(.addon-super)').forEach(function(a) { a.classList.remove('checked'); });
+    SUPER_NAMES.forEach(function(n) { delete addons[n]; });
+    el.classList.add('checked');
+    addons['Super Ticket'] = addonEffectivePrice('Super Ticket');
+    grid.style.display = 'none';
+  }
+  updateAddonPrices();
+  updateRegTotal();
+  updatePayButton();
+}
+
+function updateAddonPrices() {
+  var origDescs = {
+    'Mulligan Pack': '3 mulligans per player',
+    'Closest to Pin': 'Contest entry per player',
+    'Longest Drive': 'Contest entry per player',
+    'Raffle Tickets': '5 tickets per player',
+    'Awards Dinner Guest': '1 extra guest ticket per player'
+  };
+  // Update all individual add-ons
+  document.querySelectorAll('.addon-item:not(.addon-super)').forEach(function(el) {
+    var onclick = el.getAttribute('onclick') || '';
+    var nameMatch = onclick.match(/'([^']+)'\s*\)$/);
+    if (!nameMatch) return;
+    var name = nameMatch[1];
+    var base = ADDON_BASE_PRICES[name];
+    if (!base) return;
+    var priceEl = el.querySelector('.addon-price');
+    var descEl  = el.querySelector('.addon-desc');
+    var effective = base * Math.max(1, playerCount);
+    if (priceEl) priceEl.textContent = '$' + effective;
+    if (descEl) {
+      descEl.textContent = playerCount > 1
+        ? '$' + base + ' \u00d7 ' + playerCount + ' players'
+        : (origDescs[name] || '');
+    }
+    if (el.classList.contains('checked')) addons[name] = effective;
+  });
+  // Update Super Ticket card price too
+  var superEl = document.querySelector('.addon-super');
+  if (superEl) {
+    var superPrice = ADDON_BASE_PRICES['Super Ticket'] * Math.max(1, playerCount);
+    var superPriceEl = superEl.querySelector('.addon-price');
+    if (superPriceEl) superPriceEl.textContent = '$' + superPrice;
+    var superDescEl = superEl.querySelector('.addon-desc');
+    if (superDescEl) {
+      superDescEl.textContent = playerCount > 1
+        ? 'Everything for your team — $75 \u00d7 ' + playerCount + ' players'
+        : 'Includes everything for your whole team: Mulligan pack \u00b7 Closest to pin \u00b7 Longest drive \u00b7 Raffle tickets (5) \u00b7 Awards dinner guest';
+    }
+    if (superEl.classList.contains('checked')) addons['Super Ticket'] = superPrice;
+  }
+}
+
+function updateRegTotal() {
+  var regSubtotal     = playerCount * PLAYER_PRICE;
+  var addonTotal      = Object.values(addons).reduce((s,v)=>s+v, 0);
+  var sponsorSubtotal = Object.values(sponsorSelections).reduce((s,v)=>s+v.price, 0);
+  var total           = regSubtotal + addonTotal + sponsorSubtotal;
+  var fmt             = n => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  document.getElementById('reg-total').textContent = fmt(total);
+
+  var breakdown = playerCount > 0 ? `${playerCount} player${playerCount>1?'s':''}` : '';
+  var addonNames = Object.keys(addons);
+  if (addonNames.length) breakdown += (breakdown ? ' + ' : '') + addonNames.join(', ');
+  var sponsorNames = Object.values(sponsorSelections).map(s=>s.name);
+  if (sponsorNames.length) breakdown += (breakdown ? ' · ' : '') + sponsorNames.join(', ');
+  document.getElementById('reg-breakdown').textContent = breakdown || 'Nothing selected yet';
+  updatePayButton();
+}
+
+// ════════════════════════════════
+// VALIDATION
+// ════════════════════════════════
+function validateReg() {
+  var valid = true;
+  var fn = document.getElementById('inp-fn').value.trim();
+  var ln = document.getElementById('inp-ln').value.trim();
+  var em = document.getElementById('inp-em').value.trim();
+
+  var anyFilled = fn || ln || em;
+
+  // If they haven't filled anything in, var them through to sponsorship
+  if (!anyFilled) return true;
+
+  // If they've started filling in the form, require all three
+  if (!em || !/\S+@\S+\.\S+/.test(em)) {
+    document.getElementById('f-em').classList.add('has-error');
+    document.getElementById('inp-em').classList.add('error');
+    valid = false;
+  } else {
+    document.getElementById('f-em').classList.remove('has-error');
+    document.getElementById('inp-em').classList.remove('error');
+  }
+
+  ['fn','ln'].forEach(f => {
+    var inp  = document.getElementById(`inp-${f}`);
+    var wrap = document.getElementById(`f-${f}`);
+    var ok   = inp.value.trim().length > 0;
+    wrap.classList.toggle('has-error', !ok);
+    inp.classList.toggle('error', !ok);
+    if (!ok) valid = false;
+  });
+
+  return valid;
+}
+
+function getPrimaryGolfer() {
+  return {
+    firstName: document.getElementById('inp-fn') ? document.getElementById('inp-fn').value.trim() : '',
+    lastName:  document.getElementById('inp-ln') ? document.getElementById('inp-ln').value.trim() : '',
+    email:     document.getElementById('inp-em') ? document.getElementById('inp-em').value.trim() : '',
+    phone:     document.getElementById('inp-ph') ? document.getElementById('inp-ph').value.trim() : '',
+    company:   document.getElementById('inp-co') ? document.getElementById('inp-co').value.trim() : '',
+  };
+}
+
+function getAdditionalPlayers() {
+  var players = [];
+  for (var i = 2; i <= playerCount; i++) {
+    var fn = document.getElementById(`p${i}-fn`)?.value.trim() || '';
+    var ln = document.getElementById(`p${i}-ln`)?.value.trim() || '';
+    players.push({ firstName: fn, lastName: ln });
+  }
+  return players;
+}
+
+// ════════════════════════════════
+// ADDON HIGHLIGHT — scroll to & pulse
+// ════════════════════════════════
+function highlightAddons() {
+  // Pulse every addon item so they're all visible
+  var allAddons = document.querySelectorAll('.addon-item');
+  allAddons.forEach(el => {
+    el.classList.add('addon-highlight');
+    setTimeout(() => el.classList.remove('addon-highlight'), 2200);
+  });
+  // Scroll to the super ticket at top of addons
+  var superEl = document.querySelector('.addon-super');
+  if (superEl) superEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function selectMulligansFromModal() {
+  document.getElementById('addon-modal').style.display = 'none';
+  document.querySelectorAll('.addon-item:not(.addon-super)').forEach(function(el) {
+    var onclick = el.getAttribute('onclick') || '';
+    if (onclick.indexOf('Mulligan') !== -1) {
+      if (!el.classList.contains('checked')) {
+        el.classList.add('checked');
+        addons['Mulligan Pack'] = addonEffectivePrice('Mulligan Pack');
+      }
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+  updateRegTotal();
+  updatePayButton();
+}
+
+function closeAddonModalAndScroll() {
+  document.getElementById('addon-modal').style.display = 'none';
+  // Scroll to add-ons section and highlight all items
+  highlightAddons();
+}
+
+function viewAllSponsorshipsFromModal() {
+  document.getElementById('sponsor-modal').style.display = 'none';
+  goPage(1);
+  // Scroll to top of sponsorship page and highlight the tiers
+  setTimeout(() => {
+    var tiersEl = document.querySelector('.tiers');
+    if (tiersEl) tiersEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 300);
+}
+
+function selectSuperFromModal() {
+  document.getElementById('addon-modal').style.display = 'none';
+  var superEl = document.querySelector('.addon-super');
+  if (superEl && !superEl.classList.contains('checked')) {
+    toggleSuperTicket(superEl);
+  }
+  superEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function selectHoleSponsorFromModal() {
+  document.getElementById('sponsor-modal').style.display = 'none';
+  goPage(1);
+  // Select hole sponsor and scroll to it
+  setTimeout(() => {
+    var holeEl = document.querySelector('[data-id="hole"]');
+    if (holeEl && !holeEl.classList.contains('selected')) {
+      holeEl.click();
+    }
+    holeEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 300);
+}
+
+function proceedWithoutSponsor() {
+  document.getElementById('sponsor-modal').style.display = 'none';
+  doCheckout();
+}
+
+// ════════════════════════════════
+// PAY — REGISTRATION ONLY
+// ════════════════════════════════
+async function handleProceed() {
+  var fn = document.getElementById('inp-fn').value.trim();
+  var ln = document.getElementById('inp-ln').value.trim();
+  var em = document.getElementById('inp-em').value.trim();
+  if ((fn || ln || em) && !validateReg()) {
+    document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  if (Object.keys(addons).length === 0) {
+    window._addonModalFrom = 'proceed';
+    document.getElementById('addon-modal').style.display = 'flex';
+    highlightAddons();
+    return;
+  }
+  if (Object.keys(sponsorSelections).length === 0) {
+    document.getElementById('sponsor-modal').style.display = 'flex';
+    return;
+  }
+  await doCheckout();
+}
+
+async function handleViewSponsorship() {
+  goPage(1);
+}
+
+async function proceedWithoutAddons() {
+  document.getElementById('addon-modal').style.display = 'none';
+  var from = window._addonModalFrom || 'proceed';
+  window._addonModalFrom = null;
+  if (from === 'proceed') {
+    await doCheckout();
+  } else {
+    goPage(1);
+  }
+}
+
+async function doCheckout() {
+  var btn    = document.getElementById('proceed-btn');
+  var errEl  = document.getElementById('pay-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Creating checkout…';
+
+  var primary    = getPrimaryGolfer();
+  var additional = getAdditionalPlayers();
+  var hasGolfer  = primary.firstName || primary.lastName || primary.email;
+
+  // Build line items — only include registration if golfer info was entered
+  var sponsorships = [];
+  if (hasGolfer) {
+    sponsorships.push({ name: `Golf Registration — ${playerCount} Player${playerCount>1?'s':''}`, price: playerCount * PLAYER_PRICE });
+    Object.entries(addons).forEach(([name, price]) => sponsorships.push({ name, price }));
+  } else if (Object.keys(addons).length > 0) {
+    Object.entries(addons).forEach(([name, price]) => sponsorships.push({ name, price }));
+  }
+
+  // Also include any sponsorship selections
+  Object.values(sponsorSelections).forEach(s => sponsorships.push({ name: s.name, price: s.price }));
+
+  if (!sponsorships.length) {
+    errEl.textContent = 'Nothing selected. Please register as a golfer or choose a sponsorship.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Proceed to Payment →';
+    return;
+  }
+
+  var allPlayers = hasGolfer ? [
+    { firstName: primary.firstName, lastName: primary.lastName, email: primary.email, phone: primary.phone },
+    ...additional,
+  ] : [];
+
   try {
-    var r = await fetch(BASE + '/.netlify/functions/admin-login', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pw})
+    var res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ golfers: allPlayers, sponsorships }),
     });
-    var d = await r.json();
-    if (!r.ok || !d.token) throw new Error(d.error || 'Invalid password');
-    tok = d.token; localStorage.setItem(TK, tok); showApp();
-  } catch(e) { err.textContent = e.message; err.style.display='block'; btn.disabled=false; btn.textContent='Sign In →'; }
+    var data = await res.json();
+    if (!res.ok || !data.url) throw new Error(data.error || 'Could not create checkout');
+
+    // Send registration emails (fire and forget — don't block on it)
+    if (hasGolfer) {
+      fetch(NETLIFY_BASE + '/.netlify/functions/send-registration-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          golfers: allPlayers,
+          addons: Object.entries(addons).map(function(e){ return {name:e[0],price:e[1]}; }),
+          sponsorships: Object.values(sponsorSelections).map(function(s){ return {name:s.name,price:s.price}; }),
+          total: allPlayers.length * PLAYER_PRICE + Object.values(addons).reduce(function(s,v){return s+v;},0) + Object.values(sponsorSelections).reduce(function(s,v){return s+v.price;},0),
+        }),
+      }).catch(function(e){ console.log('Email send error (non-fatal):', e); });
+    }
+
+    window.location.href = data.url;
+  } catch (err) {
+    errEl.textContent = `Error: ${err.message}. Please try again or contact us.`;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Proceed to Payment →';
+  }
 }
-function doLogout() { localStorage.removeItem(TK); tok=null; document.getElementById('app').style.display='none'; document.getElementById('login').style.display='flex'; }
-function showApp() { document.getElementById('login').style.display='none'; document.getElementById('app').style.display='block'; loadAll(); setInterval(updateTS,60000); updateTS(); }
-if (tok) showApp();
 
-function updateTS() { var el=document.getElementById('topbar-ts'); if(el){ var n=new Date(); el.textContent=n.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' · ' + n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); } }
+// ════════════════════════════════
+// SPONSORSHIP SELECTION
+// ════════════════════════════════
+var BENEFITS_DATA = {
+  title:          { golfers:12, tickets:12, holeSigns:5, banner:true, website:true },
+  gold:           { golfers:8,  tickets:8,  holeSigns:3, banner:true, website:false },
+  silver:         { golfers:4,  tickets:4,  holeSigns:2, banner:false, website:false },
+  bronze:         { golfers:4,  tickets:0,  holeSigns:1, banner:false, website:false },
+  hole:           {},
+  'bev-cart':     { perks:['Beverage cart signage','Check-in mention'] },
+  cigar:          { perks:['Cigar station signage','On-site sampling'] },
+  breakfast:      { perks:['Breakfast signage','Morning announcement'] },
+  lunch:          { perks:['Meal signage','Awards recognition'] },
+  'long-drive-sp':{ perks:['Longest Drive sign','Winner announcement'] },
+  'close-pin-sp': { perks:['Closest to Pin sign','Winner announcement'] },
+  putting:        { perks:['Putting green signage','All-participant visibility'] },
+  cooler:         { perks:['Logo on cooler bags','Players take home'] },
+  'tee-gift':     { perks:['Brand in gift bag','Post-event takeaway'] },
+  range:          { perks:['Range signage','First brand on course'] },
+  'golf-ball':    { perks:['Branded golf balls','In-hand all round'] },
+  scorecard:      { perks:['Logo on scorecards','Handled all round'] },
+  'vip-tent':     { perks:['VIP tent signage','Awards shoutout'] },
+};
 
-// ── API ──
-async function call(method, fn, body) {
-  var opts = { method, headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok} };
-  if (body) opts.body = JSON.stringify(body);
-  var r = await fetch(BASE + '/.netlify/functions/' + fn, opts);
-  if (r.status === 401) { doLogout(); throw new Error('Unauthorized'); }
-  return r.json();
+var fmt = n => '$' + n.toLocaleString('en-US');
+
+function computeBenefits() {
+  var g=0,t=0,h=0,banner=false,website=false; var perks=[];
+  for (const [id] of Object.entries(sponsorSelections)) {
+    var b = BENEFITS_DATA[id]||{};
+    g+=b.golfers||0; t+=b.tickets||0; h+=b.holeSigns||0;
+    if(b.banner) banner=true; if(b.website) website=true;
+    if(id==='hole') h+=holeQty;
+    if(b.perks) perks.push(...b.perks);
+  }
+  return {golfers:g,tickets:t,holeSigns:h,banner,website,perks};
 }
-var get  = function(res) { return call('GET',  'admin-data?resource='+res); };
-var put  = function(res, d) { return call('PUT',  'admin-data?resource='+res, d); };
-var post = function(res, d) { return call('POST', 'admin-data?resource='+res, d); };
-var del  = function(res, id) { return call('DELETE', 'admin-data?resource='+res+'&id='+id); };
 
-// ── LOAD ──
-async function loadAll() {
+function updateSponsorTotal() {
+  var items = Object.values(sponsorSelections);
+  var total = items.reduce(function(s,v){return s+v.price;},0);
+  var hasSponsor = items.length > 0;
+
+  // Show/hide inline contact section
+  var section = document.getElementById('sponsor-contact-section');
+  if (section) {
+    var wasHidden = section.style.display === 'none' || section.style.display === '';
+    section.style.display = hasSponsor ? 'block' : 'none';
+    if (hasSponsor && wasHidden) {
+      setTimeout(function(){ section.scrollIntoView({behavior:'smooth',block:'start'}); }, 150);
+    }
+  }
+
+  // Order summary
+  var summary = document.getElementById('sp-order-summary');
+  if (summary && hasSponsor) {
+    var html = '<div style="font-weight:700;color:#0f2318;margin-bottom:8px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;">Your Sponsorship Order</div>';
+    items.forEach(function(s){
+      html += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.06);"><span style="color:#2a2a26;">'+s.name+'</span><span style="font-weight:700;color:#0f2318;">'+fmt(s.price)+'</span></div>';
+    });
+    html += '<div style="display:flex;justify-content:space-between;padding:8px 0 0;font-weight:700;font-size:14px;"><span>Total</span><span style="color:#b8940e;font-family:\'Playfair Display\',serif;font-size:18px;">'+fmt(total)+'</span></div>';
+    summary.innerHTML = html;
+    prefillSponsorContact();
+  }
+
+  var td = document.getElementById('sp-total-display');
+  if (td) td.textContent = fmt(total);
+
+  // Keep page-1 total bar in sync
+  updateRegTotal();
+  updatePayButton();
+}
+
+function prefillSponsorContact() {
+  var fields = [['inp-fn','sp-fn'],['inp-ln','sp-ln'],['inp-em','sp-em'],['inp-ph','sp-ph'],['inp-co','sp-co']];
+  fields.forEach(function(p){
+    var src = document.getElementById(p[0]);
+    var dst = document.getElementById(p[1]);
+    if (src && dst && src.value.trim() && !dst.value.trim()) dst.value = src.value.trim();
+  });
+}
+
+function validateSponsorContact() {
+  var valid = true;
+  [['sp-fn','spf-fn'],['sp-ln','spf-ln'],['sp-em','spf-em']].forEach(function(pair){
+    var inp  = document.getElementById(pair[0]);
+    var wrap = document.getElementById(pair[1]);
+    if (!inp || !wrap) return;
+    var ok = pair[0]==='sp-em' ? /\S+@\S+\.\S+/.test(inp.value) : inp.value.trim().length>0;
+    wrap.classList.toggle('has-error', !ok);
+    inp.classList.toggle('error', !ok);
+    if (!ok) valid = false;
+  });
+  if (!valid) document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth',block:'center'});
+  return valid;
+}
+
+function removeSponsor(id) {
+  var el = document.querySelector('[data-id="'+id+'"]');
+  if (el) el.classList.remove('selected');
+  if(id==='hole'){holeQty=1;var hq=document.getElementById('hole-qty');if(hq)hq.textContent='1';}
+  delete sponsorSelections[id];
+  updateSponsorTotal();
+}
+
+function clearAll() {
+  document.querySelectorAll('.selectable.selected').forEach(function(el){el.classList.remove('selected');});
+  holeQty=1; var hq=document.getElementById('hole-qty'); if(hq) hq.textContent='1';
+  for(var k in sponsorSelections) delete sponsorSelections[k];
+  updateSponsorTotal();
+}
+
+// ════════════════════════════════
+// PAY — SPONSORSHIP (card)
+// ════════════════════════════════
+async function handleSponsorPay() {
+  var sponsorships = Object.values(sponsorSelections).map(function(s){return{name:s.name,price:s.price};});
+  if (!sponsorships.length) { document.getElementById('sponsor-modal').style.display='flex'; return; }
+  if (!validateSponsorContact()) return;
+
+  var btn   = document.getElementById('sp-card-btn');
+  var errEl = document.getElementById('sp-pay-error');
+  errEl.style.display='none';
+  btn.disabled=true; btn.textContent='Creating checkout…';
+
+  var golfers = [{
+    firstName: document.getElementById('sp-fn').value.trim(),
+    lastName:  document.getElementById('sp-ln').value.trim(),
+    email:     document.getElementById('sp-em').value.trim(),
+    phone:     document.getElementById('sp-ph').value.trim(),
+    company:   document.getElementById('sp-co').value.trim(),
+  }];
+
   try {
-    var results = await Promise.all([get('entries'), get('sponsors'), get('comp'), get('settings')]);
-    D.e = Array.isArray(results[0]) ? results[0] : [];
-    D.s = Array.isArray(results[1]) ? results[1] : [];
-    D.c = Array.isArray(results[2]) ? results[2] : [];
-    D.x = results[3] || {};
-    stats(); re(); rs(); rc(); rx();
-  } catch(e) { console.error(e); }
-}
-
-function fmt(n) { return n ? '$'+parseFloat(n).toLocaleString('en-US') : '—'; }
-function fdate(d) { return d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'; }
-function bd(s, t) {
-  var map = {paid:'bd-paid',invoice:'bd-inv',comp:'bd-comp',pending:'bd-pend',Title:'bd-title',Gold:'bd-gold',Silver:'bd-silver',Bronze:'bd-bronze',Hole:'bd-hole',Alacarte:'bd-comp'};
-  return '<span class="bd '+(map[s]||'')+'">'+(t||s||'—')+'</span>';
-}
-
-function stats() {
-  var pl = D.e.reduce(function(s,e){return s+(e.players?e.players.length:0);},0);
-  var rv = [...D.e,...D.s].reduce(function(s,e){return s+(parseFloat(e.amount)||0);},0);
-  var cp = D.c.reduce(function(s,c){return s+(c.players?c.players.length:0);},0);
-  document.getElementById('s-pl').textContent = pl;
-  document.getElementById('s-te').textContent = D.e.length;
-  document.getElementById('s-rv').textContent = '$'+rv.toLocaleString('en-US');
-  document.getElementById('s-sp').textContent = D.s.length;
-  document.getElementById('s-co').textContent = cp;
-}
-
-// ── ENTRIES ──
-function re() {
-  var q=(document.getElementById('esq').value||'').toLowerCase();
-  var f=document.getElementById('esf').value;
-  var rows=D.e.filter(function(e){
-    var mq=!q||(e.teamName||'').toLowerCase().includes(q)||(e.firstName||'').toLowerCase().includes(q)||(e.lastName||'').toLowerCase().includes(q)||(e.email||'').toLowerCase().includes(q);
-    return mq && (!f||e.status===f);
-  });
-  var tb=document.getElementById('etb');
-  if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🏌️</div><p>No entries</p></div></td></tr>';return;}
-  tb.innerHTML=rows.map(function(e){
-    var pn=e.players?e.players.map(function(p){return (p.firstName||'')+(p.ln||p.lastName?' '+p.lastName:'');}).filter(Boolean).join(', '):'';
-    return '<tr>'+
-      '<td><strong>'+(e.teamName||(e.firstName+' '+e.lastName)||'Unnamed')+'</strong>'+(e.company?'<br><span style="font-size:11px;color:var(--tl)">'+e.company+'</span>':'')+'<br><span style="font-size:11px;color:var(--tl)">'+(e.email||'')+(e.phone?' · '+e.phone:'')+'</span></td>'+
-      '<td><strong>'+(e.players?e.players.length:0)+'</strong>'+(pn?'<br><span style="font-size:11px;color:var(--tl)">'+pn+'</span>':'')+'</td>'+
-      '<td style="font-size:12px">'+(e.addons||'—')+'</td>'+
-      '<td><strong>'+fmt(e.amount)+'</strong></td>'+
-      '<td>'+bd(e.status)+'</td>'+
-      '<td style="font-size:12px">'+fdate(e.createdAt)+'</td>'+
-      '<td><div class="ac">'+
-        '<button class="btn btn-s sm" onclick="openEM(\''+e.id+'\')">Edit</button>'+
-        '<button class="btn btn-d sm" onclick="delR(\'entries\',\''+e.id+'\')">Del</button>'+
-      '</div></td></tr>';
-  }).join('');
-}
-
-function openEM(id) {
-  var e=id?D.e.find(function(x){return x.id===id;}):null;
-  document.getElementById('em-t').textContent = e?'Edit Entry':'New Entry';
-  document.getElementById('em-id').value  = e?e.id:'';
-  document.getElementById('em-tn').value  = e?e.teamName||'':'';
-  document.getElementById('em-fn').value  = e?e.firstName||'':'';
-  document.getElementById('em-ln').value  = e?e.lastName||'':'';
-  document.getElementById('em-em').value  = e?e.email||'':'';
-  document.getElementById('em-ph').value  = e?e.phone||'':'';
-  document.getElementById('em-co').value  = e?e.company||'':'';
-  document.getElementById('em-am').value  = e?e.amount||'':'';
-  document.getElementById('em-ao').value  = e?e.addons||'':'';
-  document.getElementById('em-si').value  = e?e.stripeSession||'':'';
-  document.getElementById('em-no').value  = e?e.notes||'':'';
-  document.getElementById('em-st').value  = e?e.status||'paid':'paid';
-  rProws('em-pl', e?e.players||[]:[{firstName:'',lastName:'',email:'',phone:''}]);
-  openM('em');
-}
-
-async function saveE() {
-  var id=document.getElementById('em-id').value;
-  var d={
-    teamName:document.getElementById('em-tn').value.trim(),
-    firstName:document.getElementById('em-fn').value.trim(),
-    lastName:document.getElementById('em-ln').value.trim(),
-    email:document.getElementById('em-em').value.trim(),
-    phone:document.getElementById('em-ph').value.trim(),
-    company:document.getElementById('em-co').value.trim(),
-    amount:parseFloat(document.getElementById('em-am').value)||0,
-    addons:document.getElementById('em-ao').value.trim(),
-    stripeSession:document.getElementById('em-si').value.trim(),
-    notes:document.getElementById('em-no').value.trim(),
-    status:document.getElementById('em-st').value,
-    players:cProws('em-pl'),
-  };
-  if(id){
-    d.id=id; d.updatedAt=new Date().toISOString();
-    var i=D.e.findIndex(function(x){return x.id===id;});
-    if(i>=0) D.e[i]=Object.assign({},D.e[i],d);
-    await put('entries',D.e);
-  } else {
-    var rec=await post('entries',d); D.e.push(rec);
+    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/create-checkout',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({golfers, sponsorships}),
+    });
+    var data = await res.json();
+    if(!res.ok||!data.url) throw new Error(data.error||'Could not create checkout');
+    window.location.href = data.url;
+  } catch(err) {
+    errEl.textContent='Error: '+err.message+'. Please try again or contact us.';
+    errEl.style.display='block';
+    btn.disabled=false; btn.textContent='💳 Pay by Card →';
   }
-  closeM('em'); stats(); re();
 }
 
-// ── SPONSORS ──
-var TB={Title:{teams:3,players:12,tickets:12,holeSigns:5,banner:true,website:true},Gold:{teams:2,players:8,tickets:8,holeSigns:3,banner:true},Silver:{teams:1,players:4,tickets:4,holeSigns:2},Bronze:{teams:1,players:4,holeSigns:1}};
+// ════════════════════════════════
+// INVOICE — SPONSORSHIP
+// ════════════════════════════════
+async function handleSponsorInvoice() {
+  var sponsorships = Object.values(sponsorSelections).map(function(s){return{name:s.name,price:s.price};});
+  if (!sponsorships.length) return;
+  if (!validateSponsorContact()) return;
 
-function rs() {
-  var q=(document.getElementById('ssq').value||'').toLowerCase();
-  var f=document.getElementById('ssf').value;
-  var rows=D.s.filter(function(s){
-    var mq=!q||(s.company||'').toLowerCase().includes(q)||(s.firstName||'').toLowerCase().includes(q)||(s.email||'').toLowerCase().includes(q);
-    return mq && (!f||s.tier===f);
-  });
-  var tb=document.getElementById('stb');
-  if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🏆</div><p>No sponsors</p></div></td></tr>';return;}
-  tb.innerHTML=rows.map(function(s){
-    var b=TB[s.tier]||{};
-    var bts=[];
-    if(b.teams) bts.push(b.teams+' team'+(b.teams>1?'s':''));
-    if(b.players) bts.push(b.players+' players');
-    if(b.tickets) bts.push(b.tickets+' super tkts');
-    if(b.holeSigns) bts.push(b.holeSigns+' hole signs');
-    if(b.banner) bts.push('banner');
-    if(s.hole) bts.push('Hole #'+s.hole);
-    var bhtml=bts.length?'<div class="btags">'+bts.map(function(x){return '<span class="btag">'+x+'</span>';}).join('')+'</div>':'—';
-    var cu=D.c.filter(function(c){return c.sponsorId===s.id;}).length;
-    var cs=s.compSlots||b.teams||0;
-    var pct=cs>0?Math.min(100,Math.round(cu/cs*100)):0;
-    return '<tr>'+
-      '<td>'+
-        (s.logoData ? '<img src="'+s.logoData+'" style="max-height:36px;max-width:80px;display:block;margin-bottom:5px;border-radius:3px;object-fit:contain;background:#fff;border:1px solid rgba(0,0,0,0.08);padding:2px;">' : '') +
-        '<strong>'+(s.company||(s.firstName+' '+s.lastName))+'</strong>'+
-        '<br><span style="font-size:11px;color:var(--tl)">'+(s.firstName||'')+' '+(s.lastName||'')+' · '+(s.email||'')+'</span>'+
-        (s.phone ? '<br><span style="font-size:11px;color:var(--tl)">'+s.phone+'</span>' : '')+
-        (s.address ? '<br><span style="font-size:11px;color:var(--tl)">'+s.address+'</span>' : '')+
-        (s.website ? '<br><a href="'+s.website+'" target="_blank" style="font-size:11px;color:var(--gl)">'+s.website.replace('https://','')+'</a>' : '')+
-      '</td>'+
-      '<td>'+bd(s.tier,s.tier)+'</td>'+
-      '<td>'+bhtml+'</td>'+
-      '<td><strong>'+fmt(s.amount)+'</strong></td>'+
-      '<td>'+bd(s.status)+'</td>'+
-      '<td><div style="font-size:12px">'+cu+'/'+cs+' teams</div><div class="sbar"><div class="sfill'+(pct>=100?' full':'')+'" style="width:'+pct+'%"></div></div></td>'+
-      '<td><div class="ac">'+
-        '<button class="btn btn-s sm" onclick="openSM(\''+s.id+'\')">Edit</button>'+
-        '<button class="btn btn-g sm" onclick="openCM(null,\''+s.id+'\')">+Team</button>'+
-        '<button class="btn btn-d sm" onclick="delR(\'sponsors\',\''+s.id+'\')">Del</button>'+
-      '</div></td></tr>';
-  }).join('');
-}
+  var btn   = document.getElementById('sp-invoice-btn');
+  var errEl = document.getElementById('sp-pay-error');
+  errEl.style.display='none';
+  btn.disabled=true; btn.textContent='Creating invoice…';
 
-function updateCompSlots() {
-  var tier=document.getElementById('sm-ti').value;
-  var b=TB[tier]||{};
-  if(b.teams) document.getElementById('sm-cs').value=b.teams;
-}
-
-// ── LOGO UPLOAD ──
-function handleLogoUpload(input) {
-  var file = input.files[0];
-  if (!file) return;
-  if (file.size > 2 * 1024 * 1024) { alert('Logo must be under 2MB'); input.value=''; return; }
-  var lbl = document.getElementById('sm-logo-lbl');
-  lbl.textContent = '⏳ Reading…';
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    document.getElementById('sm-logo-data').value = e.target.result; // base64 data URL
-    document.getElementById('sm-logo-name').value = file.name;
-    document.getElementById('sm-logo-img').src    = e.target.result;
-    document.getElementById('sm-logo-preview').style.display = 'block';
-    lbl.textContent = '✓ ' + file.name + ' (' + Math.round(file.size/1024) + 'KB)';
-    lbl.style.borderColor = 'var(--gl)';
-    lbl.style.color = 'var(--gl)';
-  };
-  reader.readAsDataURL(file);
-}
-
-function clearLogo() {
-  document.getElementById('sm-logo-data').value = '';
-  document.getElementById('sm-logo-name').value = '';
-  document.getElementById('sm-logo-img').src    = '';
-  document.getElementById('sm-logo-preview').style.display = 'none';
-  document.getElementById('sm-logo-file').value = '';
-  document.getElementById('sm-logo-lbl').textContent = '📎 Click to upload logo (PNG, JPG, SVG)';
-  document.getElementById('sm-logo-lbl').style.borderColor = '';
-  document.getElementById('sm-logo-lbl').style.color = '';
-}
-
-function openSM(id) {
-  var s=id?D.s.find(function(x){return x.id===id;}):null;
-  document.getElementById('sm-t').textContent=s?'Edit Sponsor':'New Sponsor';
-  document.getElementById('sm-id').value=s?s.id:'';
-  document.getElementById('sm-co').value=s?s.company||'':'';
-  document.getElementById('sm-ti').value=s?s.tier||'Gold':'Gold';
-  document.getElementById('sm-fn').value=s?s.firstName||'':'';
-  document.getElementById('sm-ln').value=s?s.lastName||'':'';
-  document.getElementById('sm-em').value=s?s.email||'':'';
-  document.getElementById('sm-ph').value=s?s.phone||'':'';
-  document.getElementById('sm-addr').value=s?s.address||'':'';
-  document.getElementById('sm-web').value=s?s.website||'':'';
-  document.getElementById('sm-am').value=s?s.amount||'':'';
-  document.getElementById('sm-st').value=s?s.status||'paid':'paid';
-  document.getElementById('sm-ho').value=s?s.hole||'':'';
-  document.getElementById('sm-cs').value=s?s.compSlots||'':'';
-  document.getElementById('sm-no').value=s?s.notes||'':'';
-  // Logo
-  clearLogo();
-  if (s && s.logoData) {
-    document.getElementById('sm-logo-data').value = s.logoData;
-    document.getElementById('sm-logo-name').value = s.logoName || '';
-    document.getElementById('sm-logo-img').src    = s.logoData;
-    document.getElementById('sm-logo-preview').style.display = 'block';
-    document.getElementById('sm-logo-lbl').textContent = '✓ ' + (s.logoName || 'Logo on file');
-    document.getElementById('sm-logo-lbl').style.borderColor = 'var(--gl)';
-    document.getElementById('sm-logo-lbl').style.color = 'var(--gl)';
+  try {
+    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/create-invoice',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        firstName: document.getElementById('sp-fn').value.trim(),
+        lastName:  document.getElementById('sp-ln').value.trim(),
+        email:     document.getElementById('sp-em').value.trim(),
+        phone:     document.getElementById('sp-ph').value.trim(),
+        company:   document.getElementById('sp-co').value.trim(),
+        sponsorships,
+      }),
+    });
+    var data = await res.json();
+    if(!res.ok||!data.success) throw new Error(data.error||'Could not create invoice');
+    unlockConfirmation();
+    goPage(2);
+    document.querySelector('.success-screen h2').textContent='Invoice on its way!';
+    document.querySelector('.success-screen p').textContent='A Stripe invoice has been sent to '+document.getElementById('sp-em').value.trim()+' with a secure Pay Now link. Net 30 payment terms. Questions? Email golf@tamparoughriders.org';
+  } catch(err) {
+    errEl.textContent='Error: '+err.message+'. Please try again or contact us.';
+    errEl.style.display='block';
+    btn.disabled=false; btn.textContent='📄 Request an Invoice';
   }
-  if(!s) updateCompSlots();
-  openM('sm');
 }
 
-async function saveSp() {
-  var id=document.getElementById('sm-id').value;
-  var tier=document.getElementById('sm-ti').value;
-  var b=TB[tier]||{};
-  var btn=document.getElementById('sm-save-btn');
-  btn.disabled=true; btn.textContent='Saving…';
-  var d={
-    company:   document.getElementById('sm-co').value.trim(),
-    tier,
-    firstName: document.getElementById('sm-fn').value.trim(),
-    lastName:  document.getElementById('sm-ln').value.trim(),
-    email:     document.getElementById('sm-em').value.trim(),
-    phone:     document.getElementById('sm-ph').value.trim(),
-    address:   document.getElementById('sm-addr').value.trim(),
-    website:   document.getElementById('sm-web').value.trim(),
-    amount:    parseFloat(document.getElementById('sm-am').value)||0,
-    status:    document.getElementById('sm-st').value,
-    hole:      document.getElementById('sm-ho').value.trim(),
-    compSlots: parseInt(document.getElementById('sm-cs').value)||b.teams||0,
-    notes:     document.getElementById('sm-no').value.trim(),
-    logoData:  document.getElementById('sm-logo-data').value || null,
-    logoName:  document.getElementById('sm-logo-name').value || null,
-  };
-  if(id){
-    d.id=id; d.updatedAt=new Date().toISOString();
-    var i=D.s.findIndex(function(x){return x.id===id;});
-    if(i>=0) D.s[i]=Object.assign({},D.s[i],d);
-    await put('sponsors',D.s);
-  } else { var rec=await post('sponsors',d); D.s.push(rec); }
-  btn.disabled=false; btn.textContent='Save Sponsor';
-  closeM('sm'); stats(); rs();
-}
+// ════════════════════════════════
+// INVOICE ME (page 1 registration path)
+// ════════════════════════════════
+function showInvoiceModal() {
+  var sponsorships = Object.values(sponsorSelections).map(function(s){return{name:s.name,price:s.price};});
+  var total = sponsorships.reduce(function(s,v){return s+v.price;},0);
 
-// ── COMP ──
-function rc() {
-  var tb=document.getElementById('ctb');
-  if(!D.c.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">🎁</div><p>No comp teams yet</p></div></td></tr>';return;}
-  tb.innerHTML=D.c.map(function(c){
-    var sp=D.s.find(function(s){return s.id===c.sponsorId;});
-    var spn=sp?(sp.company||sp.firstName+' '+sp.lastName):'—';
-    var pc=c.players?c.players.length:0;
-    var cs=sp?(sp.compSlots||(TB[sp.tier]||{}).teams||0):0;
-    var cu=D.c.filter(function(x){return x.sponsorId===c.sponsorId;}).length;
-    return '<tr>'+
-      '<td><strong>'+spn+'</strong>'+(sp?'<br>'+bd(sp.tier,sp.tier):'')+'</td>'+
-      '<td><strong>'+(c.teamName||'Unnamed')+'</strong></td>'+
-      '<td style="font-size:12px">'+(c.players?c.players.map(function(p){return (p.firstName||'')+' '+(p.lastName||'');}).filter(Boolean).join(', '):'—')+'</td>'+
-      '<td style="font-size:12px"><strong>'+cu+'</strong>/'+cs+' slots</td>'+
-      '<td style="font-size:12px">'+(c.notes||'—')+'</td>'+
-      '<td><div class="ac">'+
-        '<button class="btn btn-s sm" onclick="openCM(\''+c.id+'\')">Edit</button>'+
-        '<button class="btn btn-d sm" onclick="delR(\'comp\',\''+c.id+'\')">Del</button>'+
-      '</div></td></tr>';
-  }).join('');
-}
-
-function showSlotInfo() {
-  var sid=document.getElementById('cm-sp').value;
-  var sp=D.s.find(function(s){return s.id===sid;});
-  var el=document.getElementById('cm-slot-info');
-  if(!sp){el.style.display='none';return;}
-  var b=TB[sp.tier]||{};
-  var cs=sp.compSlots||b.teams||0;
-  var cu=D.c.filter(function(c){return c.sponsorId===sid;}).length;
-  el.style.display='block';
-  el.textContent=(sp.company||sp.firstName+' '+sp.lastName)+' — '+sp.tier+' Sponsor · '+cu+'/'+cs+' comp teams used · '+b.players+' players per team';
-}
-
-function openCM(id, sponsorId) {
-  var c=id?D.c.find(function(x){return x.id===id;}):null;
-  document.getElementById('cm-t').textContent=c?'Edit Comp Team':'Assign Comp Team';
-  document.getElementById('cm-id').value=c?c.id:'';
-  document.getElementById('cm-tn').value=c?c.teamName||'':'';
-  document.getElementById('cm-no').value=c?c.notes||'':'';
-  var sel=document.getElementById('cm-sp');
-  sel.innerHTML=D.s.map(function(s){return '<option value="'+s.id+'">'+(s.company||s.firstName+' '+s.lastName)+' — '+(s.tier||'')+'</option>';}).join('');
-  if(c&&c.sponsorId) sel.value=c.sponsorId;
-  else if(sponsorId) sel.value=sponsorId;
-  showSlotInfo();
-  rProws('cm-pl', c?c.players||[]:[{firstName:'',lastName:'',email:'',phone:''}]);
-  openM('cm');
-}
-
-async function saveC() {
-  var id=document.getElementById('cm-id').value;
-  var d={
-    sponsorId:document.getElementById('cm-sp').value,
-    teamName:document.getElementById('cm-tn').value.trim(),
-    players:cProws('cm-pl'),
-    notes:document.getElementById('cm-no').value.trim(),
-  };
-  if(id){
-    d.id=id; d.updatedAt=new Date().toISOString();
-    var i=D.c.findIndex(function(x){return x.id===id;});
-    if(i>=0) D.c[i]=Object.assign({},D.c[i],d);
-    await put('comp',D.c);
-  } else { var rec=await post('comp',d); D.c.push(rec); }
-  closeM('cm'); stats(); rc(); rs();
-}
-
-// ── SETTINGS ──
-function rx() {
-  var x=D.x;
-  document.getElementById('ne').checked=x.notifyOnEntry!==false;
-  document.getElementById('ns').checked=x.notifyOnSponsor!==false;
-  var list=document.getElementById('ael');
-  var admins=x.adminEmails||[];
-  if(!admins.length){list.innerHTML='<p style="font-size:13px;color:var(--tl)">No admins added yet.</p>';return;}
-  list.innerHTML=admins.map(function(a,i){
-    return '<div class="arow">'+
-      '<div class="aname">'+(a.name||'Unnamed')+'</div>'+
-      '<div class="aemail">'+(a.email||'')+'</div>'+
-      '<span class="bd '+(a.role==='admin'?'bd-paid':'bd-comp')+'">'+(a.role||'notify')+'</span>'+
-      '<button class="btn btn-d sm" onclick="rmAE('+i+')">Remove</button>'+
-    '</div>';
-  }).join('');
-}
-
-async function saveSt() {
-  D.x.notifyOnEntry   = document.getElementById('ne').checked;
-  D.x.notifyOnSponsor = document.getElementById('ns').checked;
-  await put('settings', D.x);
-}
-
-function openAEM() {
-  document.getElementById('aem-id').value='';
-  document.getElementById('aem-n').value='';
-  document.getElementById('aem-e').value='';
-  document.getElementById('aem-r').value='admin';
-  openM('aem');
-}
-
-async function saveAE() {
-  var admins=D.x.adminEmails||[];
-  admins.push({ name:document.getElementById('aem-n').value.trim(), email:document.getElementById('aem-e').value.trim(), role:document.getElementById('aem-r').value });
-  D.x.adminEmails=admins;
-  await put('settings',D.x);
-  closeM('aem'); rx();
-}
-
-async function rmAE(i) {
-  if(!confirm('Remove this admin?')) return;
-  D.x.adminEmails.splice(i,1);
-  await put('settings',D.x); rx();
-}
-
-// ── PLAYER ROWS ──
-function rProws(cid, players) {
-  var c=document.getElementById(cid); c.innerHTML='';
-  (players||[]).forEach(function(p,i){ c.appendChild(mkProw(cid,p,i)); });
-}
-function mkProw(cid, p, i) {
-  var row=document.createElement('div'); row.className='prow'; row.id=cid+'-r'+i;
-  row.innerHTML=
-    '<div><div class="prow-lbl">First</div><input class="prow-inp" value="'+(p.firstName||'')+'" placeholder="First name"></div>'+
-    '<div><div class="prow-lbl">Last</div><input class="prow-inp" value="'+(p.lastName||'')+'" placeholder="Last name"></div>'+
-    '<div><div class="prow-lbl">Email / Phone</div><input class="prow-inp" value="'+(p.email||p.phone||'')+'" placeholder="email or phone"></div>'+
-    '<button class="del-btn" onclick="rmProw(\''+cid+'\',\''+cid+'-r'+i+'\')">×</button>';
-  return row;
-}
-function addPR(cid) { var c=document.getElementById(cid); c.appendChild(mkProw(cid,{},c.children.length)); }
-function rmProw(cid, rowId) { var r=document.getElementById(rowId); if(r) r.remove(); }
-function cProws(cid) {
-  var rows=document.getElementById(cid).querySelectorAll('.prow');
-  var out=[];
-  rows.forEach(function(row){
-    var ins=row.querySelectorAll('.prow-inp');
-    var fn=ins[0]?ins[0].value.trim():'', ln=ins[1]?ins[1].value.trim():'', em=ins[2]?ins[2].value.trim():'';
-    if(fn||ln||em) out.push({firstName:fn,lastName:ln,email:em});
-  });
-  return out;
-}
-
-// ── DELETE ──
-async function delR(res, id) {
-  if(!confirm('Delete this record? Cannot be undone.')) return;
-  await del(res, id);
-  var k=res==='comp'?'c':res==='entries'?'e':'s';
-  D[k]=D[k].filter(function(x){return x.id!==id;});
-  stats();
-  if(res==='entries') re();
-  if(res==='sponsors') rs();
-  if(res==='comp') rc();
-}
-
-// ── TABS ──
-function showTab(t) {
-  ['e','s','c','x'].forEach(function(n){document.getElementById('t'+n).style.display=n===t?'block':'none';});
-  document.querySelectorAll('.tbtn').forEach(function(b,i){b.classList.toggle('on',['e','s','c','x'][i]===t);});
-}
-
-// ── MODALS ──
-function openM(id) { document.getElementById(id).classList.add('open'); }
-function closeM(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.mo').forEach(function(el){ el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open');}); });
-
-// ── CSV EXPORT ──
-function xcsv(t) {
-  var rows, fn;
-  if(t==='e') {
-    rows=[['Team','Contact','Email','Phone','Company','# Players','Players','Amount','Status','Add-ons','Stripe Session','Notes','Date']];
-    D.e.forEach(function(e){rows.push([e.teamName||'',e.firstName+' '+e.lastName,e.email||'',e.phone||'',e.company||'',e.players?e.players.length:0,(e.players||[]).map(function(p){return p.firstName+' '+p.lastName;}).join('; '),e.amount||'',e.status||'',e.addons||'',e.stripeSession||'',e.notes||'',fdate(e.createdAt)]);});
-    fn='rr-golf-entries.csv';
-  } else if(t==='s') {
-    rows=[['Company','Tier','Contact','Email','Phone','Amount','Status','Hole','Comp Slots','Notes','Date']];
-    D.s.forEach(function(s){rows.push([s.company||'',s.tier||'',s.firstName+' '+s.lastName,s.email||'',s.phone||'',s.amount||'',s.status||'',s.hole||'',s.compSlots||'',s.notes||'',fdate(s.createdAt)]);});
-    fn='rr-golf-sponsors.csv';
-  } else {
-    rows=[['Sponsor','Team','Players','Notes','Date']];
-    D.c.forEach(function(c){var sp=D.s.find(function(s){return s.id===c.sponsorId;});rows.push([sp?(sp.company||sp.firstName+' '+sp.lastName):'—',c.teamName||'',(c.players||[]).map(function(p){return p.firstName+' '+p.lastName;}).join('; '),c.notes||'',fdate(c.createdAt)]);});
-    fn='rr-golf-comp.csv';
+  if (!sponsorships.length || total === 0) {
+    // Not on sponsorship page yet — take them there first
+    if (currentPage !== 1) {
+      goPage(1);
+      setTimeout(() => {
+        document.getElementById('sponsor-modal').style.display = 'flex';
+      }, 400);
+    } else {
+      var holeEl = document.querySelector('[data-id="hole"]');
+      if (holeEl) { holeEl.scrollIntoView({behavior:'smooth',block:'center'}); holeEl.classList.add('addon-highlight'); setTimeout(()=>holeEl.classList.remove('addon-highlight'),2000); }
+      document.getElementById('sponsor-modal').style.display = 'flex';
+    }
+    return;
   }
-  var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
-  var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=fn; a.click();
+  // Pre-fill from registration form if available
+  var fn = document.getElementById('inp-fn')?.value.trim();
+  var ln = document.getElementById('inp-ln')?.value.trim();
+  var em = document.getElementById('inp-em')?.value.trim();
+  var ph = document.getElementById('inp-ph')?.value.trim();
+  if (fn) document.getElementById('inv-fn').value = fn;
+  if (ln) document.getElementById('inv-ln').value = ln;
+  if (em) document.getElementById('inv-em').value = em;
+  if (ph) document.getElementById('inv-ph').value = ph;
+
+  // Build order summary
+  var fmt = n => '$' + n.toLocaleString('en-US');
+  var total = sponsorships.reduce((s,v)=>s+v.price, 0);
+  var html = '<div style="font-weight:700;color:#1a3320;margin-bottom:8px;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;">Your Sponsorship Order</div>';
+  sponsorships.forEach(s => {
+    html += `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.06);"><span style="color:#4a4a45;">${s.name}</span><span style="font-weight:600;color:#1a3320;">${fmt(s.price)}</span></div>`;
+  });
+  html += `<div style="display:flex;justify-content:space-between;padding:8px 0 0;font-weight:700;font-size:14px;"><span style="color:#1a3320;">Total</span><span style="color:#c9a84c;font-family:'Playfair Display',serif;font-size:18px;">${fmt(total)}</span></div>`;
+  document.getElementById('invoice-summary').innerHTML = html;
+  window._invoiceItems = sponsorships; // store for submitInvoice
+  document.getElementById('invoice-modal').style.display = 'flex';
 }
+
+async function submitInvoice() {
+  var fn = document.getElementById('inv-fn').value.trim();
+  var ln = document.getElementById('inv-ln').value.trim();
+  var em = document.getElementById('inv-em').value.trim();
+  var co = document.getElementById('inv-co').value.trim();
+  var ph = document.getElementById('inv-ph').value.trim();
+  var errEl = document.getElementById('inv-error');
+  var btn   = document.getElementById('inv-submit-btn');
+
+  errEl.style.display = 'none';
+  if (!fn || !ln) { errEl.textContent = 'Please enter your first and last name.'; errEl.style.display='block'; return; }
+  if (!em || !/\S+@\S+\.\S+/.test(em)) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display='block'; return; }
+
+  var sponsorships = window._invoiceItems || Object.values(sponsorSelections).map(function(s) { return { name: s.name, price: s.price }; });
+  window._invoiceItems = null; // clear after use
+
+  // Guard: must have items with real prices
+  if (!sponsorships.length) {
+    errEl.textContent = 'No items selected. Please add players, add-ons, or a sponsorship first.';
+    errEl.style.display = 'block';
+    return;
+  }
+  var totalAmount = sponsorships.reduce(function(s, v) { return s + v.price; }, 0);
+  if (totalAmount <= 0) {
+    errEl.textContent = 'Total is $0. Please select items first.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Creating invoice…';
+
+  try {
+    var res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-invoice`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName:fn, lastName:ln, email:em, company:co, phone:ph, sponsorships }),
+    });
+    var data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Could not create invoice');
+    document.getElementById('invoice-modal').style.display = 'none';
+    unlockConfirmation();
+    goPage(2);
+    document.querySelector('.success-screen h2').textContent = 'Invoice on its way!';
+    document.querySelector('.success-screen p').textContent = `A Stripe invoice has been sent to ${em} with a secure Pay Now link. Payment terms: net 30 days. Questions? Email r.conn@tamparoughriders.org`;
+  } catch(err) {
+    errEl.textContent = `Error: ${err.message}. Please try again or contact us directly.`;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Send Invoice Request →';
+  }
+}
+
+// ════════════════════════════════
+// INIT — runs after DOM is ready
+// ════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Hole qty buttons (on page 2 — safe to attach now DOM is loaded)
+  var hm = document.getElementById('hole-minus');
+  var hp = document.getElementById('hole-plus');
+  if (hm) hm.addEventListener('click', function(e) {
+    e.stopPropagation();
+    holeQty = Math.max(1, holeQty - 1);
+    document.getElementById('hole-qty').textContent = holeQty;
+    if (sponsorSelections['hole']) {
+      sponsorSelections['hole'].price = 250 * holeQty;
+      sponsorSelections['hole'].name  = holeQty > 1 ? 'Hole Sponsor x' + holeQty : 'Hole Sponsor';
+      updateSponsorTotal();
+    }
+  });
+  if (hp) hp.addEventListener('click', function(e) {
+    e.stopPropagation();
+    holeQty = Math.min(18, holeQty + 1);
+    document.getElementById('hole-qty').textContent = holeQty;
+    if (sponsorSelections['hole']) {
+      sponsorSelections['hole'].price = 250 * holeQty;
+      sponsorSelections['hole'].name  = holeQty > 1 ? 'Hole Sponsor x' + holeQty : 'Hole Sponsor';
+      updateSponsorTotal();
+    }
+  });
+
+  // Sponsorship card clicks
+  document.querySelectorAll('.selectable').forEach(function(el) {
+    el.addEventListener('click', function() {
+      var id   = this.dataset.id;
+      var name = this.dataset.name;
+      var base = parseInt(this.dataset.price);
+      if (this.classList.contains('selected')) {
+        this.classList.remove('selected');
+        if (id === 'hole') { holeQty = 1; var hq = document.getElementById('hole-qty'); if(hq) hq.textContent = '1'; }
+        delete sponsorSelections[id];
+      } else {
+        this.classList.add('selected');
+        var price = id === 'hole' ? base * holeQty : base;
+        var displayName = (id === 'hole' && holeQty > 1) ? 'Hole Sponsor x' + holeQty : name;
+        sponsorSelections[id] = { name: displayName, price: price };
+      }
+      updateSponsorTotal();
+    });
+  });
+
+  // Initialize totals and button state
+  updateRegTotal();
+  updatePayButton();
+
+  // Timestamp
+  updateTimestamp();
+  setInterval(updateTimestamp, 60000);
+
+  // Check for Stripe success redirect
+  if (window.location.search.includes('session_id')) {
+    unlockConfirmation();
+    goPage(2);
+  }
+
+}); // end DOMContentLoaded
+
+// ════════════════════════════════
+// PAGE NAV
+// ════════════════════════════════
+var currentPage = 0;
+
+function goPage(n) {
+  var pages = document.querySelectorAll('.page');
+  var tabEls = document.querySelectorAll('.step-tab');
+  pages.forEach(function(p,i){ p.classList.toggle('active', i===n); });
+  tabEls.forEach(function(t,i){ t.classList.toggle('active', i===n); t.classList.toggle('done', i<n); });
+  currentPage = n;
+  var bar = document.getElementById('total-bar');
+  if (bar) { if(n!==1) bar.classList.remove('visible'); else updateSponsorTotal(); }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateTimestamp() {
+  var el = document.getElementById('rr-timestamp');
+  if (!el) return;
+  var now = new Date();
+  el.textContent = now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + ' · ' +
+    now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+}
+
 </script>
+<div id="addon-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:10px;padding:36px 32px;max-width:420px;width:92%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
+    <div style="font-size:44px;margin-bottom:14px;">🎯</div>
+    <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#1a3320;margin-bottom:10px;">Are you sure you don't want any add-ons?</h3>
+    <p style="font-size:14px;color:#4a4a45;margin-bottom:8px;line-height:1.6;">The <strong>Super Ticket ($75)</strong> gets your whole team mulligans, contest entries, raffle tickets, and an awards dinner guest — saving $20 vs. buying separately.</p>
+    <p style="font-size:13px;color:#7a7a72;margin-bottom:22px;">Add-ons apply to everyone on your team.</p>
+    <div style="display:flex;flex-direction:column;gap:9px;align-items:stretch;">
+      <button onclick="selectSuperFromModal()" style="padding:13px 24px;background:#1a3320;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.04em;">
+        ⭐ Add Super Ticket — $75
+      </button>
+      <button onclick="selectMulligansFromModal()" style="padding:13px 24px;background:#2d5a3d;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">
+        Just Mulligans — $20
+      </button>
+      <button onclick="closeAddonModalAndScroll()" style="padding:11px 22px;background:#f4f6f4;border:1px solid rgba(0,0,0,0.12);color:#1a3320;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">
+        ← See all add-on choices
+      </button>
+      <button onclick="proceedWithoutAddons()" style="padding:10px 22px;background:none;border:none;color:#7a7a72;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;text-decoration:underline;">
+        No thanks, continue without add-ons
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- No sponsorship modal -->
+<div id="sponsor-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:10px;padding:36px 32px;max-width:440px;width:92%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
+    <div style="font-size:44px;margin-bottom:14px;">🏌️</div>
+    <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#1a3320;margin-bottom:10px;">Are you sure you don't want a sponsorship?</h3>
+    <p style="font-size:14px;color:#4a4a45;margin-bottom:8px;line-height:1.6;">Sponsorships put your brand in front of every golfer all day. Even a <strong>Hole Sponsor at $250</strong> gets you a custom tee sign, on-course visibility, and website listing.</p>
+    <p style="font-size:13px;color:#7a7a72;margin-bottom:22px;">Great for businesses, teams, and community supporters.</p>
+    <div style="display:flex;flex-direction:column;gap:9px;align-items:stretch;">
+      <button onclick="selectHoleSponsorFromModal()" style="padding:13px 24px;background:#1a3320;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.04em;">
+        ⛳ Add Hole Sponsor — $250
+      </button>
+      <button onclick="viewAllSponsorshipsFromModal()" style="padding:11px 22px;background:#f4f6f4;border:1px solid rgba(0,0,0,0.12);color:#1a3320;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;">
+        ← See all sponsorship options
+      </button>
+      <button onclick="proceedWithoutSponsor()" style="padding:10px 22px;background:none;border:none;color:#7a7a72;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;text-decoration:underline;">
+        No thanks, pay now
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Invoice Me modal -->
+<div id="invoice-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;overflow-y:auto;">
+  <div style="background:#fff;border-radius:10px;padding:36px 32px;max-width:460px;width:92%;margin:20px auto;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:40px;margin-bottom:10px;">📄</div>
+      <h3 style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:#1a3320;margin-bottom:6px;">Request an Invoice</h3>
+      <p style="font-size:13px;color:#7a7a72;line-height:1.6;">Stripe will email you an invoice with a secure <strong>Pay Now</strong> link. Net 30 payment terms.<br><br>
+      <strong style="color:#2a2a26;">Prefer to pay by check?</strong> Make payable to:<br>
+      <em style="color:#2a2a26;">"1st U.S. Volunteer Cavalry Regiment Rough Riders Inc"</em><br>
+      Mail to: 601 N. 19th St, Tampa FL 33605<br>
+      Include your invoice number on the check.<br>
+      Questions? golf@tamparoughriders.org · (813) 248-1898</p>
+    </div>
+
+    <!-- Invoice order summary -->
+    <div id="invoice-summary" style="background:#f8f4ed;border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:13px;"></div>
+
+    <!-- Invoice form -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4a4a45;display:block;margin-bottom:4px;">First Name *</label>
+          <input id="inv-fn" type="text" placeholder="Theodore" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4a4a45;display:block;margin-bottom:4px;">Last Name *</label>
+          <input id="inv-ln" type="text" placeholder="Roosevelt" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4a4a45;display:block;margin-bottom:4px;">Company / Organization</label>
+        <input id="inv-co" type="text" placeholder="Acme Corp (optional)" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4a4a45;display:block;margin-bottom:4px;">Email Address * <span style="font-weight:400;text-transform:none">(invoice sent here)</span></label>
+        <input id="inv-em" type="email" placeholder="you@example.com" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:#4a4a45;display:block;margin-bottom:4px;">Phone</label>
+        <input id="inv-ph" type="tel" placeholder="(813) 555-0100" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;">
+      </div>
+    </div>
+
+    <div id="inv-error" style="display:none;font-size:13px;color:#c0392b;background:#fdf0ef;border-radius:4px;padding:9px 12px;border-left:3px solid #c0392b;margin-top:14px;"></div>
+
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button onclick="submitInvoice()" id="inv-submit-btn" style="flex:1;padding:13px;background:#1a3320;color:#fff;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.04em;">
+        Send Invoice Request →
+      </button>
+      <button onclick="document.getElementById('invoice-modal').style.display='none'" style="padding:13px 18px;background:none;border:1px solid rgba(0,0,0,0.15);color:#4a4a45;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;">
+        Cancel
+      </button>
+    </div>
+    <p style="font-size:11px;color:#7a7a72;text-align:center;margin-top:10px;">Invoice processed securely by Stripe · Net 30 payment terms</p>
+  </div>
+</div>
+
 </body>
 </html>
