@@ -350,7 +350,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
 <nav class="steps-nav" id="steps-nav">
   <button class="step-tab active" onclick="goPage(0)"><span class="step-num">1</span>Register to Golf</button>
-  <button class="step-tab"        onclick="goPage(1)"><span class="step-num">2</span>Sponsorship</button>
+  <button class="step-tab"        onclick="goPage(1)"><span class="step-num">2</span>Become a Sponsor</button>
   <button class="step-tab"        id="confirm-tab" onclick="return false;" style="opacity:0.4;cursor:not-allowed;"><span class="step-num">3</span>Confirmation</button>
 </nav>
 
@@ -400,7 +400,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
       <div class="player-count-row">
         <div class="player-count-label">
           Number of players
-          <span>Max 4 per team · $165 per player · 0 if sponsoring only</span>
+          <span>Max 4 per team · $165 per player</span>
         </div>
         <div class="qty-controls">
           <button class="qty-btn" id="player-minus" onclick="changePlayerCount(-1)" disabled>−</button>
@@ -414,7 +414,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
     <!-- Add-ons -->
     <div class="reg-section">
-      <div class="reg-section-title">Add-ons <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional · applies to all players on your team</span></div>
+      <div class="reg-section-title">Add-ons <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional · per-player items apply to your whole team</span></div>
 
       <!-- Super Ticket — full width -->
       <div class="addon-item addon-super" onclick="toggleSuperTicket(this)" style="margin-bottom:10px;border-color:#c9a84c;background:linear-gradient(135deg,#fdf8ec,#fefaf0);display:flex;gap:14px;">
@@ -435,7 +435,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="addon-item" onclick="toggleAddon(this, 20, 'Mulligan Pack')">
           <div class="addon-left">
             <div class="addon-name">Mulligan pack</div>
-            <div class="addon-desc">3 mulligans per player, whole team</div>
+            <div class="addon-desc">3 mulligans per player</div>
           </div>
           <div class="addon-right">
             <div class="addon-price">$20</div>
@@ -446,7 +446,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="addon-item" onclick="toggleAddon(this, 10, 'Closest to Pin')">
           <div class="addon-left">
             <div class="addon-name">Closest to pin</div>
-            <div class="addon-desc">Entry for each team member</div>
+            <div class="addon-desc">Entry per team member</div>
           </div>
           <div class="addon-right">
             <div class="addon-price">$10</div>
@@ -457,7 +457,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="addon-item" onclick="toggleAddon(this, 10, 'Longest Drive')">
           <div class="addon-left">
             <div class="addon-name">Longest drive</div>
-            <div class="addon-desc">Entry for each team member</div>
+            <div class="addon-desc">Entry per team member</div>
           </div>
           <div class="addon-right">
             <div class="addon-price">$10</div>
@@ -468,7 +468,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="addon-item" onclick="toggleAddon(this, 25, 'Raffle Tickets')">
           <div class="addon-left">
             <div class="addon-name">Raffle tickets</div>
-            <div class="addon-desc">5 tickets per team</div>
+            <div class="addon-desc">5 tickets per player</div>
           </div>
           <div class="addon-right">
             <div class="addon-price">$25</div>
@@ -479,10 +479,22 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         <div class="addon-item" onclick="toggleAddon(this, 30, 'Awards Dinner Guest')">
           <div class="addon-left">
             <div class="addon-name">Awards dinner</div>
-            <div class="addon-desc">1 extra guest ticket for the team</div>
+            <div class="addon-desc">Extra guest ticket per player</div>
           </div>
           <div class="addon-right">
             <div class="addon-price">$30</div>
+            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+
+        <!-- Hole Sponsor — flat rate add-on -->
+        <div class="addon-item" onclick="toggleAddonFlat(this, 250, 'Hole Sponsor')" style="grid-column:1/-1;border-color:rgba(45,122,74,0.3);">
+          <div class="addon-left">
+            <div class="addon-name">⛳ Hole Sponsor</div>
+            <div class="addon-desc">Custom tee sign on one hole · Name &amp; logo on-course · Sponsor board · Website listing</div>
+          </div>
+          <div class="addon-right">
+            <div class="addon-price">$250</div>
             <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
         </div>
@@ -521,15 +533,12 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         </p>
       </div>
 
-      <div class="reg-section" style="padding:14px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-        <div class="secure-note" style="margin:0;">
+      <div class="reg-section" style="padding:14px 32px;">
+        <div class="secure-note">
           <svg width="12" height="14" viewBox="0 0 12 14" fill="none"><path d="M6 1L1 3.5V7c0 2.76 2.14 5.34 5 6 2.86-.66 5-3.24 5-6V3.5L6 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
           Secure payment processed by Stripe
           · <a href="mailto:golf@tamparoughriders.org">golf@tamparoughriders.org</a>
         </div>
-        <button onclick="handleViewSponsorship()" style="background:none;border:1px solid rgba(0,0,0,0.15);color:var(--text-mid);border-radius:5px;padding:8px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;white-space:nowrap;" onmouseover="this.style.borderColor='#2d7a4a';this.style.color='#1e4a2c'" onmouseout="this.style.borderColor='rgba(0,0,0,0.15)';this.style.color='var(--text-mid)'">
-          + Add Sponsorship →
-        </button>
       </div>
     </div>
   </div>
@@ -851,7 +860,6 @@ function renderAdditionalPlayers() {
 function hasAnythingOrdered() {
   if (playerCount > 0) return true;
   if (Object.keys(addons).length > 0) return true;
-  if (Object.keys(sponsorSelections).length > 0) return true;
   return false;
 }
 
@@ -1007,23 +1015,35 @@ function updateAddonPrices() {
   }
 }
 
+// Flat-rate addon (not per-player) — for Hole Sponsor
+function toggleAddonFlat(el, price, name) {
+  var superEl = document.querySelector('.addon-super');
+  if (superEl && superEl.classList.contains('checked')) {
+    superEl.classList.remove('checked');
+    delete addons['Super Ticket'];
+  }
+  el.classList.toggle('checked');
+  if (el.classList.contains('checked')) { addons[name] = price; }
+  else { delete addons[name]; }
+  updateRegTotal();
+  updatePayButton();
+}
+
 function updateRegTotal() {
-  var regSubtotal     = playerCount * PLAYER_PRICE;
-  var addonTotal      = Object.values(addons).reduce(function(s,v){return s+v;}, 0);
-  var sponsorSubtotal = Object.values(sponsorSelections).reduce(function(s,v){return s+v.price;}, 0);
-  var total           = regSubtotal + addonTotal + sponsorSubtotal;
+  var regSubtotal = playerCount * PLAYER_PRICE;
+  var addonTotal  = Object.values(addons).reduce(function(s,v){return s+v;}, 0);
+  var total       = regSubtotal + addonTotal;
   var f = function(n){ return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
 
   var totalEl = document.getElementById('reg-total');
   if (totalEl) totalEl.textContent = f(total);
 
-  // Build order summary lines
+  // Build order summary
   var summary = document.getElementById('reg-order-summary');
   if (summary) {
     var lines = [];
     if (playerCount > 0) lines.push({ name: 'Golf Registration — ' + playerCount + ' Player' + (playerCount>1?'s':''), price: regSubtotal });
     Object.entries(addons).forEach(function(e){ lines.push({ name: e[0], price: e[1] }); });
-    Object.values(sponsorSelections).forEach(function(s){ lines.push({ name: s.name, price: s.price }); });
     if (lines.length) {
       var html = '<div style="font-weight:700;color:#0f2318;margin-bottom:8px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;">Order Summary</div>';
       lines.forEach(function(l){
@@ -1033,18 +1053,15 @@ function updateRegTotal() {
     }
   }
 
-  // Update label
   var lbl = document.getElementById('reg-total-label');
   if (lbl) {
-    var ic = (playerCount>0?1:0) + Object.keys(addons).length + Object.keys(sponsorSelections).length;
+    var ic = (playerCount>0?1:0) + Object.keys(addons).length;
     lbl.textContent = ic > 1 ? ic + ' items · Total' : 'Total';
   }
 
-  // Show/hide checkout card
   var section = document.getElementById('golfer-checkout-section');
   if (section) section.style.display = total > 0 ? 'block' : 'none';
 
-  // Keep legacy breakdown element if it exists
   var bd = document.getElementById('reg-breakdown');
   if (bd) bd.textContent = '';
 
