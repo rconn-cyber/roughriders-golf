@@ -714,6 +714,20 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
             <input id="sp-addr" type="text" placeholder="123 Main St, Tampa FL 33601">
           </div>
         </div>
+
+        <!-- Logo upload for sponsors -->
+        <div style="margin-top:6px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px;">Logo <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-light)">(optional — for sponsor board &amp; website listing)</span></div>
+          <div id="sp-logo-preview" style="display:none;margin-bottom:8px;display:none;align-items:center;gap:10px;">
+            <img id="sp-logo-img" style="max-height:48px;max-width:160px;border:1px solid rgba(0,0,0,0.1);border-radius:4px;padding:4px;background:#fff;object-fit:contain;" src="" alt="Logo">
+            <button type="button" onclick="clearSpLogo()" style="font-size:12px;background:var(--red-p,#fdf0ef);border:1px solid rgba(176,32,32,0.2);color:var(--red,#b02020);border-radius:4px;padding:4px 10px;cursor:pointer;">Remove</button>
+          </div>
+          <label style="cursor:pointer;">
+            <div id="sp-logo-lbl" style="padding:10px 16px;background:#f4f6f4;border:2px dashed rgba(0,0,0,0.14);border-radius:5px;font-size:13px;color:var(--text-light);transition:all 0.15s;display:inline-block;">📎 Click to upload logo (PNG, JPG, SVG — max 2MB)</div>
+            <input type="file" id="sp-logo-file" accept="image/*" style="display:none;" onchange="handleSpLogoUpload(this)">
+          </label>
+          <input type="hidden" id="sp-logo-data">
+        </div>
       </div>
 
       <!-- Payment options -->
@@ -1299,6 +1313,42 @@ function updateSponsorTotal() {
   updatePayButton();
 }
 
+function handleSpLogoUpload(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { alert('Logo must be under 2MB. Please compress and re-upload.'); input.value=''; return; }
+  var lbl = document.getElementById('sp-logo-lbl');
+  lbl.textContent = '⏳ Reading…';
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('sp-logo-data').value = e.target.result;
+    var img = document.getElementById('sp-logo-img');
+    var preview = document.getElementById('sp-logo-preview');
+    img.src = e.target.result;
+    preview.style.display = 'flex';
+    lbl.textContent = '✓ ' + file.name + ' (' + Math.round(file.size/1024) + 'KB)';
+    lbl.style.borderColor = 'var(--green-light)';
+    lbl.style.color = 'var(--green-light)';
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearSpLogo() {
+  document.getElementById('sp-logo-data').value = '';
+  document.getElementById('sp-logo-img').src = '';
+  document.getElementById('sp-logo-preview').style.display = 'none';
+  document.getElementById('sp-logo-file').value = '';
+  var lbl = document.getElementById('sp-logo-lbl');
+  lbl.textContent = '📎 Click to upload logo (PNG, JPG, SVG — max 2MB)';
+  lbl.style.borderColor = '';
+  lbl.style.color = '';
+}
+
+function getSpLogoData() {
+  var el = document.getElementById('sp-logo-data');
+  return el ? el.value : '';
+}
+
 function prefillSponsorContact() {
   var fields = [['inp-fn','sp-fn'],['inp-ln','sp-ln'],['inp-em','sp-em'],['inp-ph','sp-ph'],['inp-co','sp-co']];
   fields.forEach(function(p){
@@ -1357,6 +1407,7 @@ async function handleSponsorPay() {
     email:     document.getElementById('sp-em').value.trim(),
     phone:     document.getElementById('sp-ph').value.trim(),
     company:   document.getElementById('sp-co').value.trim(),
+    logoData:  getSpLogoData(),
   }];
 
   try {
