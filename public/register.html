@@ -341,17 +341,19 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 </header>
 
 <!-- Sponsor logo strip -->
-<div id="sponsor-logo-strip" style="background:#fff;border-bottom:1px solid rgba(0,0,0,0.07);padding:16px 20px;display:none;">
+<div id="sponsor-logo-strip" style="background:#fff;border-bottom:1px solid rgba(0,0,0,0.07);padding:20px 20px 24px;display:none;">
   <div style="max-width:680px;margin:0 auto;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-light);text-align:center;margin-bottom:12px;">Thank you to our sponsors</div>
-    <div id="sponsor-logos" style="display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;"></div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-light);text-align:center;margin-bottom:14px;">Thank you to our sponsors</div>
+    <div id="sponsor-logos" style="display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;"></div>
   </div>
 </div>
 
+<div style="height:20px;"></div>
+
 <nav class="steps-nav" id="steps-nav">
-  <button class="step-tab active" onclick="goPage(0)">Register to Golf</button>
-  <button class="step-tab"        onclick="goPage(1)">Become a Sponsor</button>
-  <button class="step-tab"        id="confirm-tab" onclick="return false;" style="opacity:0.4;cursor:not-allowed;">Confirmation</button>
+  <button class="step-tab active" onclick="goPage(0)" style="font-size:16px;font-weight:700;padding:16px 12px;">Register to Golf</button>
+  <button class="step-tab"        onclick="goPage(1)" style="font-size:16px;font-weight:700;padding:16px 12px;">Become a Sponsor</button>
+  <button class="step-tab"        id="confirm-tab" onclick="return false;" style="opacity:0.4;cursor:not-allowed;font-size:14px;padding:16px 12px;">Confirmation</button>
 </nav>
 
 <main>
