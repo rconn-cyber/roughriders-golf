@@ -349,9 +349,9 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 </div>
 
 <nav class="steps-nav" id="steps-nav">
-  <button class="step-tab active" onclick="goPage(0)"><span class="step-num">1</span>Register to Golf</button>
-  <button class="step-tab"        onclick="goPage(1)"><span class="step-num">2</span>Become a Sponsor</button>
-  <button class="step-tab"        id="confirm-tab" onclick="return false;" style="opacity:0.4;cursor:not-allowed;"><span class="step-num">3</span>Confirmation</button>
+  <button class="step-tab active" onclick="goPage(0)">Register to Golf</button>
+  <button class="step-tab"        onclick="goPage(1)">Become a Sponsor</button>
+  <button class="step-tab"        id="confirm-tab" onclick="return false;" style="opacity:0.4;cursor:not-allowed;">Confirmation</button>
 </nav>
 
 <main>
@@ -403,8 +403,8 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
           <span>Max 4 per team · $165 per player</span>
         </div>
         <div class="qty-controls">
-          <button class="qty-btn" id="player-minus" onclick="changePlayerCount(-1)" disabled>−</button>
-          <div class="qty-display" id="player-count">0</div>
+          <button class="qty-btn" id="player-minus" onclick="changePlayerCount(-1)">−</button>
+          <div class="qty-display" id="player-count">1</div>
           <button class="qty-btn" id="player-plus" onclick="changePlayerCount(1)">+</button>
         </div>
       </div>
@@ -816,15 +816,15 @@ var MAX_PLAYERS  = 4;
 // ════════════════════════════════
 // REGISTRATION STATE
 // ════════════════════════════════
-var playerCount = 0;
+var playerCount = 1;
 var addons = {}; // { name: price }
 var sponsorSelections = {}; // declared here so hasAnythingOrdered() can reference it
 var holeQty = 1;
 
 function changePlayerCount(delta) {
-  playerCount = Math.min(MAX_PLAYERS, Math.max(0, playerCount + delta));
+  playerCount = Math.min(MAX_PLAYERS, Math.max(1, playerCount + delta));
   document.getElementById('player-count').textContent = playerCount;
-  document.getElementById('player-minus').disabled = playerCount <= 0;
+  document.getElementById('player-minus').disabled = playerCount <= 1;
   document.getElementById('player-plus').disabled  = playerCount >= MAX_PLAYERS;
   renderAdditionalPlayers();
   updateAddonPrices();
