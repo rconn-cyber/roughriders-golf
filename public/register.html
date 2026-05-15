@@ -1434,6 +1434,7 @@ function prefillSponsorContact() {
 
 function validateSponsorContact() {
   var valid = true;
+  var firstErr = null;
   [['sp-fn','spf-fn'],['sp-ln','spf-ln'],['sp-em','spf-em']].forEach(function(pair){
     var inp  = document.getElementById(pair[0]);
     var wrap = document.getElementById(pair[1]);
@@ -1441,9 +1442,9 @@ function validateSponsorContact() {
     var ok = pair[0]==='sp-em' ? /\S+@\S+\.\S+/.test(inp.value) : inp.value.trim().length>0;
     wrap.classList.toggle('has-error', !ok);
     inp.classList.toggle('error', !ok);
-    if (!ok) valid = false;
+    if (!ok) { valid = false; if (!firstErr) firstErr = inp; }
   });
-  if (!valid) document.querySelector('.has-error input')?.scrollIntoView({behavior:'smooth',block:'center'});
+  if (!valid && firstErr) firstErr.scrollIntoView({behavior:'smooth', block:'center'});
   return valid;
 }
 
@@ -1504,11 +1505,16 @@ async function handleSponsorPay() {
 // ════════════════════════════════
 async function handleSponsorInvoice() {
   var sponsorships = Object.values(sponsorSelections).map(function(s){return{name:s.name,price:s.price};});
-  if (!sponsorships.length) return;
+  var errEl = document.getElementById('sp-pay-error');
+  if (!sponsorships.length) {
+    errEl.textContent = 'Please select a sponsorship package above first.';
+    errEl.style.display = 'block';
+    window.scrollTo({top:0,behavior:'smooth'});
+    return;
+  }
   if (!validateSponsorContact()) return;
 
-  var btn   = document.getElementById('sp-invoice-btn');
-  var errEl = document.getElementById('sp-pay-error');
+  var btn = document.getElementById('sp-invoice-btn');
   errEl.style.display='none';
   btn.disabled=true; btn.textContent='Creating invoice…';
 
@@ -1519,8 +1525,11 @@ async function handleSponsorInvoice() {
         firstName: document.getElementById('sp-fn').value.trim(),
         lastName:  document.getElementById('sp-ln').value.trim(),
         email:     document.getElementById('sp-em').value.trim(),
-        phone:     document.getElementById('sp-ph').value.trim(),
-        company:   document.getElementById('sp-co').value.trim(),
+        phone:     document.getElementById('sp-ph') ? document.getElementById('sp-ph').value.trim() : '',
+        company:   document.getElementById('sp-co') ? document.getElementById('sp-co').value.trim() : '',
+        website:   document.getElementById('sp-web') ? document.getElementById('sp-web').value.trim() : '',
+        address:   document.getElementById('sp-addr') ? document.getElementById('sp-addr').value.trim() : '',
+        logoData:  getSpLogoData(),
         sponsorships,
       }),
     });
@@ -1533,7 +1542,7 @@ async function handleSponsorInvoice() {
   } catch(err) {
     errEl.textContent='Error: '+err.message+'. Please try again or contact us.';
     errEl.style.display='block';
-    btn.disabled=false; btn.textContent='📄 Request an Invoice';
+    btn.disabled=false; btn.textContent='📄 Request an Invoice · or pay by check';
   }
 }
 
