@@ -68,11 +68,15 @@ const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin'
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type,Authorization', 'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE' }, body: '' };
-  if (!auth(event)) return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
 
-  const store    = getBlobStore();
   const resource = (event.queryStringParameters || {}).resource;
   const id       = (event.queryStringParameters || {}).id;
+
+  // Allow public read of sponsors (for logo strip on register page) — no auth required
+  const isPublicRead = event.httpMethod === 'GET' && resource === 'sponsors';
+  if (!isPublicRead && !auth(event)) return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
+
+  const store = getBlobStore();
 
   try {
     if (event.httpMethod === 'GET') {
