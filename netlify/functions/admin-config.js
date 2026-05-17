@@ -8,7 +8,7 @@
 
 import { getStore } from '@netlify/blobs';
 
-const ADMIN_KEY  = process.env.ADMIN_KEY || 'bullyjudge';
+const ADMIN_KEY = process.env.ADMIN_KEY;
 const BLOB_STORE = 'golf-config';
 const BLOB_KEY   = 'sponsor-config';
 
