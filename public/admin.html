@@ -777,7 +777,9 @@ var _jwt = null;    // JWT from admin-login, used for admin-data
 // ════════════════════════════════
 async function doLogin() {
   var pw = document.getElementById('login-pw').value;
+  var errEl = document.getElementById('login-err');
   var btn = document.querySelector('.btn-login');
+  errEl.style.display = 'none';
   btn.textContent = 'Signing in…'; btn.disabled = true;
   try {
     var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-login', {
@@ -785,15 +787,18 @@ async function doLogin() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password: pw })
     });
-    var data = await res.json();
-    if (!res.ok || !data.token) throw new Error('bad password');
+    var rawText = await res.text();
+    var data;
+    try { data = JSON.parse(rawText); } catch(pe) { throw new Error('Non-JSON response ('+res.status+'): '+rawText.slice(0,120)); }
+    if (!res.ok || !data.token) throw new Error('Status '+res.status+': '+(data.error||JSON.stringify(data)));
     _jwt = data.token;
-    ADMIN_KEY = pw; // also used for admin-config x-admin-key
+    ADMIN_KEY = pw;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     initApp();
   } catch(e) {
-    document.getElementById('login-err').style.display = 'block';
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
     document.getElementById('login-pw').value = '';
     document.getElementById('login-pw').focus();
   } finally {
