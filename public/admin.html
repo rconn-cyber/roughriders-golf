@@ -1013,8 +1013,8 @@ function renderRegistrations(orders){
       '<td><span class="status-pill status-'+escH(status)+'">'+escH(status)+'</span></td>'+
       '<td>'+escH(date)+'</td>'+
       '<td style="white-space:nowrap;">'+
-        '<button class="btn btn-outline btn-sm" onclick="openEditEntry('registration','+idx+')">✏ Edit</button> '+
-        '<button class="btn btn-danger btn-sm" onclick="deleteEntry('registrations',''+escH(r.id||'')+'','+idx+')">✕</button>'+
+        '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'registration\','+idx+')">✏ Edit</button> '+
+        '<button class="btn btn-danger btn-sm" onclick="deleteEntry(\'registrations\',\''+escH(r.id||'')+'\','+idx+')">✕</button>'+
       '</td>'+
     '</tr>';
   }).join('');
@@ -1061,8 +1061,8 @@ function renderSponsors(sponsors){
       '<td>'+inv+'</td>'+
       '<td>'+escH(date)+'</td>'+
       '<td style="white-space:nowrap;">'+
-        '<button class="btn btn-outline btn-sm" onclick="openEditEntry('sponsor','+idx+')">✏ Edit</button> '+
-        '<button class="btn btn-danger btn-sm" onclick="deleteEntry('sponsors',''+escH(s.id||'')+'','+idx+')">✕</button>'+
+        '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'sponsor\','+idx+')">✏ Edit</button> '+
+        '<button class="btn btn-danger btn-sm" onclick="deleteEntry(\'sponsors\',\''+escH(s.id||'')+'\','+idx+')">✕</button>'+
       '</td>'+
     '</tr>';
   }).join('');
