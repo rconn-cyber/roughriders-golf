@@ -825,6 +825,50 @@ var addons = {}; // { name: price }
 var sponsorSelections = {}; // declared here so hasAnythingOrdered() can reference it
 var holeQty = 1;
 
+
+// ════════════════════════════════
+// REG TYPE: INDIVIDUAL vs TEAM
+// ════════════════════════════════
+var regType = 'individual';
+
+function setRegType(type) {
+  regType = type;
+  var indBtn  = document.getElementById('reg-type-individual');
+  var teamBtn = document.getElementById('reg-type-team');
+  var indRow  = document.getElementById('individual-qty-row');
+  var teamRow = document.getElementById('team-row');
+
+  if (type === 'team') {
+    indBtn.style.background  = '#f4f6f4'; indBtn.style.color = '#555';
+    teamBtn.style.background = '#0f2318'; teamBtn.style.color = '#fff';
+    if (indRow)  indRow.style.display  = 'none';
+    if (teamRow) teamRow.style.display = 'block';
+    playerCount = 4;
+    document.getElementById('player-count').textContent = '4';
+    var minus = document.getElementById('player-minus');
+    var plus  = document.getElementById('player-plus');
+    if (minus) minus.disabled = true;
+    if (plus)  plus.disabled  = true;
+    renderAdditionalPlayers();
+    updateAddonPrices();
+  } else {
+    indBtn.style.background  = '#0f2318'; indBtn.style.color = '#fff';
+    teamBtn.style.background = '#f4f6f4'; teamBtn.style.color = '#555';
+    if (indRow)  indRow.style.display  = 'block';
+    if (teamRow) teamRow.style.display = 'none';
+    playerCount = 1;
+    document.getElementById('player-count').textContent = '1';
+    var minus = document.getElementById('player-minus');
+    var plus  = document.getElementById('player-plus');
+    if (minus) { minus.disabled = true; }
+    if (plus)  { plus.disabled  = false; }
+    renderAdditionalPlayers();
+    updateAddonPrices();
+  }
+  updateRegTotal();
+  updatePayButton();
+}
+
 function changePlayerCount(delta) {
   playerCount = Math.min(MAX_PLAYERS, Math.max(1, playerCount + delta));
   document.getElementById('player-count').textContent = playerCount;
