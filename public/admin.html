@@ -273,7 +273,7 @@ tr:hover td { background: #f8faf8; }
           <div class="card-body" style="padding:0;">
             <div class="tbl-wrap">
               <table id="reg-table">
-                <thead><tr><th>Name</th><th>Email</th><th>Players</th><th>Add-ons</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+                <thead><tr><th>Name</th><th>Email</th><th>Players</th><th>Add-ons</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead>
                 <tbody id="reg-tbody"><tr><td colspan="7" class="empty-table"><div class="empty-icon">🏌️</div>Loading registrations…</td></tr></tbody>
               </table>
             </div>
@@ -304,7 +304,7 @@ tr:hover td { background: #f8faf8; }
           <div class="card-body" style="padding:0;">
             <div class="tbl-wrap">
               <table id="sponsor-table">
-                <thead><tr><th>Company / Name</th><th>Email</th><th>Package</th><th>Amount</th><th>Status</th><th>Invoice</th><th>Date</th></tr></thead>
+                <thead><tr><th>Company / Name</th><th>Email</th><th>Package</th><th>Amount</th><th>Status</th><th>Invoice</th><th>Date</th><th></th></tr></thead>
                 <tbody id="sponsor-tbody"><tr><td colspan="7" class="empty-table"><div class="empty-icon">🤝</div>Loading sponsors…</td></tr></tbody>
               </table>
             </div>
@@ -361,6 +361,121 @@ tr:hover td { background: #f8faf8; }
   </div>
 </div>
 
+
+<!-- EDIT ENTRY MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal-box" style="max-width:580px;">
+    <div class="modal-header">
+      <span class="modal-title" id="edit-modal-title">Edit Entry</span>
+      <button class="modal-close" onclick="closeEditModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- REGISTRATION edit fields -->
+      <div id="em-reg-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input class="form-input" id="em-fn" type="text" maxlength="40">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name *</label>
+            <input class="form-input" id="em-ln" type="text" maxlength="40">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" id="em-email" type="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input class="form-input" id="em-phone" type="tel">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Player Count</label>
+            <input class="form-input" id="em-players" type="number" min="1" max="4">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount ($)</label>
+            <input class="form-input" id="em-amount" type="number" min="0" step="5">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Add-ons <span>(edit as comma-separated list)</span></label>
+          <input class="form-input" id="em-addons-text" type="text" placeholder="Super Ticket, Mulligan Pack">
+          <div class="form-hint">Current add-ons shown as text — edit freely.</div>
+        </div>
+      </div>
+
+      <!-- SPONSOR edit fields -->
+      <div id="em-sp-section" style="display:none;">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input class="form-input" id="em-sp-fn" type="text" maxlength="40">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-input" id="em-sp-ln" type="text" maxlength="40">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" id="em-sp-email" type="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company</label>
+            <input class="form-input" id="em-sp-company" type="text" maxlength="80">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Package <span>(edit as text)</span></label>
+            <input class="form-input" id="em-sp-package" type="text" placeholder="Gold Sponsor, VIP Tent">
+            <div class="form-hint">Current sponsorships shown as text — edit freely.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount ($)</label>
+            <input class="form-input" id="em-sp-amount" type="number" min="0" step="50">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Website</label>
+          <input class="form-input" id="em-sp-website" type="url" placeholder="https://example.com">
+        </div>
+      </div>
+
+      <!-- Shared fields -->
+      <div class="form-row" style="margin-top:14px;">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="em-status">
+            <option value="paid">Paid</option>
+            <option value="comped">Comped</option>
+            <option value="in-kind">In-Kind</option>
+            <option value="pending">Pending (check)</option>
+            <option value="cash">Cash</option>
+            <option value="invoiced">Invoiced</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input class="form-input" id="em-notes" type="text" placeholder="Check #, in-kind desc, etc." maxlength="120">
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-primary" id="em-save-btn" onclick="saveEditEntry()">Save Changes</button>
+    </div>
+  </div>
+</div>
 
 <!-- MANUAL ENTRY MODAL -->
 <div class="modal-overlay" id="manual-modal">
@@ -866,24 +981,40 @@ async function loadOrders(){
   }
 }
 
+var _loadedRegs = [];
+var _loadedSponsors = [];
+
 function renderRegistrations(orders){
-  var regs = orders.filter(function(o){ return o.type === 'registration' || o.golfers; });
+  _loadedRegs = orders.filter(function(o){ return o.type === 'registration' || o.golfers; });
   var tbody = document.getElementById('reg-tbody');
-  if (!regs.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-table"><div class="empty-icon">🏌️</div>No registrations yet</td></tr>';
-    updateRegStats(regs); return;
+  if (!_loadedRegs.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-table"><div class="empty-icon">🏌️</div>No registrations yet</td></tr>';
+    updateRegStats(_loadedRegs); return;
   }
-  tbody.innerHTML = regs.map(function(r){
+  tbody.innerHTML = _loadedRegs.map(function(r, idx){
     var name = (r.firstName||'') + ' ' + (r.lastName||'');
     var players = r.playerCount || (r.golfers && r.golfers.length) || 1;
     var addons = (r.addons||[]).map(function(a){return a.name||a;}).join(', ') || '—';
     var amt = r.amount ? fmtMoney(r.amount/100) : (r.total ? fmtMoney(r.total) : '—');
     var status = r.status || r.paymentStatus || 'paid';
     var date = r.created ? new Date(r.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.date || '—');
-    return '<tr><td><strong>'+escH(name.trim()||'—')+'</strong></td><td>'+escH(r.email||'—')+'</td><td>'+players+'</td><td style="font-size:11px;color:var(--tl)">'+escH(addons)+'</td><td>'+amt+'</td><td><span class="status-pill status-'+escH(status)+'">'+escH(status)+'</span></td><td>'+escH(date)+'</td></tr>';
+    var src = r.source === 'manual' ? ' <span style="font-size:9px;background:#f0f2ef;color:var(--tl);padding:1px 5px;border-radius:3px;vertical-align:middle;">manual</span>' : '';
+    return '<tr>'+
+      '<td><strong>'+escH(name.trim()||'—')+'</strong>'+src+'</td>'+
+      '<td>'+escH(r.email||'—')+'</td>'+
+      '<td>'+players+'</td>'+
+      '<td style="font-size:11px;color:var(--tl)">'+escH(addons)+'</td>'+
+      '<td>'+amt+'</td>'+
+      '<td><span class="status-pill status-'+escH(status)+'">'+escH(status)+'</span></td>'+
+      '<td>'+escH(date)+'</td>'+
+      '<td style="white-space:nowrap;">'+
+        '<button class="btn btn-outline btn-sm" onclick="openEditEntry('registration','+idx+')">✏ Edit</button> '+
+        '<button class="btn btn-danger btn-sm" onclick="deleteEntry('registrations',''+escH(r.id||'')+'','+idx+')">✕</button>'+
+      '</td>'+
+    '</tr>';
   }).join('');
-  updateRegStats(regs);
-  document.getElementById('cnt-regs').textContent = regs.length;
+  updateRegStats(_loadedRegs);
+  document.getElementById('cnt-regs').textContent = _loadedRegs.length;
 }
 
 function updateRegStats(regs){
@@ -902,19 +1033,33 @@ function updateRegStats(regs){
 }
 
 function renderSponsors(sponsors){
+  _loadedSponsors = sponsors;
   var tbody = document.getElementById('sponsor-tbody');
   if (!sponsors.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="empty-table"><div class="empty-icon">🤝</div>No sponsor submissions yet</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-table"><div class="empty-icon">🤝</div>No sponsor submissions yet</td></tr>';
     updateSponsorStats(sponsors); return;
   }
-  tbody.innerHTML = sponsors.map(function(s){
+  tbody.innerHTML = sponsors.map(function(s, idx){
     var name = s.company || ((s.firstName||'') + ' ' + (s.lastName||'')).trim() || '—';
     var pkg = (s.sponsorships||[]).map(function(x){return x.name||x;}).join(', ') || s.package || '—';
     var amt = s.amount ? fmtMoney(s.amount/100) : (s.total ? fmtMoney(s.total) : '—');
     var status = s.status || s.paymentStatus || 'paid';
     var inv = s.invoiceUrl ? '<a href="'+escH(s.invoiceUrl)+'" target="_blank" style="color:var(--gl);font-size:11px;">View</a>' : '—';
     var date = s.created ? new Date(s.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (s.date||'—');
-    return '<tr><td><strong>'+escH(name)+'</strong></td><td>'+escH(s.email||'—')+'</td><td style="font-size:11px">'+escH(pkg)+'</td><td>'+amt+'</td><td><span class="status-pill status-'+escH(status)+'">'+escH(status)+'</span></td><td>'+inv+'</td><td>'+escH(date)+'</td></tr>';
+    var src = s.source === 'manual' ? ' <span style="font-size:9px;background:#f0f2ef;color:var(--tl);padding:1px 5px;border-radius:3px;vertical-align:middle;">manual</span>' : '';
+    return '<tr>'+
+      '<td><strong>'+escH(name)+'</strong>'+src+'</td>'+
+      '<td>'+escH(s.email||'—')+'</td>'+
+      '<td style="font-size:11px">'+escH(pkg)+'</td>'+
+      '<td>'+amt+'</td>'+
+      '<td><span class="status-pill status-'+escH(status)+'">'+escH(status)+'</span></td>'+
+      '<td>'+inv+'</td>'+
+      '<td>'+escH(date)+'</td>'+
+      '<td style="white-space:nowrap;">'+
+        '<button class="btn btn-outline btn-sm" onclick="openEditEntry('sponsor','+idx+')">✏ Edit</button> '+
+        '<button class="btn btn-danger btn-sm" onclick="deleteEntry('sponsors',''+escH(s.id||'')+'','+idx+')">✕</button>'+
+      '</td>'+
+    '</tr>';
   }).join('');
   updateSponsorStats(sponsors);
   document.getElementById('cnt-sponsors').textContent = sponsors.length;
@@ -1254,6 +1399,204 @@ document.querySelectorAll('.modal-overlay').forEach(function(ov){
   ov.addEventListener('click', function(e){ if(e.target===ov) ov.classList.remove('open'); });
 });
 
+
+
+// ════════════════════════════════
+// EDIT / DELETE ENTRIES
+// ════════════════════════════════
+var _editType  = null; // 'registration' | 'sponsor'
+var _editIdx   = null; // index in _loadedRegs / _loadedSponsors
+var _editRecord = null; // full record object
+
+function openEditEntry(type, idx) {
+  _editType   = type;
+  _editIdx    = idx;
+  _editRecord = type === 'registration' ? _loadedRegs[idx] : _loadedSponsors[idx];
+  if (!_editRecord) return;
+
+  var r = _editRecord;
+  document.getElementById('edit-modal-title').textContent =
+    type === 'registration' ? 'Edit Golfer Entry' : 'Edit Sponsor Entry';
+
+  // Show correct section
+  document.getElementById('em-reg-section').style.display = type === 'registration' ? '' : 'none';
+  document.getElementById('em-sp-section').style.display  = type === 'sponsor'       ? '' : 'none';
+
+  if (type === 'registration') {
+    document.getElementById('em-fn').value      = r.firstName || '';
+    document.getElementById('em-ln').value      = r.lastName  || '';
+    document.getElementById('em-email').value   = r.email     || '';
+    document.getElementById('em-phone').value   = r.phone     || '';
+    document.getElementById('em-players').value = r.playerCount || (r.golfers && r.golfers.length) || 1;
+    document.getElementById('em-amount').value  = r.total || (r.amount ? r.amount/100 : '');
+    var addonNames = (r.addons||[]).map(function(a){return a.name||a;}).join(', ');
+    document.getElementById('em-addons-text').value = addonNames;
+  } else {
+    document.getElementById('em-sp-fn').value      = r.firstName || '';
+    document.getElementById('em-sp-ln').value      = r.lastName  || '';
+    document.getElementById('em-sp-email').value   = r.email     || '';
+    document.getElementById('em-sp-company').value = r.company   || '';
+    document.getElementById('em-sp-website').value = r.website   || '';
+    var pkgNames = (r.sponsorships||[]).map(function(x){return x.name||x;}).join(', ') || r.package || '';
+    document.getElementById('em-sp-package').value = pkgNames;
+    document.getElementById('em-sp-amount').value  = r.total || (r.amount ? r.amount/100 : '');
+  }
+
+  // Shared
+  var status = r.status || r.paymentStatus || 'paid';
+  document.getElementById('em-status').value = status;
+  document.getElementById('em-notes').value  = r.notes || '';
+
+  document.getElementById('edit-modal').classList.add('open');
+  setTimeout(function(){
+    var f = type === 'registration' ? document.getElementById('em-fn') : document.getElementById('em-sp-fn');
+    if(f) f.focus();
+  }, 40);
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  _editRecord = null; _editType = null; _editIdx = null;
+}
+
+async function saveEditEntry() {
+  if (!_editRecord || !_jwt) return;
+  var btn = document.getElementById('em-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    var updated = Object.assign({}, _editRecord); // copy all original fields
+    var status  = document.getElementById('em-status').value;
+    var notes   = document.getElementById('em-notes').value.trim();
+
+    if (_editType === 'registration') {
+      var amount = parseFloat(document.getElementById('em-amount').value) || 0;
+      var addonText = document.getElementById('em-addons-text').value.trim();
+      var addons = addonText ? addonText.split(',').map(function(s){return {name:s.trim()};}).filter(function(a){return a.name;}) : [];
+      var players = parseInt(document.getElementById('em-players').value)||1;
+      Object.assign(updated, {
+        firstName:   document.getElementById('em-fn').value.trim(),
+        lastName:    document.getElementById('em-ln').value.trim(),
+        email:       document.getElementById('em-email').value.trim(),
+        phone:       document.getElementById('em-phone').value.trim(),
+        playerCount: players,
+        addons:      addons,
+        total:       amount,
+        status:      status,
+        notes:       notes,
+        updatedAt:   new Date().toISOString(),
+      });
+      // Update primary golfer in golfers array too
+      if (updated.golfers && updated.golfers.length > 0) {
+        updated.golfers[0].firstName = updated.firstName;
+        updated.golfers[0].lastName  = updated.lastName;
+        updated.golfers[0].email     = updated.email;
+        updated.golfers[0].phone     = updated.phone;
+      }
+    } else {
+      var spAmount = parseFloat(document.getElementById('em-sp-amount').value) || 0;
+      var pkgText = document.getElementById('em-sp-package').value.trim();
+      var sponsorships = pkgText ? pkgText.split(',').map(function(s){return {name:s.trim()};}).filter(function(x){return x.name;}) : [];
+      Object.assign(updated, {
+        firstName:    document.getElementById('em-sp-fn').value.trim(),
+        lastName:     document.getElementById('em-sp-ln').value.trim(),
+        email:        document.getElementById('em-sp-email').value.trim(),
+        company:      document.getElementById('em-sp-company').value.trim(),
+        website:      document.getElementById('em-sp-website').value.trim(),
+        sponsorships: sponsorships,
+        package:      pkgText,
+        total:        spAmount,
+        amount:       spAmount * 100,
+        status:       status,
+        notes:        notes,
+        updatedAt:    new Date().toISOString(),
+      });
+    }
+
+    var resource = _editType === 'registration' ? 'registrations' : 'sponsors';
+
+    // admin-data PUT replaces the full resource array, so we need to fetch, splice, PUT
+    var authHdr = { 'Authorization': 'Bearer ' + _jwt };
+    var fetchRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, { headers: authHdr });
+    var all = fetchRes.ok ? await fetchRes.json() : [];
+    if (!Array.isArray(all)) all = all.items || [];
+
+    // Find by id, fall back to index
+    var found = false;
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].id && updated.id && all[i].id === updated.id) {
+        all[i] = updated; found = true; break;
+      }
+    }
+    if (!found) {
+      // No ID match — replace by position in loaded array
+      var loadedArr = _editType === 'registration' ? _loadedRegs : _loadedSponsors;
+      var origRecord = loadedArr[_editIdx];
+      for (var j = 0; j < all.length; j++) {
+        if (all[j].createdAt && origRecord.createdAt && all[j].createdAt === origRecord.createdAt) {
+          all[j] = updated; found = true; break;
+        }
+      }
+      if (!found) all[_editIdx] = updated; // last resort: positional
+    }
+
+    var putRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, {
+      method: 'PUT',
+      headers: Object.assign({'Content-Type':'application/json'}, authHdr),
+      body: JSON.stringify(all),
+    });
+    if (!putRes.ok) throw new Error('HTTP ' + putRes.status);
+
+    closeEditModal();
+    loadOrders();
+    toast('Entry updated ✓');
+  } catch(e) {
+    toast('Save failed: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Changes';
+  }
+}
+
+async function deleteEntry(resource, id, idx) {
+  var label = resource === 'registrations' ? 'this registration' : 'this sponsor entry';
+  if (!confirm('Delete ' + label + '? This cannot be undone.')) return;
+  if (!_jwt) { toast('Not authenticated'); return; }
+
+  try {
+    var authHdr = { 'Authorization': 'Bearer ' + _jwt };
+
+    if (id) {
+      // admin-data DELETE by id
+      var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource+'&id='+encodeURIComponent(id), {
+        method: 'DELETE',
+        headers: authHdr,
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+    } else {
+      // No id — fetch all, remove by index, PUT back
+      var fetchRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, { headers: authHdr });
+      var all = fetchRes.ok ? await fetchRes.json() : [];
+      if (!Array.isArray(all)) all = all.items || [];
+      var loadedArr = resource === 'registrations' ? _loadedRegs : _loadedSponsors;
+      var origRecord = loadedArr[idx];
+      all = all.filter(function(r){
+        if (r.createdAt && origRecord.createdAt) return r.createdAt !== origRecord.createdAt;
+        return true;
+      });
+      var putRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, {
+        method: 'PUT',
+        headers: Object.assign({'Content-Type':'application/json'}, authHdr),
+        body: JSON.stringify(all),
+      });
+      if (!putRes.ok) throw new Error('HTTP ' + putRes.status);
+    }
+
+    loadOrders();
+    toast('Entry deleted');
+  } catch(e) {
+    toast('Delete failed: ' + e.message);
+  }
+}
 
 // ════════════════════════════════
 // MANUAL ENTRY
