@@ -3,916 +3,1145 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rough Riders Golf — Admin</title>
+<title>RR Golf — Admin Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --gd:#0f2318;--gm:#1e4a2c;--gl:#2d7a4a;--gp:#c8e6d0;
-  --gold:#b8940e;--gold-l:#e8c040;
-  --bg:#f0f2f0;--white:#fff;
-  --td:#0a0a08;--tm:#2a2a26;--tl:#555550;
-  --border:rgba(0,0,0,0.1);--red:#b02020;--red-p:#fdf0ef;
-  --sh:0 1px 4px rgba(0,0,0,0.08);
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green-dark: #0f2318; --green-mid: #1e4a2c; --green-light: #2d7a4a;
+  --green-pale: #c8e6d0; --gold: #b8940e; --gold-light: #e8c040;
+  --cream: #f8f4ed; --white: #ffffff;
+  --text-dark: #0a0a08; --text-mid: #2a2a26; --text-light: #555550;
+  --silver: #6a7478; --bronze: #8a5520; --red: #b02020;
+  --border: rgba(0,0,0,0.12);
+  --sidebar-w: 220px;
 }
-html{font-size:15px}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--td);min-height:100vh}
+html { font-size: 16px; }
+body { font-family: 'DM Sans', sans-serif; background: #f0f2ef; color: var(--text-dark); line-height: 1.5; min-height: 100vh; }
 
-/* LOGIN */
-#login{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--gd)}
-.lc{background:var(--white);border-radius:10px;padding:44px 40px;width:100%;max-width:380px;box-shadow:0 16px 48px rgba(0,0,0,0.3)}
-.lc h2{font-family:'Playfair Display',serif;font-size:22px;color:var(--gd);margin-bottom:4px}
-.lc p{font-size:13px;color:var(--tl);margin-bottom:28px}
-.fl{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
-.fl label{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tm)}
-.fi{width:100%;padding:11px 13px;border:2px solid rgba(0,0,0,.14);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .15s}
-.fi:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(45,122,74,.12)}
-.lb{width:100%;padding:13px;border:none;border-radius:5px;background:var(--gd);color:var(--white);font-family:'Playfair Display',serif;font-size:16px;font-weight:700;cursor:pointer;transition:background .18s}
-.lb:hover{background:var(--gm)}
-.lb:disabled{opacity:.5;cursor:not-allowed}
-.le{font-size:12.5px;color:var(--red);background:var(--red-p);border-radius:4px;padding:8px 12px;margin-bottom:14px;display:none}
+/* ── LOGIN ── */
+#login-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: var(--green-dark);
+}
+.login-box {
+  background: var(--white); border-radius: 10px; padding: 48px 40px;
+  max-width: 360px; width: 92%; text-align: center;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+}
+.login-logo { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--green-dark); margin-bottom: 4px; }
+.login-sub { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-light); margin-bottom: 32px; }
+.login-box input[type="password"] {
+  width: 100%; padding: 13px 16px; border: 2px solid var(--border); border-radius: 6px;
+  font-family: 'DM Sans', sans-serif; font-size: 16px; outline: none;
+  transition: border-color 0.15s; text-align: center; letter-spacing: 0.12em;
+  margin-bottom: 12px;
+}
+.login-box input:focus { border-color: var(--green-light); }
+.btn-login {
+  width: 100%; padding: 14px; background: var(--green-dark); color: #fff;
+  border: none; border-radius: 6px; font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-login:hover { background: var(--green-mid); }
+#login-err { font-size: 13px; color: var(--red); margin-top: 10px; display: none; }
 
-/* APP */
-#app{display:none}
-.tb{background:var(--gd);height:56px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.tb-brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;color:var(--white)}
-.tb-brand span{color:var(--gold-l)}
-.tb-r{display:flex;align-items:center;gap:10px}
-.tb-btn{background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.65);cursor:pointer;font-size:12px;padding:5px 12px;border-radius:3px;font-family:'DM Sans',sans-serif;transition:all .15s}
-.tb-btn:hover{border-color:rgba(255,255,255,.5);color:var(--white)}
+/* ── APP SHELL ── */
+#app { display: none; min-height: 100vh; }
 
-.wrap{max-width:1200px;margin:0 auto;padding:24px 20px 80px}
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--green-dark); padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+.topbar-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--white); }
+.topbar-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-left: 12px; letter-spacing: 0.08em; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.topbar-badge { font-size: 11px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); padding: 4px 10px; border-radius: 20px; }
+.btn-logout { font-size: 12px; color: rgba(255,255,255,0.45); background: none; border: 1px solid rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.btn-logout:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
 
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
-.st{background:var(--white);border-radius:6px;padding:16px 18px;box-shadow:var(--sh);border-left:4px solid var(--gl)}
-.st.gld{border-left-color:var(--gold)}
-.st.blu{border-left-color:#1a4a8a}
-.st.drk{border-left-color:var(--gd)}
-.sv{font-family:'Playfair Display',serif;font-size:30px;font-weight:900;color:var(--gd);line-height:1}
-.sv.gld{color:var(--gold)}
-.sl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tl);margin-top:4px}
+/* ── LAYOUT ── */
+.app-body { display: flex; }
+.sidebar {
+  width: var(--sidebar-w); background: var(--white); border-right: 1px solid var(--border);
+  min-height: calc(100vh - 56px); padding: 20px 0; flex-shrink: 0;
+  position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto;
+}
+.sidebar-section { padding: 0 12px; margin-bottom: 6px; }
+.sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-light); padding: 10px 12px 6px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 6px;
+  cursor: pointer; font-size: 13.5px; font-weight: 500; color: var(--text-mid);
+  transition: all 0.15s; margin-bottom: 2px;
+}
+.nav-item:hover { background: #f0f4f0; color: var(--green-dark); }
+.nav-item.active { background: var(--green-pale); color: var(--green-dark); font-weight: 700; }
+.nav-icon { font-size: 15px; flex-shrink: 0; width: 20px; text-align: center; }
+.nav-count { margin-left: auto; font-size: 11px; background: var(--green-dark); color: #fff; border-radius: 10px; padding: 2px 7px; font-weight: 700; }
 
-/* TABS */
-.tnav{display:flex;gap:2px;background:var(--white);border-radius:6px;padding:4px;box-shadow:var(--sh);margin-bottom:20px;width:fit-content;flex-wrap:wrap}
-.tbtn{padding:8px 18px;border:none;border-radius:4px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--tl);transition:all .15s;white-space:nowrap}
-.tbtn.on{background:var(--gd);color:var(--white)}
+.main-content { flex: 1; padding: 28px; min-width: 0; }
 
-/* TOOLBAR */
-.tbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-.si{padding:9px 13px;border:2px solid rgba(0,0,0,.1);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:220px;transition:border-color .15s}
-.si:focus{border-color:var(--gl)}
-.sel{padding:9px 12px;border:2px solid rgba(0,0,0,.1);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--white);cursor:pointer}
-.btn{padding:9px 16px;border:none;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
-.btn-p{background:var(--gd);color:var(--white)}.btn-p:hover{background:var(--gm)}
-.btn-s{background:var(--white);color:var(--tm);border:2px solid rgba(0,0,0,.1)}.btn-s:hover{border-color:var(--gl);color:var(--gd)}
-.btn-d{background:var(--red-p);color:var(--red);border:2px solid rgba(176,32,32,.15)}.btn-d:hover{background:#fbe0e0}
-.btn-g{background:var(--gold);color:var(--white)}.btn-g:hover{background:#9a7a08}
-.sm{padding:5px 10px!important;font-size:12px!important}
-.ml{margin-left:auto}
+/* ── PANELS ── */
+.panel { display: none; }
+.panel.active { display: block; }
 
-/* TABLE */
-.tw{background:var(--white);border-radius:8px;box-shadow:var(--sh);overflow:hidden}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-thead{background:#f6faf6}
-th{padding:11px 14px;text-align:left;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tl);border-bottom:2px solid rgba(0,0,0,.06);white-space:nowrap}
-td{padding:12px 14px;border-bottom:1px solid rgba(0,0,0,.04);vertical-align:top}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:#f8fbf8}
-.ac{display:flex;gap:6px;flex-wrap:wrap}
+/* ── PAGE HEADER ── */
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
+.page-header-left h1 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; color: var(--green-dark); }
+.page-header-left p { font-size: 13px; color: var(--text-light); margin-top: 3px; }
 
-/* BADGES */
-.bd{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
-.bd-paid{background:#d4edda;color:#145a24}
-.bd-inv{background:#fff3cd;color:#856404}
-.bd-comp{background:#d4e8d8;color:var(--gd)}
-.bd-pend{background:#e8e8e8;color:#555}
-.bd-title{background:#dce8fa;color:#1a4a8a}
-.bd-gold{background:#faeeda;color:#7a5000}
-.bd-silver{background:#e8e9ea;color:#3a4a50}
-.bd-bronze{background:#f8e5d4;color:#6a2800}
-.bd-hole{background:#d4e8d8;color:var(--gd)}
+/* ── BUTTONS ── */
+.btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border: none; border-radius: 5px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; letter-spacing: 0.03em; }
+.btn-primary { background: var(--green-dark); color: #fff; }
+.btn-primary:hover { background: var(--green-mid); }
+.btn-gold { background: var(--gold); color: #fff; }
+.btn-gold:hover { background: #9a7a08; }
+.btn-outline { background: var(--white); color: var(--text-mid); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--green-light); color: var(--green-dark); }
+.btn-danger { background: #fdf0ef; color: var(--red); border: 1.5px solid rgba(176,32,32,0.2); }
+.btn-danger:hover { background: var(--red); color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-xs { padding: 4px 9px; font-size: 11px; }
 
-/* MODAL */
-.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;overflow-y:auto}
-.mo.open{display:flex}
-.mc{background:var(--white);border-radius:10px;padding:32px;max-width:600px;width:92%;margin:20px auto;box-shadow:0 20px 60px rgba(0,0,0,.25);max-height:90vh;overflow-y:auto}
-.mc h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--gd);margin-bottom:20px}
-.mg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.mg1{grid-template-columns:1fr}
-.mfl{display:flex;flex-direction:column;gap:5px}
-.mfl label{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tm)}
-.mfi,.mfs,.mft{padding:10px 12px;border:2px solid rgba(0,0,0,.12);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--td);background:var(--white);outline:none;transition:border-color .15s;width:100%}
-.mfi:focus,.mfs:focus,.mft:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(45,122,74,.12)}
-.mft{resize:vertical;min-height:70px}
-.mfoot{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid rgba(0,0,0,.06)}
+/* ── CARDS ── */
+.card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; }
+.card-header { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.card-header h2 { font-size: 14px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green-dark); }
+.card-body { padding: 22px; }
 
-/* PLAYER ROWS */
-.prows{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-.prow{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;align-items:end;background:#f4f6f4;border-radius:5px;padding:8px}
-.prow-lbl{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tl);margin-bottom:3px}
-.prow-inp{width:100%;padding:6px 8px;border:1px solid rgba(0,0,0,.12);border-radius:4px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
-.prow-inp:focus{border-color:var(--gl)}
-.add-prow{border:2px dashed rgba(0,0,0,.1);border-radius:5px;padding:10px;text-align:center;cursor:pointer;font-size:13px;color:var(--tl);transition:all .15s;background:none;width:100%}
-.add-prow:hover{border-color:var(--gl);color:var(--gd)}
-.del-btn{padding:6px 10px;background:var(--red-p);border:none;border-radius:4px;color:var(--red);cursor:pointer;font-size:14px;line-height:1;align-self:end}
+/* ════════════════════════════════
+   SPONSOR LEVEL BUILDER
+   ════════════════════════════════ */
 
-/* SETTINGS */
-.ss{background:var(--white);border-radius:8px;padding:24px;box-shadow:var(--sh);margin-bottom:16px}
-.ss h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--gd);margin-bottom:14px}
-.arow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,.05)}
-.arow:last-child{border-bottom:none}
-.aname{font-weight:600;font-size:14px;min-width:150px}
-.aemail{font-size:13px;color:var(--tm);flex:1}
-.tog{position:relative;width:40px;height:22px;flex-shrink:0}
-.tog input{opacity:0;width:0;height:0}
-.tsl{position:absolute;inset:0;background:rgba(0,0,0,.15);border-radius:22px;cursor:pointer;transition:background .2s}
-.tsl:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:white;border-radius:50%;transition:transform .2s}
-.tog input:checked+.tsl{background:var(--gl)}
-.tog input:checked+.tsl:before{transform:translateX(18px)}
+/* Master Benefits Pool */
+.benefits-pool { display: flex; flex-wrap: wrap; gap: 8px; }
+.benefit-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: #f4f6f4; border: 1.5px solid var(--border); border-radius: 20px;
+  padding: 5px 12px 5px 10px; font-size: 12.5px; color: var(--text-mid); font-weight: 500;
+  cursor: default;
+}
+.benefit-pill .pill-actions { display: flex; gap: 4px; margin-left: 4px; }
+.pill-btn { background: none; border: none; cursor: pointer; font-size: 13px; padding: 0 2px; line-height: 1; opacity: 0.55; transition: opacity 0.15s; }
+.pill-btn:hover { opacity: 1; }
+.pill-add-form { display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+.pill-add-form input { padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 5px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.15s; flex: 1; min-width: 200px; }
+.pill-add-form input:focus { border-color: var(--green-light); }
 
-/* SLOTS */
-.sbar{height:6px;background:rgba(0,0,0,.07);border-radius:3px;margin-top:4px;overflow:hidden}
-.sfill{height:100%;background:var(--gl);border-radius:3px;transition:width .3s}
-.sfill.full{background:var(--gold)}
+/* Sponsor Level Cards */
+.levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.level-card {
+  background: var(--white); border: 2px solid var(--border); border-radius: 8px;
+  overflow: hidden; transition: box-shadow 0.2s;
+}
+.level-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.1); }
+.level-card-head {
+  padding: 18px 20px; display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+}
+.level-card-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--white); }
+.level-card-price { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--white); opacity: 0.9; }
+.level-card-body { padding: 14px 20px; }
+.level-card-benefits { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; min-height: 28px; }
+.level-benefit-tag {
+  font-size: 11px; background: var(--green-pale); color: var(--green-dark);
+  padding: 3px 9px; border-radius: 3px; font-weight: 500;
+}
+.level-no-benefits { font-size: 12px; color: var(--text-light); font-style: italic; }
+.level-card-actions { display: flex; gap: 8px; }
 
-.empty{text-align:center;padding:40px;color:var(--tl)}
-.empty-icon{font-size:32px;margin-bottom:8px}
-.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.1);border-top-color:var(--gl);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* Level color themes */
+.theme-title { background: linear-gradient(135deg, #0f2318, #1e4a2c); }
+.theme-gold   { background: linear-gradient(135deg, #3d2e0a, #6b4f16); }
+.theme-silver { background: linear-gradient(135deg, #2a2e30, #4a5255); }
+.theme-bronze { background: linear-gradient(135deg, #3d1e0a, #6b3316); }
+.theme-green  { background: linear-gradient(135deg, #0d3320, #1a5c35); }
+.theme-navy   { background: linear-gradient(135deg, #0d1f3c, #1a3464); }
+.theme-custom { background: linear-gradient(135deg, #2a2a2a, #4a4a4a); }
 
-.btags{display:flex;flex-wrap:wrap;gap:4px}
-.btag{font-size:11px;background:var(--gp);color:var(--gd);padding:2px 7px;border-radius:3px;font-weight:600}
+/* Add-new card */
+.level-card-add {
+  background: var(--white); border: 2px dashed rgba(0,0,0,0.15); border-radius: 8px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 160px; cursor: pointer; transition: all 0.15s; gap: 8px;
+  padding: 24px;
+}
+.level-card-add:hover { border-color: var(--green-light); background: #f4faf6; }
+.level-card-add-icon { font-size: 28px; opacity: 0.3; }
+.level-card-add-label { font-size: 13px; font-weight: 600; color: var(--text-light); }
 
-@media(max-width:680px){
-  .mg{grid-template-columns:1fr}
-  .stats{grid-template-columns:1fr 1fr}
-  .prow{grid-template-columns:1fr 1fr}
-  th:nth-child(n+5),td:nth-child(n+5){display:none}
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  z-index: 200; align-items: center; justify-content: center;
+  padding: 20px; overflow-y: auto;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--white); border-radius: 10px; width: 100%;
+  max-width: 600px; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.35);
+  animation: modalIn 0.22s cubic-bezier(0.34,1.3,0.64,1);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-header {
+  padding: 22px 26px 18px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--green-dark); }
+.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-light); line-height: 1; padding: 0; transition: color 0.15s; }
+.modal-close:hover { color: var(--text-dark); }
+.modal-body { padding: 24px 26px; }
+.modal-footer { padding: 16px 26px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+/* ── FORM FIELDS ── */
+.form-group { margin-bottom: 18px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dark); margin-bottom: 6px; }
+.form-label span { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-light); }
+.form-input {
+  width: 100%; padding: 11px 13px; border: 2px solid var(--border); border-radius: 5px;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text-dark);
+  background: var(--white); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-input:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(45,122,74,0.15); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-hint { font-size: 11.5px; color: var(--text-light); margin-top: 5px; }
+
+/* Color theme picker */
+.theme-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.theme-swatch {
+  width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+  border: 3px solid transparent; transition: all 0.15s; position: relative;
+}
+.theme-swatch.active { border-color: var(--gold); transform: scale(1.12); }
+.theme-swatch::after {
+  content: '✓'; position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0);
+  transition: color 0.15s;
+}
+.theme-swatch.active::after { color: rgba(255,255,255,0.9); }
+
+/* Benefits selector in modal */
+.benefits-selector { display: flex; flex-wrap: wrap; gap: 7px; }
+.benefit-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 13px; border-radius: 20px; cursor: pointer;
+  font-size: 12.5px; font-weight: 500; transition: all 0.15s;
+  border: 1.5px solid var(--border); background: var(--white); color: var(--text-mid);
+  user-select: none;
+}
+.benefit-toggle:hover { border-color: var(--green-light); color: var(--green-dark); }
+.benefit-toggle.on { background: var(--green-dark); border-color: var(--green-dark); color: #fff; }
+.benefit-toggle.on::before { content: '✓ '; }
+
+/* Featured badge toggle */
+.toggle-row { display: flex; align-items: center; gap: 10px; }
+.toggle-switch {
+  width: 42px; height: 24px; background: #ddd; border-radius: 12px;
+  cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--green-light); }
+.toggle-switch::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; background: #fff; border-radius: 50%;
+  transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.toggle-switch.on::after { transform: translateX(18px); }
+.toggle-label { font-size: 13px; color: var(--text-mid); }
+
+/* ── EXPORT SECTION ── */
+.export-box {
+  background: #f4f6f4; border: 1.5px solid var(--border); border-radius: 6px;
+  padding: 16px 18px;
+}
+.export-box pre {
+  font-size: 11px; color: var(--text-mid); overflow-x: auto; white-space: pre-wrap;
+  word-break: break-all; max-height: 220px; overflow-y: auto;
+  font-family: 'SF Mono', 'Consolas', monospace; line-height: 1.5;
+}
+.export-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--green-dark); color: #fff; padding: 12px 20px; border-radius: 6px;
+  font-size: 13px; font-weight: 600; z-index: 999; transition: transform 0.3s;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25); pointer-events: none;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── DRAG HANDLE ── */
+.drag-handle { cursor: grab; color: var(--text-light); font-size: 14px; padding: 0 4px; }
+.drag-handle:active { cursor: grabbing; }
+.level-card[draggable="true"] { cursor: grab; }
+.level-card.drag-over { outline: 2px dashed var(--gold); outline-offset: 2px; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 48px 24px;
+  color: var(--text-light); font-size: 14px;
+}
+.empty-state .es-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.35; }
+.empty-state strong { display: block; font-size: 16px; color: var(--text-mid); margin-bottom: 6px; }
+
+@media (max-width: 700px) {
+  .sidebar { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+  .levels-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-  <div class="lc">
-    <h2>⛳ Rough Riders Admin</h2>
-    <p>39th Annual Charity Golf Tournament</p>
-    <div class="le" id="lerr"></div>
-    <div class="fl">
-      <label>Password</label>
-      <input class="fi" id="lpw" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <button class="lb" id="lbtn" onclick="doLogin()">Sign In →</button>
+<!-- ══════════ LOGIN ══════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">⛳ RR Golf</div>
+    <div class="login-sub">Admin Dashboard</div>
+    <input type="password" id="login-pw" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()">Enter Dashboard</button>
+    <div id="login-err">Incorrect password. Try again.</div>
   </div>
 </div>
 
-<!-- APP -->
+<!-- ══════════ APP ══════════ -->
 <div id="app">
-  <div class="tb">
-    <div class="tb-brand">⛳ Rough Riders <span>Admin</span></div>
-    <div class="tb-r">
-      <span style="font-size:11px;color:rgba(255,255,255,.45);" id="topbar-ts"></span>
-      <a href="/register.html" class="tb-btn" style="text-decoration:none;">⛳ Registration Page</a>
-      <button class="tb-btn" onclick="loadAll()">↻ Refresh</button>
-      <button class="tb-btn" onclick="doLogout()">Sign Out</button>
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="topbar-title">⛳ RR Golf Admin</span>
+      <span class="topbar-sub">Sept 14, 2026 · Carrollwood CC</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-badge" id="save-status">✓ Saved</span>
+      <button class="btn-logout" onclick="doLogout()">Log out</button>
     </div>
   </div>
 
-  <div class="wrap">
-    <div class="stats">
-      <div class="st"><div class="sv" id="s-pl">—</div><div class="sl">Players</div></div>
-      <div class="st"><div class="sv" id="s-te">—</div><div class="sl">Teams</div></div>
-      <div class="st gld"><div class="sv gld" id="s-rv">—</div><div class="sl">Revenue</div></div>
-      <div class="st blu"><div class="sv" id="s-sp">—</div><div class="sl">Sponsors</div></div>
-      <div class="st drk"><div class="sv" id="s-co">—</div><div class="sl">Comp Players</div></div>
-    </div>
+  <div class="app-body">
 
-    <div class="tnav">
-      <button class="tbtn on" onclick="showTab('e')">📋 Entries</button>
-      <button class="tbtn" onclick="showTab('s')">🏆 Sponsors</button>
-      <button class="tbtn" onclick="showTab('c')">🎁 Complimentary</button>
-      <button class="tbtn" onclick="showTab('x')">⚙️ Settings</button>
-    </div>
-
-    <!-- ENTRIES -->
-    <div id="te">
-      <div class="tbar">
-        <input class="si" id="esq" placeholder="Search name, email, team…" oninput="re()">
-        <select class="sel" id="esf" onchange="re()">
-          <option value="">All</option><option value="paid">Paid</option>
-          <option value="invoice">Invoice</option><option value="comp">Comp</option>
-        </select>
-        <button class="btn btn-p ml" onclick="openEM()">+ Entry</button>
-        <button class="btn btn-s" onclick="xcsv('e')">↓ CSV</button>
-      </div>
-      <div class="tw"><table>
-        <thead><tr>
-          <th>Team / Contact</th><th>Players</th><th>Add-ons</th>
-          <th>Amount</th><th>Status</th><th>Date</th><th>Actions</th>
-        </tr></thead>
-        <tbody id="etb"><tr><td colspan="7" style="padding:30px;text-align:center;color:var(--tl)"><span class="spin"></span>Loading…</td></tr></tbody>
-      </table></div>
-    </div>
-
-    <!-- SPONSORS -->
-    <div id="ts" style="display:none">
-      <div class="tbar">
-        <input class="si" id="ssq" placeholder="Search sponsor, company…" oninput="rs()">
-        <select class="sel" id="ssf" onchange="rs()">
-          <option value="">All Tiers</option><option>Title</option><option>Gold</option>
-          <option>Silver</option><option>Bronze</option><option>Hole</option><option>Alacarte</option>
-        </select>
-        <button class="btn btn-p ml" onclick="openSM()">+ Sponsor</button>
-        <button class="btn btn-s" onclick="xcsv('s')">↓ CSV</button>
-      </div>
-      <div class="tw"><table>
-        <thead><tr>
-          <th>Sponsor</th><th>Package</th><th>Benefits</th>
-          <th>Amount</th><th>Status</th><th>Comp</th><th>Actions</th>
-        </tr></thead>
-        <tbody id="stb"><tr><td colspan="7" style="padding:30px;text-align:center;color:var(--tl)"><span class="spin"></span>Loading…</td></tr></tbody>
-      </table></div>
-    </div>
-
-    <!-- COMP -->
-    <div id="tc" style="display:none">
-      <div class="tbar">
-        <p style="font-size:13px;color:var(--tm)">Assign complimentary teams based on sponsorship benefits.</p>
-        <button class="btn btn-g ml" onclick="openCM()">+ Comp Team</button>
-        <button class="btn btn-s" onclick="xcsv('c')">↓ CSV</button>
-      </div>
-      <div class="tw"><table>
-        <thead><tr>
-          <th>Sponsor</th><th>Team Name</th><th>Players</th><th>Slots</th><th>Notes</th><th>Actions</th>
-        </tr></thead>
-        <tbody id="ctb"><tr><td colspan="6" style="padding:30px;text-align:center;color:var(--tl)"><span class="spin"></span>Loading…</td></tr></tbody>
-      </table></div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div id="tx" style="display:none">
-      <div class="ss">
-        <h3>Admin Notification Emails</h3>
-        <p style="font-size:13px;color:var(--tl);margin-bottom:14px">These people receive email notices for new registrations and sponsorships.</p>
-        <div id="ael"></div>
-        <button class="btn btn-p" style="margin-top:12px" onclick="openAEM()">+ Add Admin</button>
-      </div>
-      <div class="ss">
-        <h3>Notification Preferences</h3>
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
-            <label class="tog"><input type="checkbox" id="ne" onchange="saveSt()"><span class="tsl"></span></label>
-            <span style="font-size:14px;font-weight:500">Notify on new player registration</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:12px;cursor:pointer">
-            <label class="tog"><input type="checkbox" id="ns" onchange="saveSt()"><span class="tsl"></span></label>
-            <span style="font-size:14px;font-weight:500">Notify on new sponsorship</span>
-          </label>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-label">Sponsorships</div>
+      <div class="sidebar-section">
+        <div class="nav-item active" onclick="showPanel('levels')" id="nav-levels">
+          <span class="nav-icon">🏆</span> Sponsor Levels
+          <span class="nav-count" id="count-levels">0</span>
+        </div>
+        <div class="nav-item" onclick="showPanel('benefits-pool')" id="nav-benefits-pool">
+          <span class="nav-icon">📋</span> Benefits Pool
+          <span class="nav-count" id="count-benefits">0</span>
+        </div>
+        <div class="nav-item" onclick="showPanel('export')" id="nav-export">
+          <span class="nav-icon">📤</span> Export to Site
         </div>
       </div>
-      <div class="ss">
-        <h3>Sponsorship Benefits Reference</h3>
-        <table style="width:100%;font-size:13px;border-collapse:collapse">
-          <thead><tr>
-            <th style="padding:7px 0;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tl);text-align:left">Tier</th>
-            <th style="padding:7px 0;text-align:left">Teams</th><th style="padding:7px 0;text-align:left">Players</th>
-            <th style="padding:7px 0;text-align:left">Super Tickets</th><th style="padding:7px 0;text-align:left">Hole Signs</th>
-          </tr></thead>
-          <tbody>
-            <tr><td style="padding:6px 0"><span class="bd bd-title">Title</span></td><td>3</td><td>12</td><td>12</td><td>5</td></tr>
-            <tr><td style="padding:6px 0"><span class="bd bd-gold">Gold</span></td><td>2</td><td>8</td><td>8</td><td>3</td></tr>
-            <tr><td style="padding:6px 0"><span class="bd bd-silver">Silver</span></td><td>1</td><td>4</td><td>4</td><td>2</td></tr>
-            <tr><td style="padding:6px 0"><span class="bd bd-bronze">Bronze</span></td><td>1</td><td>4</td><td>0</td><td>1</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="ss">
-        <h3>Export Data</h3>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-s" onclick="xcsv('e')">↓ Entries</button>
-          <button class="btn btn-s" onclick="xcsv('s')">↓ Sponsors</button>
-          <button class="btn btn-s" onclick="xcsv('c')">↓ Comp Teams</button>
+    </nav>
+
+    <!-- Main -->
+    <main class="main-content">
+
+      <!-- ══ PANEL: SPONSOR LEVELS ══ -->
+      <div class="panel active" id="panel-levels">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1>Sponsor Levels</h1>
+            <p>Build and manage your sponsorship tiers. Drag to reorder. Changes are saved locally.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openLevelModal()">+ New Level</button>
+        </div>
+
+        <div class="levels-grid" id="levels-grid">
+          <!-- populated by JS -->
         </div>
       </div>
+
+      <!-- ══ PANEL: BENEFITS POOL ══ -->
+      <div class="panel" id="panel-benefits-pool">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1>Benefits Pool</h1>
+            <p>Master list of all available benefits. Assign any of these to sponsor levels.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h2>All Benefits</h2></div>
+          <div class="card-body">
+            <div class="benefits-pool" id="benefits-pool-list">
+              <!-- populated by JS -->
+            </div>
+            <div class="pill-add-form" id="benefit-add-form">
+              <input type="text" id="new-benefit-text" placeholder="e.g. Logo on sponsor banner · 4 golfers included" maxlength="80"
+                onkeydown="if(event.key==='Enter')addBenefit()">
+              <button class="btn btn-primary" onclick="addBenefit()">+ Add Benefit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PANEL: EXPORT ══ -->
+      <div class="panel" id="panel-export">
+        <div class="page-header">
+          <div class="page-header-left">
+            <h1>Export to Site</h1>
+            <p>Copy this JSON and paste into <code>register.html</code> to update the live sponsorship tiers.</p>
+          </div>
+          <button class="btn btn-outline" onclick="refreshExport()">↺ Refresh</button>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header"><h2>SPONSOR_LEVELS JSON</h2></div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-light);margin-bottom:14px;">
+              Replace the <code>SPONSOR_LEVELS</code> variable in <code>register.html</code> with this object.
+              Each level's <code>benefits</code> array maps to the perk bullets shown on the sponsorship cards.
+            </p>
+            <div class="export-box">
+              <pre id="export-json">// Click "Refresh" to generate</pre>
+            </div>
+            <div class="export-actions">
+              <button class="btn btn-primary" onclick="copyExport()">📋 Copy JSON</button>
+              <button class="btn btn-outline" onclick="downloadExport()">⬇ Download .json</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h2>HTML Snippet Preview</h2></div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-light);margin-bottom:14px;">
+              Ready-to-paste HTML for the <code>.tiers</code> section in <code>register.html</code>.
+            </p>
+            <div class="export-box">
+              <pre id="export-html">// Click "Refresh" to generate</pre>
+            </div>
+            <div class="export-actions">
+              <button class="btn btn-primary" onclick="copyHtml()">📋 Copy HTML</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══════════ LEVEL MODAL ══════════ -->
+<div class="modal-overlay" id="level-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title" id="level-modal-title">New Sponsor Level</span>
+      <button class="modal-close" onclick="closeLevelModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Level Name *</label>
+          <input class="form-input" id="lm-name" type="text" placeholder="e.g. Gold Sponsor" maxlength="40">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price *</label>
+          <input class="form-input" id="lm-price" type="number" placeholder="5000" min="0" step="50">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Level ID <span>(used internally — lowercase, no spaces)</span></label>
+        <input class="form-input" id="lm-id" type="text" placeholder="e.g. gold" maxlength="24"
+          oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'')">
+        <div class="form-hint">Auto-generated from name if left blank. Must be unique.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Color Theme</label>
+        <div class="theme-picker" id="lm-theme-picker">
+          <div class="theme-swatch theme-title active" data-theme="title" title="Forest Dark" style="background:linear-gradient(135deg,#0f2318,#1e4a2c);" onclick="pickTheme(this,'title')"></div>
+          <div class="theme-swatch theme-gold"   data-theme="gold"   title="Gold"       style="background:linear-gradient(135deg,#3d2e0a,#6b4f16);" onclick="pickTheme(this,'gold')"></div>
+          <div class="theme-swatch theme-silver" data-theme="silver" title="Silver"     style="background:linear-gradient(135deg,#2a2e30,#4a5255);" onclick="pickTheme(this,'silver')"></div>
+          <div class="theme-swatch theme-bronze" data-theme="bronze" title="Bronze"     style="background:linear-gradient(135deg,#3d1e0a,#6b3316);" onclick="pickTheme(this,'bronze')"></div>
+          <div class="theme-swatch theme-green"  data-theme="green"  title="Deep Green" style="background:linear-gradient(135deg,#0d3320,#1a5c35);" onclick="pickTheme(this,'green')"></div>
+          <div class="theme-swatch theme-navy"   data-theme="navy"   title="Navy"       style="background:linear-gradient(135deg,#0d1f3c,#1a3464);" onclick="pickTheme(this,'navy')"></div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Badge <span>(optional short label)</span></label>
+          <input class="form-input" id="lm-badge" type="text" placeholder="e.g. Top Tier" maxlength="20">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sort Order <span>(lower = first)</span></label>
+          <input class="form-input" id="lm-order" type="number" placeholder="10" min="0" step="1">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="margin-bottom:10px;">Benefits <span>(select from pool or add new)</span></label>
+        <div class="benefits-selector" id="lm-benefits-selector">
+          <!-- populated dynamically -->
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input class="form-input" id="lm-new-benefit" type="text" placeholder="Type a new benefit and press Enter"
+            style="flex:1;min-width:200px;font-size:13px;padding:8px 12px;"
+            maxlength="80" onkeydown="if(event.key==='Enter'){addBenefitFromModal();event.preventDefault();}">
+          <button class="btn btn-outline btn-sm" onclick="addBenefitFromModal()">+ Add to Pool</button>
+        </div>
+        <div class="form-hint">Click a benefit to toggle it on/off for this level.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="margin-bottom:8px;">Options</label>
+        <div class="toggle-row">
+          <div class="toggle-switch" id="lm-featured-toggle" onclick="this.classList.toggle('on')"></div>
+          <span class="toggle-label">Featured / Top Tier badge</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeLevelModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLevel()">Save Level</button>
     </div>
   </div>
 </div>
 
-<!-- ENTRY MODAL -->
-<div class="mo" id="em">
-  <div class="mc">
-    <h3 id="em-t">New Entry</h3>
-    <input type="hidden" id="em-id">
-    <div class="mg">
-      <div class="mfl"><label>Team Name</label><input class="mfi" id="em-tn" placeholder="Rough Riders A"></div>
-      <div class="mfl"><label>Status</label><select class="mfs" id="em-st"><option value="paid">Paid</option><option value="invoice">Invoice Sent</option><option value="comp">Complimentary</option></select></div>
+<!-- ══════════ BENEFIT EDIT MODAL ══════════ -->
+<div class="modal-overlay" id="benefit-edit-modal">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <span class="modal-title">Edit Benefit</span>
+      <button class="modal-close" onclick="closeBenefitEditModal()">×</button>
     </div>
-    <div class="mg">
-      <div class="mfl"><label>First Name</label><input class="mfi" id="em-fn" placeholder="Theodore"></div>
-      <div class="mfl"><label>Last Name</label><input class="mfi" id="em-ln" placeholder="Roosevelt"></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Email</label><input class="mfi" id="em-em" type="email" placeholder="you@example.com"></div>
-      <div class="mfl"><label>Phone</label><input class="mfi" id="em-ph" type="tel" placeholder="(813) 555-0100"></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Company</label><input class="mfi" id="em-co" placeholder="Optional"></div>
-      <div class="mfl"><label>Amount Paid ($)</label><input class="mfi" id="em-am" type="number" placeholder="330"></div>
-    </div>
-    <div style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);margin-bottom:8px">Players</div>
-      <div class="prows" id="em-pl"></div>
-      <button class="add-prow" onclick="addPR('em-pl')">+ Add Player</button>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Add-ons</label><input class="mfi" id="em-ao" placeholder="Super Ticket, Mulligans…"></div>
-      <div class="mfl"><label>Stripe Session ID</label><input class="mfi" id="em-si" placeholder="cs_live_…"></div>
-    </div>
-    <div class="mg mg1"><div class="mfl"><label>Notes</label><textarea class="mft" id="em-no"></textarea></div></div>
-    <div class="mfoot">
-      <button class="btn btn-s" onclick="closeM('em')">Cancel</button>
-      <button class="btn btn-p" onclick="saveE()">Save Entry</button>
-    </div>
-  </div>
-</div>
-
-<!-- SPONSOR MODAL -->
-<div class="mo" id="sm">
-  <div class="mc">
-    <h3 id="sm-t">New Sponsor</h3>
-    <input type="hidden" id="sm-id">
-    <div class="mg">
-      <div class="mfl"><label>Company / Org</label><input class="mfi" id="sm-co" placeholder="Acme Corp"></div>
-      <div class="mfl"><label>Package</label>
-        <select class="mfs" id="sm-ti" onchange="updateCompSlots()">
-          <option value="Title">Title — $7,500</option><option value="Gold">Gold — $5,000</option>
-          <option value="Silver">Silver — $2,500</option><option value="Bronze">Bronze — $1,000</option>
-          <option value="Hole">Hole Sponsor — $250</option><option value="Alacarte">À La Carte</option>
-        </select>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Benefit Text *</label>
+        <input class="form-input" id="bem-text" type="text" maxlength="80">
+        <div class="form-hint">This text appears as a bullet point on sponsorship cards.</div>
       </div>
     </div>
-    <div class="mg">
-      <div class="mfl"><label>Contact First</label><input class="mfi" id="sm-fn" placeholder="Theodore"></div>
-      <div class="mfl"><label>Contact Last</label><input class="mfi" id="sm-ln" placeholder="Roosevelt"></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Email</label><input class="mfi" id="sm-em" type="email" placeholder="you@example.com"></div>
-      <div class="mfl"><label>Phone</label><input class="mfi" id="sm-ph" type="tel"></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Mailing Address</label><input class="mfi" id="sm-addr" placeholder="123 Main St, Tampa FL 33601"></div>
-      <div class="mfl"><label>Website</label><input class="mfi" id="sm-web" placeholder="https://example.com"></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Amount ($)</label><input class="mfi" id="sm-am" type="number"></div>
-      <div class="mfl"><label>Status</label><select class="mfs" id="sm-st"><option value="paid">Paid</option><option value="invoice">Invoice Sent</option><option value="pending">Pending</option></select></div>
-    </div>
-    <div class="mg">
-      <div class="mfl"><label>Hole # (if applicable)</label><input class="mfi" id="sm-ho" placeholder="e.g. 7, 12"></div>
-      <div class="mfl"><label>Comp Team Slots</label><input class="mfi" id="sm-cs" type="number" placeholder="Auto from tier"></div>
-    </div>
-
-    <!-- Logo Upload -->
-    <div style="margin-bottom:14px;">
-      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);margin-bottom:8px;">Logo</div>
-      <div id="sm-logo-preview" style="display:none;margin-bottom:10px;">
-        <img id="sm-logo-img" style="max-height:60px;max-width:200px;border:1px solid rgba(0,0,0,0.1);border-radius:4px;padding:4px;background:#fff;" src="" alt="Logo">
-        <button onclick="clearLogo()" style="margin-left:10px;font-size:12px;background:var(--red-p);border:1px solid rgba(176,32,32,0.2);color:var(--red);border-radius:4px;padding:3px 10px;cursor:pointer;">Remove</button>
-      </div>
-      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-        <div style="padding:9px 16px;background:#f4f6f4;border:2px dashed rgba(0,0,0,0.15);border-radius:5px;font-size:13px;color:var(--tl);transition:all 0.15s;" id="sm-logo-lbl">📎 Click to upload logo (PNG, JPG, SVG)</div>
-        <input type="file" id="sm-logo-file" accept="image/*" style="display:none;" onchange="handleLogoUpload(this)">
-      </label>
-      <div style="font-size:11px;color:var(--tl);margin-top:5px;">Recommended: PNG or SVG, transparent background, min 300px wide</div>
-      <input type="hidden" id="sm-logo-data">
-      <input type="hidden" id="sm-logo-name">
-    </div>
-
-    <div class="mg mg1"><div class="mfl"><label>Notes</label><textarea class="mft" id="sm-no"></textarea></div></div>
-    <div class="mfoot">
-      <button class="btn btn-s" onclick="closeM('sm')">Cancel</button>
-      <button class="btn btn-p" id="sm-save-btn" onclick="saveSp()">Save Sponsor</button>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="deleteBenefitFromModal()">Delete</button>
+      <div style="flex:1;"></div>
+      <button class="btn btn-outline" onclick="closeBenefitEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBenefitEdit()">Save</button>
     </div>
   </div>
 </div>
 
-<!-- COMP MODAL -->
-<div class="mo" id="cm">
-  <div class="mc">
-    <h3 id="cm-t">Assign Comp Team</h3>
-    <input type="hidden" id="cm-id">
-    <div class="mg">
-      <div class="mfl"><label>Sponsor</label><select class="mfs" id="cm-sp" onchange="showSlotInfo()"></select></div>
-      <div class="mfl"><label>Team Name</label><input class="mfi" id="cm-tn" placeholder="Gold Sponsor Team A"></div>
-    </div>
-    <div id="cm-slot-info" style="font-size:12px;color:var(--tl);margin-bottom:12px;padding:8px 12px;background:#f4f6f4;border-radius:5px;display:none"></div>
-    <div style="margin-bottom:12px">
-      <div style="font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tm);margin-bottom:8px">Players</div>
-      <div class="prows" id="cm-pl"></div>
-      <button class="add-prow" onclick="addPR('cm-pl')">+ Add Player</button>
-    </div>
-    <div class="mg mg1"><div class="mfl"><label>Notes</label><textarea class="mft" id="cm-no"></textarea></div></div>
-    <div class="mfoot">
-      <button class="btn btn-s" onclick="closeM('cm')">Cancel</button>
-      <button class="btn btn-g" onclick="saveC()">Assign Team</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN EMAIL MODAL -->
-<div class="mo" id="aem">
-  <div class="mc" style="max-width:400px">
-    <h3>Add Admin</h3>
-    <input type="hidden" id="aem-id">
-    <div class="mg mg1" style="margin-bottom:12px"><div class="mfl"><label>Name</label><input class="mfi" id="aem-n" placeholder="Robin Conn"></div></div>
-    <div class="mg mg1" style="margin-bottom:12px"><div class="mfl"><label>Email</label><input class="mfi" id="aem-e" type="email" placeholder="r.conn@tamparoughriders.org"></div></div>
-    <div class="mg mg1" style="margin-bottom:12px"><div class="mfl"><label>Role</label><select class="mfs" id="aem-r"><option value="admin">Admin (full access + notifications)</option><option value="notify">Notify only (email notices)</option></select></div></div>
-    <div class="mfoot">
-      <button class="btn btn-s" onclick="closeM('aem')">Cancel</button>
-      <button class="btn btn-p" onclick="saveAE()">Save</button>
-    </div>
-  </div>
-</div>
+<!-- ══════════ TOAST ══════════ -->
+<div id="toast"></div>
 
 <script>
-var BASE = 'https://rr-golf.netlify.app';
-var TK   = 'rr_adm_tk';
-var tok  = localStorage.getItem(TK);
-var D    = { e:[], s:[], c:[], x:{} };
+// ════════════════════════════════
+// AUTH
+// ════════════════════════════════
+var ADMIN_PW = 'bullyjudge';
 
-// ── AUTH ──
-async function doLogin() {
-  var pw = document.getElementById('lpw').value;
-  var btn = document.getElementById('lbtn');
-  var err = document.getElementById('lerr');
-  err.style.display = 'none';
-  if (!pw) { err.textContent = 'Enter password'; err.style.display = 'block'; return; }
-  btn.disabled = true; btn.textContent = 'Signing in…';
-  try {
-    var r = await fetch(BASE + '/.netlify/functions/admin-login', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({password:pw})
-    });
-    var d = await r.json();
-    if (!r.ok || !d.token) throw new Error(d.error || 'Invalid password');
-    tok = d.token; localStorage.setItem(TK, tok); showApp();
-  } catch(e) { err.textContent = e.message; err.style.display='block'; btn.disabled=false; btn.textContent='Sign In →'; }
-}
-function doLogout() { localStorage.removeItem(TK); tok=null; document.getElementById('app').style.display='none'; document.getElementById('login').style.display='flex'; }
-function showApp() { document.getElementById('login').style.display='none'; document.getElementById('app').style.display='block'; loadAll(); setInterval(updateTS,60000); updateTS(); }
-if (tok) showApp();
-
-function updateTS() { var el=document.getElementById('topbar-ts'); if(el){ var n=new Date(); el.textContent=n.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' · ' + n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}); } }
-
-// ── API ──
-async function call(method, fn, body) {
-  var opts = { method, headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok} };
-  if (body) opts.body = JSON.stringify(body);
-  var r = await fetch(BASE + '/.netlify/functions/' + fn, opts);
-  if (r.status === 401) { doLogout(); throw new Error('Unauthorized'); }
-  return r.json();
-}
-var get  = function(res) { return call('GET',  'admin-data?resource='+res); };
-var put  = function(res, d) { return call('PUT',  'admin-data?resource='+res, d); };
-var post = function(res, d) { return call('POST', 'admin-data?resource='+res, d); };
-var del  = function(res, id) { return call('DELETE', 'admin-data?resource='+res+'&id='+id); };
-
-// ── LOAD ──
-async function loadAll() {
-  try {
-    var results = await Promise.all([get('entries'), get('sponsors'), get('comp'), get('settings')]);
-    D.e = Array.isArray(results[0]) ? results[0] : [];
-    D.s = Array.isArray(results[1]) ? results[1] : [];
-    D.c = Array.isArray(results[2]) ? results[2] : [];
-    D.x = results[3] || {};
-    stats(); re(); rs(); rc(); rx();
-  } catch(e) { console.error(e); }
-}
-
-function fmt(n) { return n ? '$'+parseFloat(n).toLocaleString('en-US') : '—'; }
-function fdate(d) { return d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'; }
-function bd(s, t) {
-  var map = {paid:'bd-paid',invoice:'bd-inv',comp:'bd-comp',pending:'bd-pend',Title:'bd-title',Gold:'bd-gold',Silver:'bd-silver',Bronze:'bd-bronze',Hole:'bd-hole',Alacarte:'bd-comp'};
-  return '<span class="bd '+(map[s]||'')+'">'+(t||s||'—')+'</span>';
-}
-
-function stats() {
-  var pl = D.e.reduce(function(s,e){return s+(e.players?e.players.length:0);},0);
-  var rv = [...D.e,...D.s].reduce(function(s,e){return s+(parseFloat(e.amount)||0);},0);
-  var cp = D.c.reduce(function(s,c){return s+(c.players?c.players.length:0);},0);
-  document.getElementById('s-pl').textContent = pl;
-  document.getElementById('s-te').textContent = D.e.length;
-  document.getElementById('s-rv').textContent = '$'+rv.toLocaleString('en-US');
-  document.getElementById('s-sp').textContent = D.s.length;
-  document.getElementById('s-co').textContent = cp;
-}
-
-// ── ENTRIES ──
-function re() {
-  var q=(document.getElementById('esq').value||'').toLowerCase();
-  var f=document.getElementById('esf').value;
-  var rows=D.e.filter(function(e){
-    var mq=!q||(e.teamName||'').toLowerCase().includes(q)||(e.firstName||'').toLowerCase().includes(q)||(e.lastName||'').toLowerCase().includes(q)||(e.email||'').toLowerCase().includes(q);
-    return mq && (!f||e.status===f);
-  });
-  var tb=document.getElementById('etb');
-  if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🏌️</div><p>No entries</p></div></td></tr>';return;}
-  tb.innerHTML=rows.map(function(e){
-    var pn=e.players?e.players.map(function(p){return (p.firstName||'')+(p.ln||p.lastName?' '+p.lastName:'');}).filter(Boolean).join(', '):'';
-    return '<tr>'+
-      '<td><strong>'+(e.teamName||(e.firstName+' '+e.lastName)||'Unnamed')+'</strong>'+(e.company?'<br><span style="font-size:11px;color:var(--tl)">'+e.company+'</span>':'')+'<br><span style="font-size:11px;color:var(--tl)">'+(e.email||'')+(e.phone?' · '+e.phone:'')+'</span></td>'+
-      '<td><strong>'+(e.players?e.players.length:0)+'</strong>'+(pn?'<br><span style="font-size:11px;color:var(--tl)">'+pn+'</span>':'')+'</td>'+
-      '<td style="font-size:12px">'+(e.addons||'—')+'</td>'+
-      '<td><strong>'+fmt(e.amount)+'</strong></td>'+
-      '<td>'+bd(e.status)+'</td>'+
-      '<td style="font-size:12px">'+fdate(e.createdAt)+'</td>'+
-      '<td><div class="ac">'+
-        '<button class="btn btn-s sm" onclick="openEM(\''+e.id+'\')">Edit</button>'+
-        '<button class="btn btn-d sm" onclick="delR(\'entries\',\''+e.id+'\')">Del</button>'+
-      '</div></td></tr>';
-  }).join('');
-}
-
-function openEM(id) {
-  var e=id?D.e.find(function(x){return x.id===id;}):null;
-  document.getElementById('em-t').textContent = e?'Edit Entry':'New Entry';
-  document.getElementById('em-id').value  = e?e.id:'';
-  document.getElementById('em-tn').value  = e?e.teamName||'':'';
-  document.getElementById('em-fn').value  = e?e.firstName||'':'';
-  document.getElementById('em-ln').value  = e?e.lastName||'':'';
-  document.getElementById('em-em').value  = e?e.email||'':'';
-  document.getElementById('em-ph').value  = e?e.phone||'':'';
-  document.getElementById('em-co').value  = e?e.company||'':'';
-  document.getElementById('em-am').value  = e?e.amount||'':'';
-  document.getElementById('em-ao').value  = e?e.addons||'':'';
-  document.getElementById('em-si').value  = e?e.stripeSession||'':'';
-  document.getElementById('em-no').value  = e?e.notes||'':'';
-  document.getElementById('em-st').value  = e?e.status||'paid':'paid';
-  rProws('em-pl', e?e.players||[]:[{firstName:'',lastName:'',email:'',phone:''}]);
-  openM('em');
-}
-
-async function saveE() {
-  var id=document.getElementById('em-id').value;
-  var d={
-    teamName:document.getElementById('em-tn').value.trim(),
-    firstName:document.getElementById('em-fn').value.trim(),
-    lastName:document.getElementById('em-ln').value.trim(),
-    email:document.getElementById('em-em').value.trim(),
-    phone:document.getElementById('em-ph').value.trim(),
-    company:document.getElementById('em-co').value.trim(),
-    amount:parseFloat(document.getElementById('em-am').value)||0,
-    addons:document.getElementById('em-ao').value.trim(),
-    stripeSession:document.getElementById('em-si').value.trim(),
-    notes:document.getElementById('em-no').value.trim(),
-    status:document.getElementById('em-st').value,
-    players:cProws('em-pl'),
-  };
-  if(id){
-    d.id=id; d.updatedAt=new Date().toISOString();
-    var i=D.e.findIndex(function(x){return x.id===id;});
-    if(i>=0) D.e[i]=Object.assign({},D.e[i],d);
-    await put('entries',D.e);
+function doLogin() {
+  var pw = document.getElementById('login-pw').value;
+  if (pw === ADMIN_PW) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    initApp();
   } else {
-    var rec=await post('entries',d); D.e.push(rec);
+    document.getElementById('login-err').style.display = 'block';
+    document.getElementById('login-pw').value = '';
+    document.getElementById('login-pw').focus();
   }
-  closeM('em'); stats(); re();
 }
 
-// ── SPONSORS ──
-var TB={Title:{teams:3,players:12,tickets:12,holeSigns:5,banner:true,website:true},Gold:{teams:2,players:8,tickets:8,holeSigns:3,banner:true},Silver:{teams:1,players:4,tickets:4,holeSigns:2},Bronze:{teams:1,players:4,holeSigns:1}};
+function doLogout() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-pw').value = '';
+}
 
-function rs() {
-  var q=(document.getElementById('ssq').value||'').toLowerCase();
-  var f=document.getElementById('ssf').value;
-  var rows=D.s.filter(function(s){
-    var mq=!q||(s.company||'').toLowerCase().includes(q)||(s.firstName||'').toLowerCase().includes(q)||(s.email||'').toLowerCase().includes(q);
-    return mq && (!f||s.tier===f);
+document.getElementById('login-pw').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ════════════════════════════════
+// STATE
+// ════════════════════════════════
+var STATE = {
+  benefits: [],   // [{ id, text }]
+  levels: []      // [{ id, name, price, theme, badge, order, featured, benefits: [id,...] }]
+};
+
+var THEMES = {
+  title:  'linear-gradient(135deg,#0f2318,#1e4a2c)',
+  gold:   'linear-gradient(135deg,#3d2e0a,#6b4f16)',
+  silver: 'linear-gradient(135deg,#2a2e30,#4a5255)',
+  bronze: 'linear-gradient(135deg,#3d1e0a,#6b3316)',
+  green:  'linear-gradient(135deg,#0d3320,#1a5c35)',
+  navy:   'linear-gradient(135deg,#0d1f3c,#1a3464)',
+};
+
+// ── Default seed data (mirrors current register.html) ──
+var DEFAULT_BENEFITS = [
+  { id: 'b1',  text: '3 teams — 12 golfers' },
+  { id: 'b2',  text: '2 teams — 8 golfers' },
+  { id: 'b3',  text: '1 team — 4 golfers' },
+  { id: 'b4',  text: '12 super tickets' },
+  { id: 'b5',  text: '8 super tickets' },
+  { id: 'b6',  text: '4 super tickets' },
+  { id: 'b7',  text: '5 hole sponsor signs' },
+  { id: 'b8',  text: '3 hole sponsor signs' },
+  { id: 'b9',  text: '2 hole sponsor signs' },
+  { id: 'b10', text: '1 hole sponsor sign' },
+  { id: 'b11', text: 'Logo on sponsor banner' },
+  { id: 'b12', text: 'Website listing' },
+  { id: 'b13', text: 'Logo on tournament materials & banner' },
+  { id: 'b14', text: 'Logo on tournament materials' },
+  { id: 'b15', text: 'VIP hospitality access' },
+  { id: 'b16', text: 'Speaking opportunity' },
+  { id: 'b17', text: 'Verbal recognition at awards' },
+  { id: 'b18', text: 'Custom tee sign' },
+  { id: 'b19', text: 'Name & logo on-course' },
+];
+
+var DEFAULT_LEVELS = [
+  { id: 'title',  name: 'Title Sponsor',  price: 7500, theme: 'title',  badge: 'Top Tier', order: 1,  featured: true,  benefits: ['b1','b4','b7','b11','b12'] },
+  { id: 'gold',   name: 'Gold Sponsor',   price: 5000, theme: 'gold',   badge: '',         order: 2,  featured: false, benefits: ['b2','b5','b8','b13'] },
+  { id: 'silver', name: 'Silver Sponsor', price: 2500, theme: 'silver', badge: '',         order: 3,  featured: false, benefits: ['b3','b6','b9','b14'] },
+  { id: 'bronze', name: 'Bronze Sponsor', price: 1000, theme: 'bronze', badge: '',         order: 4,  featured: false, benefits: ['b3','b10','b14'] },
+];
+
+function loadState() {
+  try {
+    var raw = localStorage.getItem('rrgolf_admin_state');
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      STATE.benefits = parsed.benefits || DEFAULT_BENEFITS;
+      STATE.levels   = parsed.levels   || DEFAULT_LEVELS;
+    } else {
+      STATE.benefits = JSON.parse(JSON.stringify(DEFAULT_BENEFITS));
+      STATE.levels   = JSON.parse(JSON.stringify(DEFAULT_LEVELS));
+    }
+  } catch(e) {
+    STATE.benefits = JSON.parse(JSON.stringify(DEFAULT_BENEFITS));
+    STATE.levels   = JSON.parse(JSON.stringify(DEFAULT_LEVELS));
+  }
+}
+
+function saveState() {
+  localStorage.setItem('rrgolf_admin_state', JSON.stringify(STATE));
+  setSaveStatus('✓ Saved');
+}
+
+function setSaveStatus(msg) {
+  var el = document.getElementById('save-status');
+  if (el) el.textContent = msg;
+}
+
+function genId(prefix) {
+  return prefix + '_' + Date.now().toString(36);
+}
+
+function slugify(s) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').substring(0,24);
+}
+
+// ════════════════════════════════
+// PANEL NAV
+// ════════════════════════════════
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'export') refreshExport();
+}
+
+// ════════════════════════════════
+// COUNTS
+// ════════════════════════════════
+function updateCounts() {
+  var cl = document.getElementById('count-levels');
+  var cb = document.getElementById('count-benefits');
+  if (cl) cl.textContent = STATE.levels.length;
+  if (cb) cb.textContent = STATE.benefits.length;
+}
+
+// ════════════════════════════════
+// RENDER: BENEFIT POOL
+// ════════════════════════════════
+function renderBenefitsPool() {
+  var container = document.getElementById('benefits-pool-list');
+  if (!container) return;
+  if (!STATE.benefits.length) {
+    container.innerHTML = '<div class="empty-state" style="padding:20px 0;"><div class="es-icon">📋</div><strong>No benefits yet</strong>Add your first benefit below.</div>';
+    return;
+  }
+  container.innerHTML = STATE.benefits.map(function(b) {
+    return '<div class="benefit-pill" id="pill-' + b.id + '">' +
+      '<span>' + escHtml(b.text) + '</span>' +
+      '<div class="pill-actions">' +
+        '<button class="pill-btn" title="Edit" onclick="openBenefitEditModal(\'' + b.id + '\')">✏️</button>' +
+        '<button class="pill-btn" title="Delete" onclick="deleteBenefit(\'' + b.id + '\')">✕</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  updateCounts();
+}
+
+function addBenefit() {
+  var inp = document.getElementById('new-benefit-text');
+  var text = inp.value.trim();
+  if (!text) { inp.focus(); return; }
+  if (STATE.benefits.find(b => b.text.toLowerCase() === text.toLowerCase())) {
+    showToast('That benefit already exists');
+    return;
+  }
+  STATE.benefits.push({ id: genId('b'), text: text });
+  inp.value = '';
+  saveState();
+  renderBenefitsPool();
+  showToast('Benefit added ✓');
+}
+
+// ── Benefit Edit Modal ──
+var _editingBenefitId = null;
+
+function openBenefitEditModal(id) {
+  var b = STATE.benefits.find(x => x.id === id);
+  if (!b) return;
+  _editingBenefitId = id;
+  document.getElementById('bem-text').value = b.text;
+  document.getElementById('benefit-edit-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('bem-text').focus(); }, 50);
+}
+
+function closeBenefitEditModal() {
+  _editingBenefitId = null;
+  document.getElementById('benefit-edit-modal').classList.remove('open');
+}
+
+function saveBenefitEdit() {
+  var text = document.getElementById('bem-text').value.trim();
+  if (!text) { document.getElementById('bem-text').focus(); return; }
+  var b = STATE.benefits.find(x => x.id === _editingBenefitId);
+  if (!b) return;
+  b.text = text;
+  saveState();
+  renderBenefitsPool();
+  closeBenefitEditModal();
+  showToast('Benefit updated ✓');
+}
+
+function deleteBenefitFromModal() {
+  if (!confirm('Delete this benefit? It will be removed from all levels.')) return;
+  deleteBenefit(_editingBenefitId);
+  closeBenefitEditModal();
+}
+
+function deleteBenefit(id) {
+  if (!id) return;
+  STATE.benefits = STATE.benefits.filter(b => b.id !== id);
+  // Remove from all levels
+  STATE.levels.forEach(function(lv) {
+    lv.benefits = lv.benefits.filter(bid => bid !== id);
   });
-  var tb=document.getElementById('stb');
-  if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">🏆</div><p>No sponsors</p></div></td></tr>';return;}
-  tb.innerHTML=rows.map(function(s){
-    var b=TB[s.tier]||{};
-    var bts=[];
-    if(b.teams) bts.push(b.teams+' team'+(b.teams>1?'s':''));
-    if(b.players) bts.push(b.players+' players');
-    if(b.tickets) bts.push(b.tickets+' super tkts');
-    if(b.holeSigns) bts.push(b.holeSigns+' hole signs');
-    if(b.banner) bts.push('banner');
-    if(s.hole) bts.push('Hole #'+s.hole);
-    var bhtml=bts.length?'<div class="btags">'+bts.map(function(x){return '<span class="btag">'+x+'</span>';}).join('')+'</div>':'—';
-    var cu=D.c.filter(function(c){return c.sponsorId===s.id;}).length;
-    var cs=s.compSlots||b.teams||0;
-    var pct=cs>0?Math.min(100,Math.round(cu/cs*100)):0;
-    var websiteUrl = s.website ? s.website.replace(/&/g,'&amp;') : '';
-    var websiteDisplay = s.website ? s.website.replace('https://','').replace('http://','').split('?')[0] : '';
-    return '<tr>'+
-      '<td>'+
-        (s.logoData ? '<img src="'+s.logoData+'" style="max-height:36px;max-width:80px;display:block;margin-bottom:5px;border-radius:3px;object-fit:contain;background:#fff;border:1px solid rgba(0,0,0,0.08);padding:2px;" onerror="this.style.display=\'none\'">' : '') +
-        '<strong>'+(s.company||(s.firstName+' '+s.lastName))+'</strong>'+
-        '<br><span style="font-size:11px;color:var(--tl)">'+(s.firstName||'')+' '+(s.lastName||'')+' · '+(s.email||'')+'</span>'+
-        (s.phone ? '<br><span style="font-size:11px;color:var(--tl)">'+s.phone+'</span>' : '')+
-        (s.address ? '<br><span style="font-size:11px;color:var(--tl)">'+s.address+'</span>' : '')+
-        (websiteUrl ? '<br><a href="'+websiteUrl+'" target="_blank" style="font-size:11px;color:var(--gl)">'+websiteDisplay+'</a>' : '')+
-      '</td>'+
-      '<td>'+bd(s.tier,s.tier)+'</td>'+
-      '<td>'+bhtml+'</td>'+
-      '<td><strong>'+fmt(s.amount)+'</strong></td>'+
-      '<td>'+bd(s.status)+'</td>'+
-      '<td><div style="font-size:12px">'+cu+'/'+cs+' teams</div><div class="sbar"><div class="sfill'+(pct>=100?' full':'')+'" style="width:'+pct+'%"></div></div></td>'+
-      '<td><div class="ac">'+
-        '<button class="btn btn-s sm" onclick="openSM(\''+s.id+'\')">Edit</button>'+
-        '<button class="btn btn-g sm" onclick="openCM(null,\''+s.id+'\')">+Team</button>'+
-        '<button class="btn btn-d sm" onclick="delR(\'sponsors\',\''+s.id+'\')">Del</button>'+
-      '</div></td></tr>';
+  saveState();
+  renderBenefitsPool();
+  renderLevels();
+  showToast('Benefit deleted');
+}
+
+// ════════════════════════════════
+// RENDER: LEVELS GRID
+// ════════════════════════════════
+function renderLevels() {
+  var grid = document.getElementById('levels-grid');
+  if (!grid) return;
+  var sorted = STATE.levels.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
+
+  var html = sorted.map(function(lv) {
+    var theme = THEMES[lv.theme] || THEMES.title;
+    var benefitTags = lv.benefits.map(function(bid) {
+      var b = STATE.benefits.find(x => x.id === bid);
+      return b ? '<span class="level-benefit-tag">' + escHtml(b.text) + '</span>' : '';
+    }).join('');
+    var priceStr = '$' + Number(lv.price).toLocaleString('en-US');
+    return '<div class="level-card" id="lcard-' + lv.id + '" draggable="true" ondragstart="dragStart(event,\'' + lv.id + '\')" ondragover="dragOver(event)" ondrop="dragDrop(event,\'' + lv.id + '\')" ondragleave="dragLeave(event)">' +
+      '<div class="level-card-head" style="background:' + theme + ';">' +
+        '<div>' +
+          (lv.badge ? '<div style="font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:3px;">' + escHtml(lv.badge) + '</div>' : '') +
+          '<div class="level-card-name">' + escHtml(lv.name) + '</div>' +
+        '</div>' +
+        '<div class="level-card-price">' + priceStr + '</div>' +
+      '</div>' +
+      '<div class="level-card-body">' +
+        '<div class="level-card-benefits">' +
+          (benefitTags || '<span class="level-no-benefits">No benefits assigned</span>') +
+        '</div>' +
+        '<div class="level-card-actions">' +
+          '<button class="btn btn-outline btn-sm" onclick="openLevelModal(\'' + lv.id + '\')">✏️ Edit</button>' +
+          '<button class="btn btn-danger btn-sm" onclick="deleteLevel(\'' + lv.id + '\')">✕ Delete</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
   }).join('');
+
+  html += '<div class="level-card-add" onclick="openLevelModal()">' +
+    '<div class="level-card-add-icon">＋</div>' +
+    '<div class="level-card-add-label">Add New Level</div>' +
+  '</div>';
+
+  grid.innerHTML = html;
+  updateCounts();
 }
 
-function updateCompSlots() {
-  var tier=document.getElementById('sm-ti').value;
-  var b=TB[tier]||{};
-  if(b.teams) document.getElementById('sm-cs').value=b.teams;
+function deleteLevel(id) {
+  if (!confirm('Delete this sponsor level?')) return;
+  STATE.levels = STATE.levels.filter(lv => lv.id !== id);
+  saveState();
+  renderLevels();
+  showToast('Level deleted');
 }
 
-// ── LOGO UPLOAD ──
-function handleLogoUpload(input) {
-  var file = input.files[0];
-  if (!file) return;
-  if (file.size > 2 * 1024 * 1024) { alert('Logo must be under 2MB'); input.value=''; return; }
-  var lbl = document.getElementById('sm-logo-lbl');
-  lbl.textContent = '⏳ Reading…';
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    document.getElementById('sm-logo-data').value = e.target.result; // base64 data URL
-    document.getElementById('sm-logo-name').value = file.name;
-    document.getElementById('sm-logo-img').src    = e.target.result;
-    document.getElementById('sm-logo-preview').style.display = 'block';
-    lbl.textContent = '✓ ' + file.name + ' (' + Math.round(file.size/1024) + 'KB)';
-    lbl.style.borderColor = 'var(--gl)';
-    lbl.style.color = 'var(--gl)';
-  };
-  reader.readAsDataURL(file);
-}
+// ════════════════════════════════
+// LEVEL MODAL
+// ════════════════════════════════
+var _editingLevelId = null;
+var _modalTheme = 'title';
+var _modalBenefits = []; // currently selected benefit IDs in modal
 
-function clearLogo() {
-  document.getElementById('sm-logo-data').value = '';
-  document.getElementById('sm-logo-name').value = '';
-  document.getElementById('sm-logo-img').src    = '';
-  document.getElementById('sm-logo-preview').style.display = 'none';
-  document.getElementById('sm-logo-file').value = '';
-  document.getElementById('sm-logo-lbl').textContent = '📎 Click to upload logo (PNG, JPG, SVG)';
-  document.getElementById('sm-logo-lbl').style.borderColor = '';
-  document.getElementById('sm-logo-lbl').style.color = '';
-}
+function openLevelModal(id) {
+  _editingLevelId = id || null;
+  _modalTheme = 'title';
+  _modalBenefits = [];
 
-function openSM(id) {
-  var s=id?D.s.find(function(x){return x.id===id;}):null;
-  document.getElementById('sm-t').textContent=s?'Edit Sponsor':'New Sponsor';
-  document.getElementById('sm-id').value=s?s.id:'';
-  document.getElementById('sm-co').value=s?s.company||'':'';
-  document.getElementById('sm-ti').value=s?s.tier||'Gold':'Gold';
-  document.getElementById('sm-fn').value=s?s.firstName||'':'';
-  document.getElementById('sm-ln').value=s?s.lastName||'':'';
-  document.getElementById('sm-em').value=s?s.email||'':'';
-  document.getElementById('sm-ph').value=s?s.phone||'':'';
-  document.getElementById('sm-addr').value=s?s.address||'':'';
-  document.getElementById('sm-web').value=s?s.website||'':'';
-  document.getElementById('sm-am').value=s?s.amount||'':'';
-  document.getElementById('sm-st').value=s?s.status||'paid':'paid';
-  document.getElementById('sm-ho').value=s?s.hole||'':'';
-  document.getElementById('sm-cs').value=s?s.compSlots||'':'';
-  document.getElementById('sm-no').value=s?s.notes||'':'';
-  // Logo
-  clearLogo();
-  if (s && s.logoData) {
-    document.getElementById('sm-logo-data').value = s.logoData;
-    document.getElementById('sm-logo-name').value = s.logoName || '';
-    document.getElementById('sm-logo-img').src    = s.logoData;
-    document.getElementById('sm-logo-preview').style.display = 'block';
-    document.getElementById('sm-logo-lbl').textContent = '✓ ' + (s.logoName || 'Logo on file');
-    document.getElementById('sm-logo-lbl').style.borderColor = 'var(--gl)';
-    document.getElementById('sm-logo-lbl').style.color = 'var(--gl)';
+  var lv = id ? STATE.levels.find(x => x.id === id) : null;
+
+  // Set title
+  document.getElementById('level-modal-title').textContent = lv ? 'Edit Sponsor Level' : 'New Sponsor Level';
+
+  // Populate fields
+  document.getElementById('lm-name').value    = lv ? lv.name    : '';
+  document.getElementById('lm-price').value   = lv ? lv.price   : '';
+  document.getElementById('lm-id').value      = lv ? lv.id      : '';
+  document.getElementById('lm-badge').value   = lv ? (lv.badge  || '') : '';
+  document.getElementById('lm-order').value   = lv ? (lv.order  || 10) : (STATE.levels.length + 1) * 10;
+
+  // Theme
+  _modalTheme = lv ? (lv.theme || 'title') : 'title';
+  document.querySelectorAll('#lm-theme-picker .theme-swatch').forEach(function(sw) {
+    sw.classList.toggle('active', sw.dataset.theme === _modalTheme);
+  });
+
+  // Featured toggle
+  var tog = document.getElementById('lm-featured-toggle');
+  tog.classList.toggle('on', !!(lv && lv.featured));
+
+  // Selected benefits
+  _modalBenefits = lv ? lv.benefits.slice() : [];
+
+  // Auto-fill ID from name if new
+  if (!lv) {
+    document.getElementById('lm-name').addEventListener('input', autoFillId);
+  } else {
+    document.getElementById('lm-name').removeEventListener('input', autoFillId);
   }
-  if(!s) updateCompSlots();
-  openM('sm');
+
+  renderModalBenefitsSelector();
+  document.getElementById('level-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('lm-name').focus(); }, 50);
 }
 
-async function saveSp() {
-  var id=document.getElementById('sm-id').value;
-  var tier=document.getElementById('sm-ti').value;
-  var b=TB[tier]||{};
-  var btn=document.getElementById('sm-save-btn');
-  btn.disabled=true; btn.textContent='Saving…';
-  var d={
-    company:   document.getElementById('sm-co').value.trim(),
-    tier,
-    firstName: document.getElementById('sm-fn').value.trim(),
-    lastName:  document.getElementById('sm-ln').value.trim(),
-    email:     document.getElementById('sm-em').value.trim(),
-    phone:     document.getElementById('sm-ph').value.trim(),
-    address:   document.getElementById('sm-addr').value.trim(),
-    website:   document.getElementById('sm-web').value.trim(),
-    amount:    parseFloat(document.getElementById('sm-am').value)||0,
-    status:    document.getElementById('sm-st').value,
-    hole:      document.getElementById('sm-ho').value.trim(),
-    compSlots: parseInt(document.getElementById('sm-cs').value)||b.teams||0,
-    notes:     document.getElementById('sm-no').value.trim(),
-    logoData:  document.getElementById('sm-logo-data').value || null,
-    logoName:  document.getElementById('sm-logo-name').value || null,
-  };
-  if(id){
-    d.id=id; d.updatedAt=new Date().toISOString();
-    var i=D.s.findIndex(function(x){return x.id===id;});
-    if(i>=0) D.s[i]=Object.assign({},D.s[i],d);
-    await put('sponsors',D.s);
-  } else { var rec=await post('sponsors',d); D.s.push(rec); }
-  btn.disabled=false; btn.textContent='Save Sponsor';
-  closeM('sm'); stats(); rs();
+function autoFillId() {
+  var name = document.getElementById('lm-name').value;
+  var idEl = document.getElementById('lm-id');
+  if (!idEl.dataset.dirty) {
+    idEl.value = slugify(name);
+  }
 }
 
-// ── COMP ──
-function rc() {
-  var tb=document.getElementById('ctb');
-  if(!D.c.length){tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">🎁</div><p>No comp teams yet</p></div></td></tr>';return;}
-  tb.innerHTML=D.c.map(function(c){
-    var sp=D.s.find(function(s){return s.id===c.sponsorId;});
-    var spn=sp?(sp.company||sp.firstName+' '+sp.lastName):'—';
-    var pc=c.players?c.players.length:0;
-    var cs=sp?(sp.compSlots||(TB[sp.tier]||{}).teams||0):0;
-    var cu=D.c.filter(function(x){return x.sponsorId===c.sponsorId;}).length;
-    return '<tr>'+
-      '<td><strong>'+spn+'</strong>'+(sp?'<br>'+bd(sp.tier,sp.tier):'')+'</td>'+
-      '<td><strong>'+(c.teamName||'Unnamed')+'</strong></td>'+
-      '<td style="font-size:12px">'+(c.players?c.players.map(function(p){return (p.firstName||'')+' '+(p.lastName||'');}).filter(Boolean).join(', '):'—')+'</td>'+
-      '<td style="font-size:12px"><strong>'+cu+'</strong>/'+cs+' slots</td>'+
-      '<td style="font-size:12px">'+(c.notes||'—')+'</td>'+
-      '<td><div class="ac">'+
-        '<button class="btn btn-s sm" onclick="openCM(\''+c.id+'\')">Edit</button>'+
-        '<button class="btn btn-d sm" onclick="delR(\'comp\',\''+c.id+'\')">Del</button>'+
-      '</div></td></tr>';
-  }).join('');
+document.getElementById('lm-id').addEventListener('input', function() {
+  this.dataset.dirty = '1';
+});
+
+function closeLevelModal() {
+  document.getElementById('level-modal').classList.remove('open');
+  _editingLevelId = null;
+  document.getElementById('lm-name').removeEventListener('input', autoFillId);
+  delete document.getElementById('lm-id').dataset.dirty;
 }
 
-function showSlotInfo() {
-  var sid=document.getElementById('cm-sp').value;
-  var sp=D.s.find(function(s){return s.id===sid;});
-  var el=document.getElementById('cm-slot-info');
-  if(!sp){el.style.display='none';return;}
-  var b=TB[sp.tier]||{};
-  var cs=sp.compSlots||b.teams||0;
-  var cu=D.c.filter(function(c){return c.sponsorId===sid;}).length;
-  el.style.display='block';
-  el.textContent=(sp.company||sp.firstName+' '+sp.lastName)+' — '+sp.tier+' Sponsor · '+cu+'/'+cs+' comp teams used · '+b.players+' players per team';
+function pickTheme(el, theme) {
+  _modalTheme = theme;
+  document.querySelectorAll('#lm-theme-picker .theme-swatch').forEach(sw => sw.classList.remove('active'));
+  el.classList.add('active');
 }
 
-function openCM(id, sponsorId) {
-  var c=id?D.c.find(function(x){return x.id===id;}):null;
-  document.getElementById('cm-t').textContent=c?'Edit Comp Team':'Assign Comp Team';
-  document.getElementById('cm-id').value=c?c.id:'';
-  document.getElementById('cm-tn').value=c?c.teamName||'':'';
-  document.getElementById('cm-no').value=c?c.notes||'':'';
-  var sel=document.getElementById('cm-sp');
-  sel.innerHTML=D.s.map(function(s){return '<option value="'+s.id+'">'+(s.company||s.firstName+' '+s.lastName)+' — '+(s.tier||'')+'</option>';}).join('');
-  if(c&&c.sponsorId) sel.value=c.sponsorId;
-  else if(sponsorId) sel.value=sponsorId;
-  showSlotInfo();
-  rProws('cm-pl', c?c.players||[]:[{firstName:'',lastName:'',email:'',phone:''}]);
-  openM('cm');
-}
-
-async function saveC() {
-  var id=document.getElementById('cm-id').value;
-  var d={
-    sponsorId:document.getElementById('cm-sp').value,
-    teamName:document.getElementById('cm-tn').value.trim(),
-    players:cProws('cm-pl'),
-    notes:document.getElementById('cm-no').value.trim(),
-  };
-  if(id){
-    d.id=id; d.updatedAt=new Date().toISOString();
-    var i=D.c.findIndex(function(x){return x.id===id;});
-    if(i>=0) D.c[i]=Object.assign({},D.c[i],d);
-    await put('comp',D.c);
-  } else { var rec=await post('comp',d); D.c.push(rec); }
-  closeM('cm'); stats(); rc(); rs();
-}
-
-// ── SETTINGS ──
-function rx() {
-  var x=D.x;
-  document.getElementById('ne').checked=x.notifyOnEntry!==false;
-  document.getElementById('ns').checked=x.notifyOnSponsor!==false;
-  var list=document.getElementById('ael');
-  var admins=x.adminEmails||[];
-  if(!admins.length){list.innerHTML='<p style="font-size:13px;color:var(--tl)">No admins added yet.</p>';return;}
-  list.innerHTML=admins.map(function(a,i){
-    return '<div class="arow">'+
-      '<div class="aname">'+(a.name||'Unnamed')+'</div>'+
-      '<div class="aemail">'+(a.email||'')+'</div>'+
-      '<span class="bd '+(a.role==='admin'?'bd-paid':'bd-comp')+'">'+(a.role||'notify')+'</span>'+
-      '<button class="btn btn-d sm" onclick="rmAE('+i+')">Remove</button>'+
+function renderModalBenefitsSelector() {
+  var container = document.getElementById('lm-benefits-selector');
+  if (!container) return;
+  if (!STATE.benefits.length) {
+    container.innerHTML = '<span style="font-size:12px;color:var(--text-light);font-style:italic;">No benefits in pool yet — add some below.</span>';
+    return;
+  }
+  container.innerHTML = STATE.benefits.map(function(b) {
+    var on = _modalBenefits.includes(b.id);
+    return '<div class="benefit-toggle' + (on ? ' on' : '') + '" onclick="toggleModalBenefit(\'' + b.id + '\',this)">' +
+      escHtml(b.text) +
     '</div>';
   }).join('');
 }
 
-async function saveSt() {
-  D.x.notifyOnEntry   = document.getElementById('ne').checked;
-  D.x.notifyOnSponsor = document.getElementById('ns').checked;
-  await put('settings', D.x);
-}
-
-function openAEM() {
-  document.getElementById('aem-id').value='';
-  document.getElementById('aem-n').value='';
-  document.getElementById('aem-e').value='';
-  document.getElementById('aem-r').value='admin';
-  openM('aem');
-}
-
-async function saveAE() {
-  var admins=D.x.adminEmails||[];
-  admins.push({ name:document.getElementById('aem-n').value.trim(), email:document.getElementById('aem-e').value.trim(), role:document.getElementById('aem-r').value });
-  D.x.adminEmails=admins;
-  await put('settings',D.x);
-  closeM('aem'); rx();
-}
-
-async function rmAE(i) {
-  if(!confirm('Remove this admin?')) return;
-  D.x.adminEmails.splice(i,1);
-  await put('settings',D.x); rx();
-}
-
-// ── PLAYER ROWS ──
-function rProws(cid, players) {
-  var c=document.getElementById(cid); c.innerHTML='';
-  (players||[]).forEach(function(p,i){ c.appendChild(mkProw(cid,p,i)); });
-}
-function mkProw(cid, p, i) {
-  var row=document.createElement('div'); row.className='prow'; row.id=cid+'-r'+i;
-  row.innerHTML=
-    '<div><div class="prow-lbl">First</div><input class="prow-inp" value="'+(p.firstName||'')+'" placeholder="First name"></div>'+
-    '<div><div class="prow-lbl">Last</div><input class="prow-inp" value="'+(p.lastName||'')+'" placeholder="Last name"></div>'+
-    '<div><div class="prow-lbl">Email / Phone</div><input class="prow-inp" value="'+(p.email||p.phone||'')+'" placeholder="email or phone"></div>'+
-    '<button class="del-btn" onclick="rmProw(\''+cid+'\',\''+cid+'-r'+i+'\')">×</button>';
-  return row;
-}
-function addPR(cid) { var c=document.getElementById(cid); c.appendChild(mkProw(cid,{},c.children.length)); }
-function rmProw(cid, rowId) { var r=document.getElementById(rowId); if(r) r.remove(); }
-function cProws(cid) {
-  var rows=document.getElementById(cid).querySelectorAll('.prow');
-  var out=[];
-  rows.forEach(function(row){
-    var ins=row.querySelectorAll('.prow-inp');
-    var fn=ins[0]?ins[0].value.trim():'', ln=ins[1]?ins[1].value.trim():'', em=ins[2]?ins[2].value.trim():'';
-    if(fn||ln||em) out.push({firstName:fn,lastName:ln,email:em});
-  });
-  return out;
-}
-
-// ── DELETE ──
-async function delR(res, id) {
-  if(!confirm('Delete this record? Cannot be undone.')) return;
-  await del(res, id);
-  var k=res==='comp'?'c':res==='entries'?'e':'s';
-  D[k]=D[k].filter(function(x){return x.id!==id;});
-  stats();
-  if(res==='entries') re();
-  if(res==='sponsors') rs();
-  if(res==='comp') rc();
-}
-
-// ── TABS ──
-function showTab(t) {
-  ['e','s','c','x'].forEach(function(n){document.getElementById('t'+n).style.display=n===t?'block':'none';});
-  document.querySelectorAll('.tbtn').forEach(function(b,i){b.classList.toggle('on',['e','s','c','x'][i]===t);});
-}
-
-// ── MODALS ──
-function openM(id) { document.getElementById(id).classList.add('open'); }
-function closeM(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.mo').forEach(function(el){ el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open');}); });
-
-// ── CSV EXPORT ──
-function xcsv(t) {
-  var rows, fn;
-  if(t==='e') {
-    rows=[['Team','Contact','Email','Phone','Company','# Players','Players','Amount','Status','Add-ons','Stripe Session','Notes','Date']];
-    D.e.forEach(function(e){rows.push([e.teamName||'',e.firstName+' '+e.lastName,e.email||'',e.phone||'',e.company||'',e.players?e.players.length:0,(e.players||[]).map(function(p){return p.firstName+' '+p.lastName;}).join('; '),e.amount||'',e.status||'',e.addons||'',e.stripeSession||'',e.notes||'',fdate(e.createdAt)]);});
-    fn='rr-golf-entries.csv';
-  } else if(t==='s') {
-    rows=[['Company','Tier','Contact','Email','Phone','Amount','Status','Hole','Comp Slots','Notes','Date']];
-    D.s.forEach(function(s){rows.push([s.company||'',s.tier||'',s.firstName+' '+s.lastName,s.email||'',s.phone||'',s.amount||'',s.status||'',s.hole||'',s.compSlots||'',s.notes||'',fdate(s.createdAt)]);});
-    fn='rr-golf-sponsors.csv';
+function toggleModalBenefit(id, el) {
+  var idx = _modalBenefits.indexOf(id);
+  if (idx === -1) {
+    _modalBenefits.push(id);
+    el.classList.add('on');
   } else {
-    rows=[['Sponsor','Team','Players','Notes','Date']];
-    D.c.forEach(function(c){var sp=D.s.find(function(s){return s.id===c.sponsorId;});rows.push([sp?(sp.company||sp.firstName+' '+sp.lastName):'—',c.teamName||'',(c.players||[]).map(function(p){return p.firstName+' '+p.lastName;}).join('; '),c.notes||'',fdate(c.createdAt)]);});
-    fn='rr-golf-comp.csv';
+    _modalBenefits.splice(idx, 1);
+    el.classList.remove('on');
   }
-  var csv=rows.map(function(r){return r.map(function(v){return '"'+String(v).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
-  var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=fn; a.click();
+}
+
+function addBenefitFromModal() {
+  var inp = document.getElementById('lm-new-benefit');
+  var text = inp.value.trim();
+  if (!text) { inp.focus(); return; }
+  if (STATE.benefits.find(b => b.text.toLowerCase() === text.toLowerCase())) {
+    // Benefit exists — just toggle it on if not already
+    var existing = STATE.benefits.find(b => b.text.toLowerCase() === text.toLowerCase());
+    if (!_modalBenefits.includes(existing.id)) {
+      _modalBenefits.push(existing.id);
+    }
+    inp.value = '';
+    renderModalBenefitsSelector();
+    return;
+  }
+  var newB = { id: genId('b'), text: text };
+  STATE.benefits.push(newB);
+  _modalBenefits.push(newB.id);
+  inp.value = '';
+  saveState();
+  renderBenefitsPool();
+  renderModalBenefitsSelector();
+  showToast('Benefit added to pool & selected ✓');
+}
+
+function saveLevel() {
+  var name  = document.getElementById('lm-name').value.trim();
+  var price = parseInt(document.getElementById('lm-price').value, 10);
+  var rawId = document.getElementById('lm-id').value.trim();
+  var id    = rawId || slugify(name);
+  var badge = document.getElementById('lm-badge').value.trim();
+  var order = parseInt(document.getElementById('lm-order').value, 10) || 10;
+  var featured = document.getElementById('lm-featured-toggle').classList.contains('on');
+
+  if (!name) { document.getElementById('lm-name').focus(); showToast('Level name is required'); return; }
+  if (!price || price < 0) { document.getElementById('lm-price').focus(); showToast('Price is required'); return; }
+  if (!id) { document.getElementById('lm-id').focus(); showToast('Level ID is required'); return; }
+
+  // Check ID uniqueness (unless editing same)
+  var conflict = STATE.levels.find(lv => lv.id === id && lv.id !== _editingLevelId);
+  if (conflict) { showToast('That ID is already in use — choose another'); document.getElementById('lm-id').focus(); return; }
+
+  if (_editingLevelId) {
+    // Edit existing
+    var lv = STATE.levels.find(x => x.id === _editingLevelId);
+    if (lv) {
+      // If ID changed, update all references
+      if (_editingLevelId !== id) {
+        lv.id = id;
+      }
+      lv.name     = name;
+      lv.price    = price;
+      lv.theme    = _modalTheme;
+      lv.badge    = badge;
+      lv.order    = order;
+      lv.featured = featured;
+      lv.benefits = _modalBenefits.slice();
+    }
+  } else {
+    STATE.levels.push({
+      id: id, name: name, price: price,
+      theme: _modalTheme, badge: badge, order: order,
+      featured: featured, benefits: _modalBenefits.slice()
+    });
+  }
+
+  saveState();
+  renderLevels();
+  closeLevelModal();
+  showToast((_editingLevelId ? 'Level updated' : 'Level created') + ' ✓');
+}
+
+// ════════════════════════════════
+// DRAG TO REORDER
+// ════════════════════════════════
+var _dragId = null;
+
+function dragStart(e, id) {
+  _dragId = id;
+  e.dataTransfer.effectAllowed = 'move';
+}
+function dragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+function dragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function dragDrop(e, targetId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!_dragId || _dragId === targetId) return;
+
+  var fromLv  = STATE.levels.find(x => x.id === _dragId);
+  var toLv    = STATE.levels.find(x => x.id === targetId);
+  if (!fromLv || !toLv) return;
+
+  // Swap order values
+  var tmp = fromLv.order;
+  fromLv.order = toLv.order;
+  toLv.order   = tmp;
+
+  _dragId = null;
+  saveState();
+  renderLevels();
+}
+
+// ════════════════════════════════
+// EXPORT
+// ════════════════════════════════
+function buildExportObject() {
+  var sorted = STATE.levels.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
+  var obj = {};
+  sorted.forEach(function(lv) {
+    obj[lv.id] = {
+      name:     lv.name,
+      price:    lv.price,
+      theme:    lv.theme,
+      badge:    lv.badge || null,
+      featured: lv.featured,
+      benefits: lv.benefits.map(function(bid) {
+        var b = STATE.benefits.find(x => x.id === bid);
+        return b ? b.text : null;
+      }).filter(Boolean)
+    };
+  });
+  return obj;
+}
+
+function buildHtmlSnippet() {
+  var sorted = STATE.levels.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
+  var themeClass = { title:'title-tier', gold:'gold-tier', silver:'silver-tier', bronze:'bronze-tier', green:'green-tier', navy:'navy-tier' };
+  var strokeColor = { title:'white', gold:'white', silver:'white', bronze:'white', green:'white', navy:'white' };
+
+  return sorted.map(function(lv) {
+    var tc = themeClass[lv.theme] || 'title-tier';
+    var sc = strokeColor[lv.theme] || 'white';
+    var price = Number(lv.price).toLocaleString('en-US');
+    var benefitLines = lv.benefits.map(function(bid) {
+      var b = STATE.benefits.find(x => x.id === bid);
+      return b ? '        <div class="perk"><span class="perk-dot"></span><span>' + escHtml(b.text) + '</span></div>' : '';
+    }).filter(Boolean).join('\n');
+    var badgeHtml = lv.badge ? '\n        <div class="featured-pill">' + escHtml(lv.badge) + '</div>' : '';
+    return '    <div class="tier ' + tc + ' selectable" data-id="' + lv.id + '" data-name="' + escHtml(lv.name) + '" data-price="' + lv.price + '">\n' +
+      '      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="' + sc + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>\n' +
+      '      <div class="tier-header">\n' +
+      '        <div class="tier-label">' + escHtml(lv.name) + '</div>\n' +
+      '        <div class="tier-price"><sup>$</sup>' + price + '</div>' + badgeHtml + '\n' +
+      '      </div>\n' +
+      '      <div class="tier-body">\n' + benefitLines + '\n' +
+      '      </div>\n' +
+      '    </div>';
+  }).join('\n');
+}
+
+function refreshExport() {
+  var obj = buildExportObject();
+  document.getElementById('export-json').textContent =
+    'var SPONSOR_LEVELS = ' + JSON.stringify(obj, null, 2) + ';';
+  document.getElementById('export-html').textContent =
+    '<!-- TIERS (paste inside <div class="tiers"> in register.html) -->\n' + buildHtmlSnippet();
+}
+
+function copyExport() {
+  var text = document.getElementById('export-json').textContent;
+  copyToClipboard(text, 'JSON copied to clipboard ✓');
+}
+
+function copyHtml() {
+  var text = document.getElementById('export-html').textContent;
+  copyToClipboard(text, 'HTML copied to clipboard ✓');
+}
+
+function downloadExport() {
+  var obj = buildExportObject();
+  var blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sponsor-levels.json';
+  a.click();
+}
+
+function copyToClipboard(text, msg) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function(){ showToast(msg); });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast(msg);
+  }
+}
+
+// ════════════════════════════════
+// TOAST
+// ════════════════════════════════
+var _toastTimer = null;
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2600);
+}
+
+// ════════════════════════════════
+// UTILS
+// ════════════════════════════════
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(function(ov) {
+  ov.addEventListener('click', function(e) {
+    if (e.target === ov) {
+      ov.classList.remove('open');
+    }
+  });
+});
+
+// ════════════════════════════════
+// INIT
+// ════════════════════════════════
+function initApp() {
+  loadState();
+  renderBenefitsPool();
+  renderLevels();
+  updateCounts();
 }
 </script>
 </body>
