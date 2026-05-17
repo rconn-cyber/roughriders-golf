@@ -246,6 +246,10 @@ tr:hover td { background: #f8faf8; }
         <span class="nav-icon">📋</span> Benefits Pool
         <span class="nav-count" id="cnt-pool">0</span>
       </div>
+      <div class="sb-label" style="margin-top:8px;">Print</div>
+      <div class="nav-item" onclick="openCheckin()" style="color:var(--gold);">
+        <span class="nav-icon">🖨</span> Check-In Sheets
+      </div>
     </nav>
 
     <main class="main">
@@ -1031,7 +1035,7 @@ function renderRegistrations(orders){
     var addons = (r.addons||[]).map(function(a){return a.name||a;}).join(', ') || '—';
     var amt = r.amount ? fmtMoney(r.amount/100) : (r.total ? fmtMoney(r.total) : '—');
     var status = r.status || r.paymentStatus || 'paid';
-    var date = r.created ? new Date(r.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.date || '—');
+    var date = r.created ? new Date(r.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.date ? new Date(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'));
     var src = r.source === 'manual' ? ' <span style="font-size:9px;background:#f0f2ef;color:var(--tl);padding:1px 5px;border-radius:3px;vertical-align:middle;">manual</span>' : '';
     return '<tr>'+
       '<td><strong>'+escH(name.trim()||'—')+'</strong>'+src+'</td>'+
@@ -1081,7 +1085,7 @@ function renderSponsors(sponsors){
     var logoCell = s.logoData
       ? '<img src="'+s.logoData+'" style="max-height:32px;max-width:80px;object-fit:contain;vertical-align:middle;border-radius:2px;" title="Logo on file">'
       : '<span style="font-size:11px;color:var(--tl);">—</span>';
-    var date = s.created ? new Date(s.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (s.date||'—');
+    var date = s.created ? new Date(s.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (s.date ? new Date(s.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (s.createdAt ? new Date(s.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'));
     var src = s.source === 'manual' ? ' <span style="font-size:9px;background:#f0f2ef;color:var(--tl);padding:1px 5px;border-radius:3px;vertical-align:middle;">manual</span>' : '';
     return '<tr>'+
       '<td><strong>'+escH(name)+'</strong>'+src+'</td>'+
@@ -2003,6 +2007,12 @@ async function saveManualSponsor(paymentType, notes) {
 // ════════════════════════════════
 // INIT
 // ════════════════════════════════
+function openCheckin() {
+  // Pass JWT via sessionStorage so checkin.html can auto-load
+  if (_jwt) sessionStorage.setItem('rrgolf_jwt', _jwt);
+  window.open('checkin.html', '_blank');
+}
+
 async function initApp(){
   setSaveBadge('saving', 'Loading…');
   await loadConfig();
