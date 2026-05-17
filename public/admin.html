@@ -178,6 +178,22 @@ tr:hover td { background: #f8faf8; }
 .toggle-switch.on::after { transform: translateX(18px); }
 .toggle-row { display: flex; align-items: center; gap: 9px; }
 
+/* SPONSOR EDIT — player rows */
+.sp-player-row { display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.06); }
+.sp-player-num { width:20px;height:20px;border-radius:50%;background:#0f2318;color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.sp-player-num.extra { background:#b8940e; }
+.sp-player-inputs { display:flex;gap:6px;flex:1;flex-wrap:wrap; }
+.sp-player-inputs input { flex:1;min-width:100px;padding:6px 9px;border:1px solid var(--border);border-radius:4px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none; }
+.sp-player-inputs input:focus { border-color:var(--gl); }
+.sp-team-divider { font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tl);padding:8px 0 4px;border-top:1px dashed var(--border);margin-top:4px; }
+
+/* BENEFIT TOGGLES in sponsor edit */
+.sp-benefit-tog { display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border:1.5px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;font-weight:500;transition:all .12s;background:var(--w);color:var(--tm);user-select:none;font-family:'DM Sans',sans-serif; }
+.sp-benefit-tog:hover { border-color:var(--gl);color:var(--gd); }
+.sp-benefit-tog.on { background:var(--gd);border-color:var(--gd);color:#fff; }
+.sp-benefit-tog.custom { border-style:dashed; }
+.sp-benefit-tog.custom.on { border-style:solid; }
+
 /* TOAST */
 #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(70px); background: var(--gd); color: #fff; padding: 10px 18px; border-radius: 6px; font-size: 12px; font-weight: 600; z-index: 999; transition: transform .28s; box-shadow: 0 6px 20px rgba(0,0,0,.22); pointer-events: none; }
 #toast.show { transform: translateX(-50%) translateY(0); }
@@ -455,6 +471,31 @@ tr:hover td { background: #f8faf8; }
           <label class="form-label">Website</label>
           <input class="form-input" id="em-sp-website" type="url" placeholder="https://example.com">
         </div>
+        <!-- INCLUDED PLAYERS -->
+        <div class="form-group" id="em-sp-players-section" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <label class="form-label" style="margin-bottom:0;">Included Players <span id="em-sp-slots-note" style="color:var(--tl);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></label>
+            <button class="btn btn-outline btn-sm" onclick="addSpTeam()" id="em-sp-add-team-btn">+ Add Team</button>
+          </div>
+          <div id="em-sp-players-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+          <button class="btn btn-outline btn-sm" onclick="addSpPlayer()" style="margin-top:8px;">+ Add Player</button>
+        </div>
+
+        <!-- BENEFITS -->
+        <div class="form-group">
+          <label class="form-label">Benefits <span>— what this sponsor receives</span></label>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;" id="em-sp-benefits">
+            <!-- populated when modal opens -->
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+            <input class="form-input" id="em-sp-new-ben" type="text" placeholder="Add custom benefit…"
+              style="flex:1;min-width:160px;font-size:13px;padding:8px 11px;" maxlength="80"
+              onkeydown="if(event.key==='Enter'){addCustomSpBenefit();event.preventDefault();}">
+            <button class="btn btn-outline btn-sm" onclick="addCustomSpBenefit()">+ Add</button>
+          </div>
+          <div class="form-hint">Toggles auto-populate from selected package. Edit freely.</div>
+        </div>
+
         <div class="form-group">
           <label class="form-label">Logo</label>
           <div id="em-logo-preview" style="display:none;margin-bottom:10px;">
@@ -1490,11 +1531,11 @@ function openEditEntry(type, idx) {
     var html = '';
     sortBy(STATE.levels).forEach(function(lv){
       var on = currentPkgs.some(function(p){return p===lv.name.toLowerCase()||p.indexOf(lv.name.toLowerCase())>=0;});
-      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount()">'+escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
+      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount();var sps=getCurrentSpSponsorships();updateSpPlayerSection(sps);rebuildBenefitsFromPackage(sps);">'+escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
     });
     sortBy(STATE.alacarte).forEach(function(ac){
       var on = currentPkgs.some(function(p){return p===ac.name.toLowerCase()||p.indexOf(ac.name.toLowerCase())>=0;});
-      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(ac.name)+'" data-sp-price="'+ac.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount()">'+escH(ac.name)+' — '+fmtMoney(ac.price)+'</div>';
+      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(ac.name)+'" data-sp-price="'+ac.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount();var sps=getCurrentSpSponsorships();updateSpPlayerSection(sps);rebuildBenefitsFromPackage(sps);">'+escH(ac.name)+' — '+fmtMoney(ac.price)+'</div>';
     });
     picker.innerHTML = html;
   }
@@ -1504,9 +1545,11 @@ function openEditEntry(type, idx) {
   document.getElementById('em-status').value = status;
   document.getElementById('em-notes').value  = r.notes || '';
 
-  // Init logo section for sponsors
+  // Init logo + players + benefits for sponsors
   if (type === 'sponsor') {
     initEditLogo(r);
+    initSpPlayers(r);
+    initSpBenefits(r);
   }
 
   document.getElementById('edit-modal').classList.add('open');
@@ -1517,6 +1560,220 @@ function openEditEntry(type, idx) {
 }
 
 
+
+
+// ════════════════════════════════
+// SPONSOR EDIT — PLAYERS + BENEFITS
+// ════════════════════════════════
+
+// Parse how many players a package includes from benefit text or package name
+function getIncludedPlayers(sponsorships) {
+  var total = 0;
+  // Look at selected package names against STATE.levels benefits
+  sponsorships.forEach(function(sp) {
+    var name = (sp.name||sp||'').toLowerCase();
+    // Check against levels
+    STATE.levels.forEach(function(lv) {
+      if (lv.name.toLowerCase() !== name && !name.includes(lv.name.toLowerCase())) return;
+      lv.benefits.forEach(function(bid) {
+        var bt = benText(bid).toLowerCase();
+        // e.g. "3 teams — 12 golfers", "2 teams — 8 golfers", "1 team — 4 golfers"
+        var m = bt.match(/(\d+)\s*(?:teams?|players?|golfers?)/);
+        if (m) {
+          var n = parseInt(m[1]);
+          // If "teams", multiply by 4
+          if (bt.includes('team')) n = n * 4;
+          if (n > total) total = n;
+        }
+      });
+    });
+    // Fallback: name-based inference
+    if (total === 0) {
+      if (name.includes('title'))  total = Math.max(total, 12);
+      if (name.includes('gold'))   total = Math.max(total, 8);
+      if (name.includes('silver')) total = Math.max(total, 4);
+      if (name.includes('bronze')) total = Math.max(total, 4);
+    }
+  });
+  return total;
+}
+
+// State for sponsor player editing
+var _spPlayers = []; // [{firstName,lastName,email,phone}]
+var _spBenefits = []; // [{text, custom:bool, on:bool}]
+
+function initSpPlayers(record) {
+  // Load existing players
+  _spPlayers = (record.golfers || []).map(function(g) {
+    return { firstName: g.firstName||'', lastName: g.lastName||'', email: g.email||'', phone: g.phone||'' };
+  });
+  renderSpPlayersList();
+  updateSpPlayerSection(record.sponsorships || []);
+}
+
+function updateSpPlayerSection(sponsorships) {
+  var included = getIncludedPlayers(sponsorships);
+  var sec  = document.getElementById('em-sp-players-section');
+  var note = document.getElementById('em-sp-slots-note');
+  if (included > 0) {
+    sec.style.display = '';
+    note.textContent  = '(' + included + ' included with package)';
+    // Expand player list to match included slots if under
+    while (_spPlayers.length < included) {
+      _spPlayers.push({ firstName:'', lastName:'', email:'', phone:'' });
+    }
+    renderSpPlayersList(included);
+  } else {
+    // No included players but still show section if they have players
+    if (_spPlayers.length > 0) {
+      sec.style.display = '';
+      note.textContent  = '';
+      renderSpPlayersList(0);
+    } else {
+      sec.style.display = 'none';
+    }
+  }
+}
+
+function renderSpPlayersList(includedCount) {
+  var list = document.getElementById('em-sp-players-list');
+  if (!list) return;
+  includedCount = includedCount || 0;
+  var html = '';
+  for (var i = 0; i < _spPlayers.length; i++) {
+    var p = _spPlayers[i];
+    var isExtra = (i >= includedCount && includedCount > 0);
+    var teamNum = Math.floor(i / 4) + 1;
+    var posInTeam = i % 4;
+    // Team divider
+    if (i > 0 && posInTeam === 0 && includedCount > 4) {
+      html += '<div class="sp-team-divider">Team ' + teamNum + '</div>';
+    } else if (i === 0 && includedCount > 4) {
+      html += '<div class="sp-team-divider">Team 1</div>';
+    }
+    var numClass = isExtra ? 'sp-player-num extra' : 'sp-player-num';
+    html += '<div class="sp-player-row" id="sp-pr-' + i + '">' +
+      '<div class="' + numClass + '">' + (i+1) + '</div>' +
+      '<div class="sp-player-inputs">' +
+        '<input type="text" placeholder="First name" value="' + escH(p.firstName) + '" oninput="_spPlayers[' + i + '].firstName=this.value">' +
+        '<input type="text" placeholder="Last name" value="' + escH(p.lastName) + '" oninput="_spPlayers[' + i + '].lastName=this.value">' +
+        '<input type="email" placeholder="Email (optional)" value="' + escH(p.email) + '" oninput="_spPlayers[' + i + '].email=this.value" style="min-width:140px;">' +
+      '</div>' +
+      '<button class="btn btn-danger btn-sm" onclick="removeSpPlayer(' + i + ')" style="padding:3px 7px;font-size:11px;">✕</button>' +
+    '</div>';
+  }
+  list.innerHTML = html;
+}
+
+function addSpPlayer() {
+  _spPlayers.push({ firstName:'', lastName:'', email:'', phone:'' });
+  var included = getIncludedPlayers(getCurrentSpSponsorships());
+  renderSpPlayersList(included);
+  // Focus first empty name field
+  setTimeout(function(){
+    var rows = document.querySelectorAll('#em-sp-players-list .sp-player-row');
+    var last = rows[rows.length-1];
+    if (last) { var inp = last.querySelector('input'); if(inp) inp.focus(); }
+  }, 30);
+}
+
+function addSpTeam() {
+  var included = getIncludedPlayers(getCurrentSpSponsorships());
+  for (var i = 0; i < 4; i++) {
+    _spPlayers.push({ firstName:'', lastName:'', email:'', phone:'' });
+  }
+  renderSpPlayersList(included);
+  document.getElementById('em-sp-players-section').style.display = '';
+  setTimeout(function(){
+    var rows = document.querySelectorAll('#em-sp-players-list .sp-player-row');
+    var first = rows[rows.length - 4];
+    if (first) { var inp = first.querySelector('input'); if(inp) inp.focus(); }
+  }, 30);
+  toast('Team of 4 added (' + _spPlayers.length + ' total players)');
+}
+
+function removeSpPlayer(idx) {
+  _spPlayers.splice(idx, 1);
+  var included = getIncludedPlayers(getCurrentSpSponsorships());
+  renderSpPlayersList(included);
+}
+
+function getCurrentSpSponsorships() {
+  var result = [];
+  document.querySelectorAll('#em-sp-picker .benefit-toggle.on').forEach(function(t){
+    result.push({ name: t.dataset.spName, price: parseInt(t.dataset.spPrice)||0 });
+  });
+  return result;
+}
+
+// Benefits
+function initSpBenefits(record) {
+  _spBenefits = [];
+  // Load existing benefits from record
+  var existing = record.benefits || [];
+  existing.forEach(function(b) {
+    _spBenefits.push({ text: b, custom: true, on: true });
+  });
+  renderSpBenefits();
+}
+
+function rebuildBenefitsFromPackage(sponsorships) {
+  // Collect benefit texts from selected levels
+  var pkgBens = [];
+  sponsorships.forEach(function(sp) {
+    var name = (sp.name||'').toLowerCase();
+    STATE.levels.forEach(function(lv) {
+      if (lv.name.toLowerCase() !== name) return;
+      lv.benefits.forEach(function(bid) {
+        var t = benText(bid);
+        if (t && !pkgBens.includes(t)) pkgBens.push(t);
+      });
+    });
+  });
+
+  // Keep custom ones, merge package ones
+  var customOnes = _spBenefits.filter(function(b){ return b.custom && b.on; });
+  _spBenefits = [];
+
+  // Package benefits first
+  pkgBens.forEach(function(t) {
+    _spBenefits.push({ text: t, custom: false, on: true });
+  });
+  // Then custom ones not already in package
+  customOnes.forEach(function(b) {
+    if (!pkgBens.includes(b.text)) {
+      _spBenefits.push({ text: b.text, custom: true, on: true });
+    }
+  });
+
+  renderSpBenefits();
+}
+
+function renderSpBenefits() {
+  var container = document.getElementById('em-sp-benefits');
+  if (!container) return;
+  container.innerHTML = _spBenefits.map(function(b, i) {
+    return '<div class="sp-benefit-tog' + (b.custom?' custom':'') + (b.on?' on':'') + '" onclick="toggleSpBenefit(' + i + ',this)">' +
+      escH(b.text) +
+      (b.custom ? ' <span style="opacity:.5;font-size:10px;">(custom)</span>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function toggleSpBenefit(idx, el) {
+  _spBenefits[idx].on = !_spBenefits[idx].on;
+  el.classList.toggle('on');
+}
+
+function addCustomSpBenefit() {
+  var inp = document.getElementById('em-sp-new-ben');
+  var text = inp.value.trim();
+  if (!text) { inp.focus(); return; }
+  _spBenefits.push({ text: text, custom: true, on: true });
+  inp.value = '';
+  renderSpBenefits();
+  toast('Benefit added ✓');
+}
 
 // ════════════════════════════════
 // LOGO MANAGEMENT (Edit Sponsor)
@@ -1670,6 +1927,10 @@ async function saveEditEntry() {
         logoUpdate.logoData = null;
         logoUpdate.logoFileName = null;
       }
+      // Collect players (filter blanks)
+      var spGolfers = _spPlayers.filter(function(p){ return p.firstName || p.lastName || p.email; });
+      // Collect active benefits
+      var spBenList = _spBenefits.filter(function(b){ return b.on; }).map(function(b){ return b.text; });
       Object.assign(updated, {
         firstName:    document.getElementById('em-sp-fn').value.trim(),
         lastName:     document.getElementById('em-sp-ln').value.trim(),
@@ -1678,6 +1939,9 @@ async function saveEditEntry() {
         website:      document.getElementById('em-sp-website').value.trim(),
         sponsorships: sponsorships,
         package:      pkgText,
+        golfers:      spGolfers,
+        playerCount:  spGolfers.length,
+        benefits:     spBenList,
         total:        spAmount,
         amount:       spAmount * 100,
         status:       status,
