@@ -304,7 +304,7 @@ tr:hover td { background: #f8faf8; }
           <div class="card-body" style="padding:0;">
             <div class="tbl-wrap">
               <table id="sponsor-table">
-                <thead><tr><th>Company / Name</th><th>Email</th><th>Package</th><th>Amount</th><th>Status</th><th>Invoice</th><th>Date</th><th></th></tr></thead>
+                <thead><tr><th>Company / Name</th><th>Email</th><th>Package</th><th>Amount</th><th>Status</th><th>Logo</th><th>Date</th><th></th></tr></thead>
                 <tbody id="sponsor-tbody"><tr><td colspan="7" class="empty-table"><div class="empty-icon">🤝</div>Loading sponsors…</td></tr></tbody>
               </table>
             </div>
@@ -450,6 +450,31 @@ tr:hover td { background: #f8faf8; }
         <div class="form-group">
           <label class="form-label">Website</label>
           <input class="form-input" id="em-sp-website" type="url" placeholder="https://example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Logo</label>
+          <div id="em-logo-preview" style="display:none;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:#f8faf6;border:1px solid var(--border);border-radius:6px;">
+              <img id="em-logo-img" src="" alt="Logo" style="max-height:52px;max-width:140px;object-fit:contain;border-radius:3px;">
+              <div style="flex:1;min-width:0;">
+                <div id="em-logo-filename" style="font-size:12px;font-weight:600;color:var(--tm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+                <div style="font-size:11px;color:var(--tl);margin-top:2px;">Current logo on file</div>
+              </div>
+              <button class="btn btn-danger btn-sm" onclick="removeEditLogo()" style="flex-shrink:0;">✕ Remove</button>
+            </div>
+          </div>
+          <div id="em-logo-upload-area"
+            style="border:2px dashed var(--border);border-radius:6px;padding:20px;text-align:center;cursor:pointer;transition:all .15s;"
+            onclick="document.getElementById('em-logo-file').click()"
+            ondragover="event.preventDefault();this.style.borderColor='var(--gl)';this.style.background='#f4faf6';"
+            ondragleave="this.style.borderColor='';this.style.background='';"
+            ondrop="event.preventDefault();this.style.borderColor='';this.style.background='';handleEditLogoDrop(event);">
+            <div style="font-size:22px;margin-bottom:6px;opacity:.4;">🖼</div>
+            <div style="font-size:13px;font-weight:600;color:var(--tm);">Click to upload or drag &amp; drop</div>
+            <div style="font-size:11px;color:var(--tl);margin-top:3px;">PNG, JPG, SVG, GIF — max 2MB</div>
+          </div>
+          <input type="file" id="em-logo-file" accept="image/*" style="display:none;" onchange="handleEditLogoFile(this.files[0])">
+          <div class="form-hint" id="em-logo-hint" style="display:none;"></div>
         </div>
       </div>
 
@@ -1053,7 +1078,9 @@ function renderSponsors(sponsors){
     var pkg = (s.sponsorships||[]).map(function(x){return x.name||x;}).join(', ') || s.package || '—';
     var amt = s.amount ? fmtMoney(s.amount/100) : (s.total ? fmtMoney(s.total) : '—');
     var status = s.status || s.paymentStatus || 'paid';
-    var inv = s.invoiceUrl ? '<a href="'+escH(s.invoiceUrl)+'" target="_blank" style="color:var(--gl);font-size:11px;">View</a>' : '—';
+    var logoCell = s.logoData
+      ? '<img src="'+s.logoData+'" style="max-height:32px;max-width:80px;object-fit:contain;vertical-align:middle;border-radius:2px;" title="Logo on file">'
+      : '<span style="font-size:11px;color:var(--tl);">—</span>';
     var date = s.created ? new Date(s.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (s.date||'—');
     var src = s.source === 'manual' ? ' <span style="font-size:9px;background:#f0f2ef;color:var(--tl);padding:1px 5px;border-radius:3px;vertical-align:middle;">manual</span>' : '';
     return '<tr>'+
@@ -1062,7 +1089,7 @@ function renderSponsors(sponsors){
       '<td style="font-size:11px">'+escH(pkg)+'</td>'+
       '<td>'+amt+'</td>'+
       '<td><span class="status-pill status-'+escH(status)+'">'+escH(status)+'</span></td>'+
-      '<td>'+inv+'</td>'+
+      '<td>'+logoCell+'</td>'+
       '<td>'+escH(date)+'</td>'+
       '<td style="white-space:nowrap;">'+
         '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'sponsor\','+idx+')">✏ Edit</button> '+
@@ -1473,6 +1500,11 @@ function openEditEntry(type, idx) {
   document.getElementById('em-status').value = status;
   document.getElementById('em-notes').value  = r.notes || '';
 
+  // Init logo section for sponsors
+  if (type === 'sponsor') {
+    initEditLogo(r);
+  }
+
   document.getElementById('edit-modal').classList.add('open');
   setTimeout(function(){
     var f = type === 'registration' ? document.getElementById('em-fn') : document.getElementById('em-sp-fn');
@@ -1480,6 +1512,83 @@ function openEditEntry(type, idx) {
   }, 40);
 }
 
+
+
+// ════════════════════════════════
+// LOGO MANAGEMENT (Edit Sponsor)
+// ════════════════════════════════
+var _editLogoData   = null;  // base64 data URL of new upload (null = no change)
+var _editLogoRemove = false; // true = user clicked Remove
+
+function initEditLogo(record) {
+  _editLogoData   = null;
+  _editLogoRemove = false;
+  var hint = document.getElementById('em-logo-hint');
+  hint.style.display = 'none';
+  hint.textContent = '';
+
+  var logoSrc = record.logoData || record.logo || null;
+  var preview = document.getElementById('em-logo-preview');
+  var upArea  = document.getElementById('em-logo-upload-area');
+  var img     = document.getElementById('em-logo-img');
+  var fname   = document.getElementById('em-logo-filename');
+
+  if (logoSrc) {
+    img.src = logoSrc;
+    fname.textContent = record.logoFileName || 'logo file';
+    preview.style.display = 'block';
+    upArea.style.display  = 'none';
+  } else {
+    preview.style.display = 'none';
+    upArea.style.display  = 'block';
+  }
+}
+
+function removeEditLogo() {
+  _editLogoRemove = true;
+  _editLogoData   = null;
+  document.getElementById('em-logo-preview').style.display = 'none';
+  document.getElementById('em-logo-upload-area').style.display = 'block';
+  document.getElementById('em-logo-hint').textContent = 'Logo will be removed on save.';
+  document.getElementById('em-logo-hint').style.display = 'block';
+}
+
+function handleEditLogoDrop(event) {
+  var file = event.dataTransfer.files && event.dataTransfer.files[0];
+  if (file) handleEditLogoFile(file);
+}
+
+function handleEditLogoFile(file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    showEditLogoHint('Not an image file — please upload PNG, JPG, SVG, or GIF.', true);
+    return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    showEditLogoHint('File is too large (max 2MB). Please compress the image first.', true);
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    _editLogoData = e.target.result; // base64 data URL
+    _editLogoRemove = false;
+    // Show preview
+    var img = document.getElementById('em-logo-img');
+    img.src = _editLogoData;
+    document.getElementById('em-logo-filename').textContent = file.name;
+    document.getElementById('em-logo-preview').style.display = 'block';
+    document.getElementById('em-logo-upload-area').style.display = 'none';
+    showEditLogoHint('New logo ready — will be saved with the entry.', false);
+  };
+  reader.readAsDataURL(file);
+}
+
+function showEditLogoHint(msg, isError) {
+  var hint = document.getElementById('em-logo-hint');
+  hint.textContent = msg;
+  hint.style.color = isError ? 'var(--red)' : 'var(--gl)';
+  hint.style.display = 'block';
+}
 
 function recalcEditRegAmount() {
   var base = parseInt(document.getElementById('em-players').value)||1;
@@ -1548,6 +1657,15 @@ async function saveEditEntry() {
         sponsorships.push({ name: t.dataset.spName, price: parseInt(t.dataset.spPrice)||0 });
       });
       var pkgText = sponsorships.map(function(s){return s.name;}).join(', ');
+      // Handle logo
+      var logoUpdate = {};
+      if (_editLogoData) {
+        logoUpdate.logoData = _editLogoData;
+        logoUpdate.logoFileName = (document.getElementById('em-logo-file').files[0] || {}).name || 'logo';
+      } else if (_editLogoRemove) {
+        logoUpdate.logoData = null;
+        logoUpdate.logoFileName = null;
+      }
       Object.assign(updated, {
         firstName:    document.getElementById('em-sp-fn').value.trim(),
         lastName:     document.getElementById('em-sp-ln').value.trim(),
@@ -1561,7 +1679,7 @@ async function saveEditEntry() {
         status:       status,
         notes:        notes,
         updatedAt:    new Date().toISOString(),
-      });
+      }, logoUpdate);
     }
 
     var resource = _editType === 'registration' ? 'registrations' : 'sponsors';
