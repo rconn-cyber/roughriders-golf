@@ -398,11 +398,33 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
     <!-- Player count -->
     <div class="reg-section">
-      <div class="reg-section-title">Players in Your Group</div>
+      <div class="reg-section-title">Registration Type</div>
+
+      <!-- Individual / Team toggle -->
+      <div style="display:flex;gap:0;border:2px solid rgba(0,0,0,0.14);border-radius:6px;overflow:hidden;margin-bottom:20px;">
+        <button id="reg-type-individual" onclick="setRegType('individual')"
+          style="flex:1;padding:11px 8px;border:none;background:#0f2318;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;">
+          Individual &nbsp;&middot;&nbsp; $165
+        </button>
+        <button id="reg-type-team" onclick="setRegType('team')"
+          style="flex:1;padding:11px 8px;border:none;background:#f4f6f4;color:#555;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;">
+          Team of 4 &nbsp;&middot;&nbsp; $650 <span style="font-size:11px;font-weight:400;opacity:0.75;">(save $10)</span>
+        </button>
+      </div>
+
+      <!-- Team confirmation (shown when team selected) -->
+      <div id="team-row" style="display:none;margin-bottom:14px;">
+        <div style="background:#f0faf4;border:1px solid rgba(45,122,74,0.25);border-radius:6px;padding:12px 16px;font-size:13px;color:#1a3320;">
+          ⛳ <strong>Full team of 4 registered — $650</strong> &nbsp;&middot;&nbsp; <span style="color:#555;font-weight:400;">Enter all 4 player names below</span>
+        </div>
+      </div>
+
+      <!-- Individual qty (hidden when team selected) -->
+      <div id="individual-qty-row">
       <div class="player-count-row">
         <div class="player-count-label">
           Number of players
-          <span>Max 4 per team · $150 per player</span>
+          <span>$165 per player · max 4 · or register as a team for $650</span>
         </div>
         <div class="qty-controls">
           <button class="qty-btn" id="player-minus" onclick="changePlayerCount(-1)">−</button>
@@ -410,6 +432,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
           <button class="qty-btn" id="player-plus" onclick="changePlayerCount(1)">+</button>
         </div>
       </div>
+      </div><!-- end individual-qty-row -->
       <!-- Additional player name fields -->
       <div class="additional-players" id="additional-players"></div>
     </div>
@@ -422,7 +445,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
       <div class="addon-item addon-super" onclick="toggleSuperTicket(this)" style="margin-bottom:10px;border-color:#c9a84c;background:linear-gradient(135deg,#fdf8ec,#fefaf0);display:flex;gap:14px;">
         <div class="addon-left">
           <div class="addon-name" style="color:#1a3320;font-size:14px;">⭐ Super Ticket — Best Value</div>
-          <div class="addon-desc">Includes for your whole team: Mulligan pack · Closest to pin · Longest drive · 1 raffle ticket per player</div>
+          <div class="addon-desc">Includes for your whole team: Mulligan pack · Closest to pin · Longest drive</div>
         </div>
         <div class="addon-right">
           <div style="text-align:right;">
@@ -451,7 +474,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
             <div class="addon-desc">Entry per team member</div>
           </div>
           <div class="addon-right">
-            <div class="addon-price">$20</div>
+            <div class="addon-price">$10</div>
             <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
         </div>
@@ -462,25 +485,8 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
             <div class="addon-desc">Entry per team member</div>
           </div>
           <div class="addon-right">
-            <div class="addon-price">$20</div>
+            <div class="addon-price">$10</div>
             <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          </div>
-        </div>
-
-        <div class="addon-item rr-raffle-item" style="flex-direction:column;align-items:stretch;cursor:default;gap:8px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div class="addon-left">
-              <div class="addon-name">Raffle tickets</div>
-              <div class="addon-desc" id="raffle-desc">$5 each &nbsp;&bull;&nbsp; 6 for $20 &nbsp;&bull;&nbsp; 1 included w/ Super Ticket</div>
-            </div>
-            <div class="addon-right">
-              <div class="qty-controls" style="border-color:rgba(0,0,0,0.14);">
-                <button class="qty-btn" type="button" onclick="rrRaffleAdj(-1)" style="width:32px;height:32px;">&#8722;</button>
-                <div class="qty-display" id="raffle-qty-display" style="width:36px;font-size:16px;">0</div>
-                <button class="qty-btn" type="button" onclick="rrRaffleAdj(1)" style="width:32px;height:32px;">&#43;</button>
-              </div>
-              <div class="addon-price" id="raffle-price-display" style="min-width:40px;text-align:right;"></div>
-            </div>
           </div>
         </div>
 
@@ -807,7 +813,8 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 // CONFIG
 // ════════════════════════════════
 var NETLIFY_BASE = 'https://rr-golf.netlify.app';
-var PLAYER_PRICE = 150;
+var PLAYER_PRICE = 165;
+var TEAM_PRICE = 650;
 var MAX_PLAYERS  = 4;
 
 // ════════════════════════════════
@@ -949,12 +956,11 @@ function toggleAddon(el, basePrice, name) {
 }
 
 function toggleSuperTicket(el) {
-  var SUPER_NAMES = ['Mulligan Pack','Closest to Pin','Longest Drive','Raffle Tickets'];
+  var SUPER_NAMES = ['Mulligan Pack','Closest to Pin','Longest Drive'];
   var grid = document.getElementById('addons-grid');
   if (el.classList.contains('checked')) {
     el.classList.remove('checked');
     delete addons['Super Ticket'];
-    rrSetSuperRaffle(false);
     // Show all individual addons including hole sponsor
     document.querySelectorAll('#addons-grid .addon-item').forEach(function(a) { a.style.display = ''; });
   } else {
@@ -966,7 +972,6 @@ function toggleSuperTicket(el) {
     SUPER_NAMES.forEach(function(n) { delete addons[n]; });
     el.classList.add('checked');
     addons['Super Ticket'] = addonEffectivePrice('Super Ticket');
-    rrSetSuperRaffle(true);
     // Hide individual addons but keep hole sponsor visible
     document.querySelectorAll('#addons-grid .addon-item').forEach(function(a) {
       var onclick = a.getAttribute('onclick') || '';
@@ -982,9 +987,8 @@ function updateAddonPrices() {
   var origDescs = {
     'Mulligan Pack': '1 mulligan per player',
     'Closest to Pin': 'Contest entry per player',
-    'Longest Drive': 'Contest entry per player',
-    
-      };
+    'Longest Drive': 'Contest entry per player'
+  };
   // Update all individual add-ons
   document.querySelectorAll('.addon-item:not(.addon-super)').forEach(function(el) {
     var onclick = el.getAttribute('onclick') || '';
@@ -1013,7 +1017,7 @@ function updateAddonPrices() {
     var superDescEl = superEl.querySelector('.addon-desc');
     if (superDescEl) {
       superDescEl.textContent = playerCount > 1
-        ? 'Everything for your team — $50 \u00d7 ' + playerCount + ' players'
+        ? 'Everything for your team — $75 \u00d7 ' + playerCount + ' players'
         : 'Includes everything for your whole team: Mulligan pack \u00b7 Closest to pin \u00b7 Longest drive \u00b7 Raffle tickets (5) \u00b7 Awards dinner guest';
     }
     if (superEl.classList.contains('checked')) addons['Super Ticket'] = superPrice;
@@ -1035,7 +1039,7 @@ function toggleAddonFlat(el, price, name) {
 }
 
 function updateRegTotal() {
-  var regSubtotal = playerCount * PLAYER_PRICE;
+  var regSubtotal = regType === 'team' ? TEAM_PRICE : playerCount * PLAYER_PRICE;
   var addonTotal  = Object.values(addons).reduce(function(s,v){return s+v;}, 0);
   var total       = regSubtotal + addonTotal;
   var f = function(n){ return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); };
@@ -1047,7 +1051,7 @@ function updateRegTotal() {
   var summary = document.getElementById('reg-order-summary');
   if (summary) {
     var lines = [];
-    if (playerCount > 0) lines.push({ name: 'Golf Registration — ' + playerCount + ' Player' + (playerCount>1?'s':''), price: regSubtotal });
+    if (playerCount > 0) lines.push({ name: regType === 'team' ? 'Golf Registration — Team of 4' : 'Golf Registration — ' + playerCount + ' Player' + (playerCount>1?'s':''), price: regSubtotal });
     Object.entries(addons).forEach(function(e){ lines.push({ name: e[0], price: e[1] }); });
     if (lines.length) {
       var html = '<div style="font-weight:700;color:#0f2318;margin-bottom:8px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;">Order Summary</div>';
@@ -1753,62 +1757,6 @@ function goPage(n) {
   var bar = document.getElementById('total-bar');
   if (bar) { if(n!==1) bar.classList.remove('visible'); else updateSponsorTotal(); }
   window.scrollTo({top:0,behavior:'smooth'});
-}
-
-
-// ════════════════════════════════
-// RAFFLE TICKET QTY LOGIC
-// ════════════════════════════════
-var rrRaffleCount = 0;
-var rrSuperActive = false;
-
-function rrRafflePrice(n) {
-  if (n <= 0) return 0;
-  var sets = Math.floor(n / 6);
-  var rem  = n % 6;
-  return (sets * 20) + (rem * 5);
-}
-
-function rrRaffleAdj(delta) {
-  var min = rrSuperActive ? 1 : 0;
-  rrRaffleCount = Math.max(min, rrRaffleCount + delta);
-  var display = document.getElementById('raffle-qty-display');
-  var priceEl = document.getElementById('raffle-price-display');
-  if (display) display.textContent = rrRaffleCount;
-  var extraQty = rrSuperActive ? Math.max(0, rrRaffleCount - 1) : rrRaffleCount;
-  var price = rrRafflePrice(extraQty);
-  if (priceEl) {
-    if (rrSuperActive && rrRaffleCount <= 1) priceEl.textContent = 'Incl.';
-    else priceEl.textContent = price > 0 ? '$' + price : '';
-  }
-  // Store in addons object
-  if (price > 0) addons['Raffle Tickets'] = price;
-  else delete addons['Raffle Tickets'];
-  updateRegTotal();
-  updatePayButton();
-}
-
-function rrSetSuperRaffle(active) {
-  rrSuperActive = active;
-  if (active) {
-    if (rrRaffleCount < 1) {
-      rrRaffleCount = 1;
-      var display = document.getElementById('raffle-qty-display');
-      if (display) display.textContent = '1';
-    }
-    var priceEl = document.getElementById('raffle-price-display');
-    if (priceEl && rrRaffleCount <= 1) priceEl.textContent = 'Incl.';
-    delete addons['Raffle Tickets'];
-  } else {
-    if (rrRaffleCount === 1) {
-      rrRaffleCount = 0;
-      var display = document.getElementById('raffle-qty-display');
-      if (display) display.textContent = '0';
-      var priceEl = document.getElementById('raffle-price-display');
-      if (priceEl) priceEl.textContent = '';
-    }
-    delete addons['Raffle Tickets'];
-  }
 }
 
 function updateTimestamp() {
