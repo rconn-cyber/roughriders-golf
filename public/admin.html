@@ -1709,37 +1709,64 @@ function getCurrentSpSponsorships() {
 // Benefits
 function initSpBenefits(record) {
   _spBenefits = [];
-  // Load existing benefits from record
   var existing = record.benefits || [];
-  existing.forEach(function(b) {
-    _spBenefits.push({ text: b, custom: true, on: true });
-  });
-  renderSpBenefits();
+
+  if (existing.length > 0) {
+    // Record has saved benefits — restore them as custom (editable)
+    existing.forEach(function(b) {
+      _spBenefits.push({ text: b, custom: false, on: true });
+    });
+    renderSpBenefits();
+  } else {
+    // No saved benefits — auto-populate from current package selections
+    var sps = getCurrentSpSponsorships();
+    if (sps.length > 0) {
+      rebuildBenefitsFromPackage(sps);
+    } else {
+      // No package selected yet — wait for user to pick one
+      renderSpBenefits();
+    }
+  }
 }
 
 function rebuildBenefitsFromPackage(sponsorships) {
-  // Collect benefit texts from selected levels
   var pkgBens = [];
+
   sponsorships.forEach(function(sp) {
-    var name = (sp.name||'').toLowerCase();
+    var name = (sp.name||'').toLowerCase().trim();
+
+    // Check STATE.levels — benefits stored as benefit IDs
     STATE.levels.forEach(function(lv) {
-      if (lv.name.toLowerCase() !== name) return;
+      if (lv.name.toLowerCase().trim() !== name) return;
       lv.benefits.forEach(function(bid) {
         var t = benText(bid);
         if (t && !pkgBens.includes(t)) pkgBens.push(t);
       });
     });
+
+    // Check STATE.alacarte — benefits stored as bullets array
+    STATE.alacarte.forEach(function(ac) {
+      if (ac.name.toLowerCase().trim() !== name) return;
+      (ac.bullets||[]).forEach(function(b) {
+        if (b && !pkgBens.includes(b)) pkgBens.push(b);
+      });
+    });
   });
 
-  // Keep custom ones, merge package ones
+  // Keep user-toggled-off package benefits as off, keep custom ones
+  var existing = {};
+  _spBenefits.forEach(function(b) { existing[b.text] = b; });
+
   var customOnes = _spBenefits.filter(function(b){ return b.custom && b.on; });
   _spBenefits = [];
 
-  // Package benefits first
+  // Package / à la carte benefits — restore previous on/off state if exists
   pkgBens.forEach(function(t) {
-    _spBenefits.push({ text: t, custom: false, on: true });
+    var prev = existing[t];
+    _spBenefits.push({ text: t, custom: false, on: prev ? prev.on : true });
   });
-  // Then custom ones not already in package
+
+  // Custom benefits not already in package
   customOnes.forEach(function(b) {
     if (!pkgBens.includes(b.text)) {
       _spBenefits.push({ text: b.text, custom: true, on: true });
