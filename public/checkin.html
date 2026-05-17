@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RR Golf — Check-In Sheets</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ── SCREEN STYLES ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #eef0ed; color: #0a0a08; }
+
+/* Topbar (screen only) */
+.topbar {
+  background: #0f2318; padding: 0 24px; display: flex; align-items: center;
+  justify-content: space-between; height: 54px; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 10px rgba(0,0,0,.3);
+}
+.tb-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: #fff; }
+.tb-sub { font-size: 11px; color: rgba(255,255,255,.4); margin-left: 12px; }
+.tb-actions { display: flex; align-items: center; gap: 10px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  border-radius: 5px; font-family: 'DM Sans', sans-serif; font-size: 12px;
+  font-weight: 700; cursor: pointer; border: none; transition: all .15s; letter-spacing: .02em;
+}
+.btn-primary { background: #1e4a2c; color: #fff; }
+.btn-primary:hover { background: #2d7a4a; }
+.btn-outline { background: rgba(255,255,255,.08); color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.2); }
+.btn-outline:hover { background: rgba(255,255,255,.15); color: #fff; }
+.btn-gold { background: #b8940e; color: #fff; }
+.btn-gold:hover { background: #9a7a08; }
+
+/* Controls bar */
+.controls {
+  background: #fff; border-bottom: 1px solid rgba(0,0,0,.1);
+  padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.ctrl-label { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #555; }
+.filter-btn {
+  padding: 6px 14px; border-radius: 20px; font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 600; cursor: pointer; border: 1.5px solid rgba(0,0,0,.15);
+  background: #fff; color: #2a2a26; transition: all .15s;
+}
+.filter-btn.active { background: #0f2318; color: #fff; border-color: #0f2318; }
+.filter-btn:hover:not(.active) { border-color: #2d7a4a; color: #0f2318; }
+.ctrl-sep { width: 1px; height: 28px; background: rgba(0,0,0,.12); }
+.status-msg { font-size: 12px; color: #555; margin-left: auto; }
+
+/* Preview area */
+.preview-area { padding: 24px; }
+.preview-empty {
+  text-align: center; padding: 60px 24px; color: #888;
+}
+.preview-empty .ei { font-size: 48px; margin-bottom: 14px; opacity: .3; }
+
+/* Page wrapper — one per entry */
+.page-pair {
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12);
+}
+.page-pair:last-child { margin-bottom: 0; }
+
+/* ── SHARED PAGE STYLES ── */
+.sheet {
+  width: 8.5in; min-height: 5.3in; background: #fff;
+  padding: .45in .5in .4in; position: relative;
+  border-bottom: 3px dashed #ccc;
+  page-break-inside: avoid;
+}
+.sheet:last-child { border-bottom: none; }
+
+/* ── CHECK-IN SHEET ── */
+.checkin-sheet {}
+.ci-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 14px; gap: 16px;
+}
+.ci-logo-area { display: flex; align-items: center; gap: 12px; }
+.ci-logo-flag { font-size: 26px; line-height: 1; }
+.ci-org { font-family: 'Playfair Display', serif; }
+.ci-org-name { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #0f2318; }
+.ci-event { font-size: 10px; color: #666; margin-top: 1px; }
+.ci-date-loc { text-align: right; font-size: 10px; color: #666; line-height: 1.5; }
+.ci-date-loc strong { display: block; font-size: 12px; color: #0f2318; font-weight: 700; }
+
+.ci-title-bar {
+  background: #0f2318; color: #fff; padding: 8px 14px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.ci-title-main { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; }
+.ci-title-badges { display: flex; gap: 7px; align-items: center; }
+.ci-badge {
+  font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 3px;
+}
+.badge-team     { background: #1e4a2c; color: #fff; }
+.badge-indiv    { background: #2d5a8e; color: #fff; }
+.badge-sponsor  { background: #6b4f16; color: #fff; }
+.badge-comped   { background: #4a3080; color: #fff; }
+.badge-in-kind  { background: #2a5a4a; color: #fff; }
+.badge-check    { background: #5a3a10; color: #fff; }
+.badge-paid     { background: #1e4a2c; color: #fff; }
+.badge-pending  { background: #7a5c00; color: #fff; }
+.badge-cash     { background: #3a5a20; color: #fff; }
+
+.ci-body { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
+.ci-section-title {
+  font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: #0f2318; border-bottom: 1.5px solid #0f2318; padding-bottom: 3px; margin-bottom: 8px;
+}
+.ci-players-list { }
+.ci-player-row {
+  display: flex; align-items: center; gap: 8px; padding: 5px 0;
+  border-bottom: 1px solid #f0f0f0; font-size: 12px;
+}
+.ci-player-num {
+  width: 18px; height: 18px; border-radius: 50%; background: #0f2318; color: #fff;
+  font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ci-player-name { font-weight: 600; flex: 1; }
+.ci-player-email { font-size: 10px; color: #888; }
+.ci-player-blank {
+  display: flex; align-items: center; gap: 8px; padding: 5px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.ci-player-blank .ci-player-num { background: #ccc; }
+.blank-line { flex: 1; border-bottom: 1px solid #bbb; height: 16px; }
+
+.ci-details-grid { display: flex; flex-direction: column; gap: 7px; }
+.ci-detail-row { display: flex; gap: 6px; font-size: 11px; }
+.ci-detail-label { font-weight: 700; color: #333; width: 70px; flex-shrink: 0; }
+.ci-detail-val { color: #0a0a08; flex: 1; }
+
+.ci-addons-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.ci-addon-pill {
+  font-size: 10px; font-weight: 600; padding: 3px 9px; border-radius: 3px;
+  background: #c8e6d0; color: #0f2318;
+}
+
+.ci-checkin-boxes { display: flex; gap: 20px; margin-bottom: 12px; }
+.ci-box { display: flex; align-items: center; gap: 7px; }
+.ci-checkbox { width: 18px; height: 18px; border: 2px solid #0f2318; border-radius: 2px; flex-shrink: 0; }
+.ci-box-label { font-size: 11px; font-weight: 600; color: #333; }
+
+.ci-sig-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 12px;
+}
+.ci-sig-field { }
+.ci-sig-line { border-bottom: 1.5px solid #333; height: 24px; margin-bottom: 4px; }
+.ci-sig-label { font-size: 9px; color: #888; letter-spacing: .04em; text-transform: uppercase; }
+
+.ci-notes-box {
+  border: 1px solid #ddd; border-radius: 3px; padding: 6px 10px; min-height: 32px;
+  font-size: 11px; color: #555; margin-top: 8px; font-style: italic;
+}
+.ci-notes-box.has-content { color: #0a0a08; font-style: normal; font-weight: 500; }
+
+.ci-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 10px; padding-top: 8px; border-top: 1px solid #eee;
+  font-size: 9px; color: #aaa;
+}
+
+/* ── BAG SHEET ── */
+.bag-sheet { background: #fff; }
+.bag-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2.5px solid #0f2318;
+}
+.bag-title-area {}
+.bag-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; color: #0f2318; }
+.bag-subtitle { font-size: 11px; color: #666; margin-top: 2px; }
+.bag-name-box {
+  text-align: right;
+}
+.bag-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: #0f2318; }
+.bag-type-badge {
+  display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 3px; margin-top: 3px;
+}
+
+.bag-items-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.bag-item {
+  display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px;
+  border: 1.5px solid #e0e0e0; border-radius: 5px; position: relative;
+}
+.bag-item.highlight { border-color: #b8940e; background: #fffdf5; }
+.bag-item.sponsor-item { border-color: #c8e6d0; background: #f8fdf9; }
+.bag-item-check {
+  width: 20px; height: 20px; border: 2px solid #333; border-radius: 3px;
+  flex-shrink: 0; margin-top: 1px;
+}
+.bag-item-info {}
+.bag-item-name { font-size: 12px; font-weight: 700; color: #0a0a08; line-height: 1.3; }
+.bag-item-note { font-size: 10px; color: #888; margin-top: 2px; }
+.bag-item-qty {
+  position: absolute; top: 7px; right: 10px;
+  font-size: 9px; font-weight: 700; color: #888; letter-spacing: .06em;
+}
+
+.bag-players-section { margin-bottom: 12px; }
+.bag-players-title {
+  font-size: 9px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+  color: #0f2318; margin-bottom: 7px;
+}
+.bag-players-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.bag-player-tag {
+  font-size: 11px; font-weight: 600; background: #f0f2ef; color: #2a2a26;
+  padding: 4px 11px; border-radius: 3px;
+}
+
+.bag-sponsor-logo {
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid #eee; border-radius: 4px; padding: 8px; margin-bottom: 10px;
+  max-height: 64px; overflow: hidden;
+}
+.bag-sponsor-logo img { max-height: 50px; max-width: 160px; object-fit: contain; }
+
+.bag-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 8px; border-top: 1px solid #eee; font-size: 9px; color: #aaa;
+  margin-top: 8px;
+}
+.bag-staple-note {
+  font-size: 9px; font-weight: 700; color: #b8940e; letter-spacing: .06em;
+  text-transform: uppercase; border: 1px solid #b8940e; padding: 2px 8px; border-radius: 3px;
+}
+
+/* ── PRINT STYLES ── */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { background: #fff; }
+  .topbar, .controls, .preview-empty { display: none !important; }
+  .preview-area { padding: 0; }
+  .page-pair { margin: 0; box-shadow: none; page-break-after: avoid; }
+  .sheet {
+    width: 100%; min-height: 0; padding: .35in .4in .3in;
+    border-bottom: 2px dashed #bbb; page-break-inside: avoid;
+  }
+  .sheet:last-child { border-bottom: none; }
+  .page-pair + .page-pair { page-break-before: always; }
+}
+
+@media screen and (max-width: 900px) {
+  .sheet { width: 100%; overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span class="tb-title">⛳ RR Golf — Check-In Sheets</span>
+    <span class="tb-sub">Sept 14, 2026 · Carrollwood CC</span>
+  </div>
+  <div class="tb-actions">
+    <span id="sheet-count" style="font-size:12px;color:rgba(255,255,255,.5);"></span>
+    <button class="btn btn-outline" onclick="window.location.href='admin.html'">← Admin</button>
+    <button class="btn btn-gold" onclick="window.print()">🖨 Print All</button>
+  </div>
+</div>
+
+<div class="controls">
+  <span class="ctrl-label">Show:</span>
+  <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+  <button class="filter-btn" data-filter="registration" onclick="setFilter('registration')">Golfers</button>
+  <button class="filter-btn" data-filter="sponsor" onclick="setFilter('sponsor')">Sponsors</button>
+  <div class="ctrl-sep"></div>
+  <span class="ctrl-label">Sort:</span>
+  <button class="filter-btn active" data-sort="name" onclick="setSort('name')">Name</button>
+  <button class="filter-btn" data-sort="status" onclick="setSort('status')">Status</button>
+  <button class="filter-btn" data-sort="type" onclick="setSort('type')">Type</button>
+  <div class="ctrl-sep"></div>
+  <button class="btn btn-primary" onclick="loadData()" style="padding:6px 14px;font-size:12px;">↺ Reload</button>
+  <span class="status-msg" id="status-msg">Loading…</span>
+</div>
+
+<div class="preview-area" id="preview-area">
+  <div class="preview-empty">
+    <div class="ei">📋</div>
+    <strong style="display:block;font-size:15px;color:#555;margin-bottom:6px;">Loading check-in sheets…</strong>
+    <p>Fetching registrations and sponsors</p>
+  </div>
+</div>
+
+<script>
+var NETLIFY_BASE = 'https://rr-golf.netlify.app';
+var _filter = 'all';
+var _sort   = 'name';
+var _regs   = [];
+var _sps    = [];
+
+// ── Auth: read JWT from sessionStorage (set by admin.html on login) ──
+var _jwt = sessionStorage.getItem('rrgolf_jwt') || '';
+
+function setFilter(f) {
+  _filter = f;
+  document.querySelectorAll('[data-filter]').forEach(function(b){
+    b.classList.toggle('active', b.dataset.filter === f);
+  });
+  renderSheets();
+}
+function setSort(s) {
+  _sort = s;
+  document.querySelectorAll('[data-sort]').forEach(function(b){
+    b.classList.toggle('active', b.dataset.sort === s);
+  });
+  renderSheets();
+}
+
+async function loadData() {
+  document.getElementById('status-msg').textContent = 'Loading…';
+  if (!_jwt) {
+    // Prompt for password and get JWT
+    var pw = prompt('Enter admin password to load check-in data:');
+    if (!pw) { document.getElementById('status-msg').textContent = 'Cancelled'; return; }
+    try {
+      var loginRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw })
+      });
+      var loginData = await loginRes.json();
+      if (!loginRes.ok || !loginData.token) throw new Error('Invalid password');
+      _jwt = loginData.token;
+      sessionStorage.setItem('rrgolf_jwt', _jwt);
+    } catch(e) {
+      document.getElementById('status-msg').textContent = 'Login failed: ' + e.message;
+      return;
+    }
+  }
+
+  var authHdr = { 'Authorization': 'Bearer ' + _jwt };
+  var errors = [];
+  try {
+    var rRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', { headers: authHdr });
+    var rData = rRes.ok ? await rRes.json() : [];
+    _regs = Array.isArray(rData) ? rData : (rData.items || []);
+  } catch(e) { errors.push('registrations'); }
+  try {
+    var sRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=sponsors', { headers: authHdr });
+    var sData = sRes.ok ? await sRes.json() : [];
+    _sps = Array.isArray(sData) ? sData : (sData.items || []);
+  } catch(e) { errors.push('sponsors'); }
+
+  var total = _regs.length + _sps.length;
+  document.getElementById('status-msg').textContent = total + ' entries loaded' + (errors.length ? ' (errors: '+errors.join(', ')+')' : '');
+  renderSheets();
+}
+
+function getEntryType(r) {
+  if (r._source === 'sponsor' || r.sponsorships || r.package) return 'sponsor';
+  return 'registration';
+}
+
+function getDisplayType(r) {
+  var st = (r.status || r.paymentStatus || '').toLowerCase();
+  if (st === 'comped') return 'comped';
+  if (st === 'in-kind') return 'in-kind';
+  if (st === 'pending') return 'check';
+  if (r.sponsorships || r.package) return 'sponsor';
+  var p = r.playerCount || (r.golfers && r.golfers.length) || 1;
+  return p >= 4 ? 'team' : 'individual';
+}
+
+function displayName(r) {
+  if (r.company) return r.company;
+  return ((r.firstName||'') + ' ' + (r.lastName||'')).trim() || 'Unknown';
+}
+
+function sortEntries(arr) {
+  return arr.slice().sort(function(a, b) {
+    if (_sort === 'name') return displayName(a).localeCompare(displayName(b));
+    if (_sort === 'status') return (a.status||'').localeCompare(b.status||'');
+    if (_sort === 'type') return getDisplayType(a).localeCompare(getDisplayType(b));
+    return 0;
+  });
+}
+
+function renderSheets() {
+  var area = document.getElementById('preview-area');
+
+  // Build combined entry list
+  var all = [];
+  _regs.forEach(function(r){ all.push(Object.assign({}, r, {_source:'registration'})); });
+  _sps.forEach(function(s){ all.push(Object.assign({}, s, {_source:'sponsor'})); });
+
+  // Filter
+  var filtered = all.filter(function(e) {
+    if (_filter === 'all') return true;
+    return e._source === _filter;
+  });
+
+  // Sort
+  filtered = sortEntries(filtered);
+
+  document.getElementById('sheet-count').textContent = filtered.length + ' sheets';
+
+  if (!filtered.length) {
+    area.innerHTML = '<div class="preview-empty"><div class="ei">📋</div><strong style="display:block;font-size:15px;color:#555;margin-bottom:6px;">No entries</strong><p>No entries match the current filter.</p></div>';
+    return;
+  }
+
+  area.innerHTML = filtered.map(function(entry, idx) {
+    return buildPagePair(entry, idx + 1, filtered.length);
+  }).join('');
+}
+
+// ═══════════════════════════
+// BUILD PAGE PAIR
+// ═══════════════════════════
+function buildPagePair(entry, num, total) {
+  return '<div class="page-pair">' +
+    buildCheckinSheet(entry, num, total) +
+    buildBagSheet(entry) +
+  '</div>';
+}
+
+// ═══════════════════════════
+// CHECK-IN SHEET (top half)
+// ═══════════════════════════
+function buildCheckinSheet(e, num, total) {
+  var type    = getDisplayType(e);
+  var source  = e._source;
+  var name    = displayName(e);
+  var isTeam  = (type === 'team');
+  var isSp    = (source === 'sponsor');
+  var players = e.golfers || [];
+  var playerCount = e.playerCount || players.length || 1;
+  var addons  = e.addons || [];
+  var status  = (e.status || e.paymentStatus || 'paid').toLowerCase();
+  var pkg     = (e.sponsorships||[]).map(function(x){return x.name||x;}).join(', ') || e.package || '';
+  var amt     = e.total ? '$' + Number(e.total).toLocaleString('en-US') : (e.amount ? '$' + Number(e.amount/100).toLocaleString('en-US') : '—');
+  var date    = e.date ? new Date(e.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) :
+                e.createdAt ? new Date(e.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+
+  // Badge class
+  var badgeClass = {
+    team:'badge-team', individual:'badge-indiv', sponsor:'badge-sponsor',
+    comped:'badge-comped', 'in-kind':'badge-in-kind', check:'badge-check',
+    paid:'badge-paid', pending:'badge-pending', cash:'badge-cash'
+  }[type] || 'badge-paid';
+
+  var badgeLabel = {
+    team:'Team of 4', individual:'Individual', sponsor:'Sponsor',
+    comped:'Comped', 'in-kind':'In-Kind', check:'Check'
+  }[type] || type;
+
+  // Status badge
+  var statusBadge = '';
+  if (status && status !== type) {
+    var sBadgeClass = {paid:'badge-paid',pending:'badge-pending',comped:'badge-comped','in-kind':'badge-in-kind',cash:'badge-cash',invoiced:'badge-check',cancelled:'badge-pending'}[status]||'badge-paid';
+    statusBadge = '<span class="ci-badge '+sBadgeClass+'" style="margin-left:6px;">'+esc(status)+'</span>';
+  }
+
+  // Players list
+  var playersHtml = '';
+  if (!isSp) {
+    for (var i = 0; i < Math.max(playerCount, isTeam ? 4 : 1); i++) {
+      var p = players[i];
+      if (p && (p.firstName || p.lastName)) {
+        playersHtml += '<div class="ci-player-row">' +
+          '<div class="ci-player-num">'+(i+1)+'</div>' +
+          '<div style="flex:1">' +
+            '<div class="ci-player-name">'+esc((p.firstName||'')+' '+(p.lastName||''))+'</div>' +
+            (p.email ? '<div class="ci-player-email">'+esc(p.email)+'</div>' : '') +
+          '</div>' +
+        '</div>';
+      } else {
+        playersHtml += '<div class="ci-player-blank">' +
+          '<div class="ci-player-num" style="background:#ccc;">'+(i+1)+'</div>' +
+          '<div class="blank-line"></div>' +
+        '</div>';
+      }
+    }
+  } else {
+    // Sponsor — show contact info
+    if (e.email) playersHtml += '<div class="ci-player-row"><div class="ci-player-num">✉</div><div style="flex:1"><div class="ci-player-name">'+esc(e.email)+'</div></div></div>';
+    if (e.phone) playersHtml += '<div class="ci-player-row"><div class="ci-player-num">📞</div><div style="flex:1"><div class="ci-player-name">'+esc(e.phone)+'</div></div></div>';
+    if (e.website) playersHtml += '<div class="ci-player-row"><div class="ci-player-num">🌐</div><div style="flex:1"><div class="ci-player-name" style="font-size:11px;">'+esc(e.website)+'</div></div></div>';
+  }
+
+  // Details
+  var detailsHtml =
+    det('Amount', amt) +
+    (isSp ? det('Package', pkg || '—') : '') +
+    (!isSp ? det('Players', playerCount + (isTeam ? ' (Team)' : ' (Individual)')) : '') +
+    det('Registered', date) +
+    (e.notes ? det('Notes', e.notes) : '');
+
+  // Add-ons pills
+  var addonsHtml = '';
+  if (addons.length > 0) {
+    addonsHtml = '<div style="margin-top:10px;"><div class="ci-section-title">Add-Ons</div><div class="ci-addons-list">' +
+      addons.map(function(a){ return '<span class="ci-addon-pill">'+esc(a.name||a)+'</span>'; }).join('') +
+    '</div></div>';
+  }
+  if (isSp && pkg) {
+    addonsHtml = '<div style="margin-top:10px;"><div class="ci-section-title">Sponsorship Package</div><div class="ci-addons-list">' +
+      pkg.split(',').map(function(p){ return '<span class="ci-addon-pill" style="background:#c8e6d0;">'+esc(p.trim())+'</span>'; }).join('') +
+    '</div></div>';
+  }
+
+  return '<div class="sheet checkin-sheet">' +
+    // Header
+    '<div class="ci-header">' +
+      '<div class="ci-logo-area">' +
+        '<div class="ci-logo-flag">⛳</div>' +
+        '<div class="ci-org"><div class="ci-org-name">1st U.S. Volunteer Cavalry — Rough Riders</div><div class="ci-event">31st Annual Charity Golf Tournament</div></div>' +
+      '</div>' +
+      '<div class="ci-date-loc"><strong>September 14, 2026</strong>Carrollwood Country Club<br>Tampa, FL</div>' +
+    '</div>' +
+    // Title bar
+    '<div class="ci-title-bar">' +
+      '<div class="ci-title-main">'+esc(name)+'</div>' +
+      '<div class="ci-title-badges">' +
+        '<span class="ci-badge '+badgeClass+'">'+badgeLabel+'</span>' +
+        statusBadge +
+        '<span style="font-size:10px;color:rgba(255,255,255,.4);margin-left:8px;">#'+num+' of '+total+'</span>' +
+      '</div>' +
+    '</div>' +
+    // Body
+    '<div class="ci-body">' +
+      '<div>' +
+        '<div class="ci-section-title">'+(isSp ? 'Sponsor Contact' : 'Players')+'</div>' +
+        '<div class="ci-players-list">'+playersHtml+'</div>' +
+      '</div>' +
+      '<div>' +
+        '<div class="ci-section-title">Details</div>' +
+        '<div class="ci-details-grid">'+detailsHtml+'</div>' +
+        addonsHtml +
+      '</div>' +
+    '</div>' +
+    // Check-in boxes
+    '<div class="ci-checkin-boxes">' +
+      ciBox('Checked In') +
+      ciBox('Bag Received') +
+      ciBox('Wristband') +
+      (isTeam ? ciBox('Scorecard') : '') +
+    '</div>' +
+    // Signature
+    '<div class="ci-sig-row">' +
+      sig('Staff Initials') + sig('Time') + sig('Cart #') +
+    '</div>' +
+    // Notes
+    '<div class="ci-notes-box'+(e.notes?' has-content':'')+'">'+
+      (e.notes ? esc(e.notes) : 'Notes / Special requests') +
+    '</div>' +
+    // Footer
+    '<div class="ci-footer">' +
+      '<span>STAFF COPY — CHECK-IN SHEET</span>' +
+      '<span>Printed: '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})+'</span>' +
+    '</div>' +
+  '</div>';
+}
+
+// ═══════════════════════════
+// BAG SHEET (bottom half)
+// ═══════════════════════════
+function buildBagSheet(e) {
+  var type    = getDisplayType(e);
+  var source  = e._source;
+  var name    = displayName(e);
+  var isSp    = (source === 'sponsor');
+  var isTeam  = (type === 'team');
+  var players = e.golfers || [];
+  var playerCount = e.playerCount || players.length || 1;
+  var addons  = e.addons || [];
+  var pkg     = (e.sponsorships||[]).map(function(x){return x.name||x;}).join(', ') || e.package || '';
+
+  var badgeClass = {
+    team:'badge-team', individual:'badge-indiv', sponsor:'badge-sponsor',
+    comped:'badge-comped', 'in-kind':'badge-in-kind', check:'badge-check'
+  }[type] || 'badge-paid';
+  var badgeLabel = {
+    team:'Team of 4', individual:'Individual', sponsor:'Sponsor',
+    comped:'Comped', 'in-kind':'In-Kind', check:'Check'
+  }[type] || type;
+
+  // Build bag items
+  var items = [];
+
+  if (!isSp) {
+    // Base registration items
+    items.push({ name: 'Golf Registration', note: playerCount + ' player' + (playerCount>1?'s':'') + (isTeam?' — Team':''), highlight: false });
+    // Scorecard
+    if (isTeam) items.push({ name: 'Scorecard', note: '1 per team', highlight: false });
+    // Add-ons
+    addons.forEach(function(a) {
+      var aname = a.name || a;
+      var note = '';
+      if (aname.toLowerCase().indexOf('super') >= 0)      note = 'Mulligan + Closest to Pin + Longest Drive';
+      if (aname.toLowerCase().indexOf('mulligan') >= 0)   note = '1 mulligan per player';
+      if (aname.toLowerCase().indexOf('closest') >= 0)    note = 'Contest entry ticket';
+      if (aname.toLowerCase().indexOf('longest') >= 0)    note = 'Contest entry ticket';
+      if (aname.toLowerCase().indexOf('hole') >= 0)       note = 'Hole sponsor sign';
+      items.push({ name: aname, note: note, highlight: true });
+    });
+    // Tee gift if in addons or always
+    items.push({ name: 'Tee Gift Bag', note: playerCount + ' per player', highlight: false });
+  } else {
+    // Sponsor bag contents
+    items.push({ name: 'Sponsor Welcome Packet', note: 'Includes receipt, contacts', highlight: false, sponsor: true });
+    items.push({ name: 'Sponsor Sign / Materials', note: 'Per package details', highlight: false, sponsor: true });
+    if (pkg) {
+      pkg.split(',').forEach(function(p) {
+        var pname = p.trim();
+        var note = '';
+        if (pname.toLowerCase().indexOf('title')  >= 0) note = '5 hole signs + 3 teams + 12 super tickets';
+        if (pname.toLowerCase().indexOf('gold')   >= 0) note = '3 hole signs + 2 teams + 8 super tickets';
+        if (pname.toLowerCase().indexOf('silver') >= 0) note = '2 hole signs + 1 team + 4 super tickets';
+        if (pname.toLowerCase().indexOf('bronze') >= 0) note = '1 hole sign + 1 team';
+        if (pname.toLowerCase().indexOf('bev')    >= 0) note = 'Cart signage + brand mention';
+        if (pname.toLowerCase().indexOf('vip')    >= 0) note = 'VIP area signage + banner';
+        if (pname.toLowerCase().indexOf('cooler') >= 0) note = 'Logo on all player cooler bags';
+        if (pname.toLowerCase().indexOf('score')  >= 0) note = 'Logo on all scorecards';
+        if (pname.toLowerCase().indexOf('golf ball') >= 0) note = 'Logo on all tournament balls';
+        if (note || pname) items.push({ name: pname, note: note, highlight: true, sponsor: true });
+      });
+    }
+    items.push({ name: 'Sponsor Receipt / Invoice Copy', note: 'For records', highlight: false, sponsor: true });
+  }
+
+  // Players tags
+  var playersTagsHtml = '';
+  if (!isSp && players.length > 0) {
+    var named = players.filter(function(p){return p && (p.firstName||p.lastName);});
+    if (named.length > 0) {
+      playersTagsHtml = '<div class="bag-players-section">' +
+        '<div class="bag-players-title">Players in this bag</div>' +
+        '<div class="bag-players-grid">' +
+        named.map(function(p){ return '<div class="bag-player-tag">'+esc((p.firstName||'')+' '+(p.lastName||''))+'</div>'; }).join('') +
+        '</div></div>';
+    }
+  }
+
+  // Logo for sponsors
+  var logoHtml = '';
+  if (isSp && e.logoData) {
+    logoHtml = '<div class="bag-sponsor-logo"><img src="'+e.logoData+'" alt="'+esc(name)+' logo"></div>';
+  }
+
+  var itemsHtml = items.map(function(item) {
+    return '<div class="bag-item'+(item.highlight?' highlight':'')+(item.sponsor?' sponsor-item':'')+'">' +
+      '<div class="bag-item-check"></div>' +
+      '<div class="bag-item-info">' +
+        '<div class="bag-item-name">'+esc(item.name)+'</div>' +
+        (item.note ? '<div class="bag-item-note">'+esc(item.note)+'</div>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  return '<div class="sheet bag-sheet">' +
+    '<div class="bag-header">' +
+      '<div class="bag-title-area">' +
+        '<div class="bag-title">🎒 Bag Contents</div>' +
+        '<div class="bag-subtitle">Verify all items before sealing. Staple to outside of bag.</div>' +
+      '</div>' +
+      '<div class="bag-name-box">' +
+        (logoHtml ? logoHtml : '') +
+        '<div class="bag-name">'+esc(name)+'</div>' +
+        '<span class="bag-type-badge '+badgeClass+'">'+badgeLabel+'</span>' +
+      '</div>' +
+    '</div>' +
+    playersTagsHtml +
+    '<div class="bag-items-grid">'+itemsHtml+'</div>' +
+    '<div class="bag-footer">' +
+      '<span>VOLUNTEER COPY — BAG SHEET</span>' +
+      '<div class="bag-staple-note">✂ Staple to outside of bag</div>' +
+      '<span>'+esc(name)+'</span>' +
+    '</div>' +
+  '</div>';
+}
+
+// ── Helpers ──
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = String(s||'');
+  return d.innerHTML;
+}
+function det(label, val) {
+  return '<div class="ci-detail-row"><span class="ci-detail-label">'+label+'</span><span class="ci-detail-val">'+esc(val)+'</span></div>';
+}
+function ciBox(label) {
+  return '<div class="ci-box"><div class="ci-checkbox"></div><span class="ci-box-label">'+label+'</span></div>';
+}
+function sig(label) {
+  return '<div class="ci-sig-field"><div class="ci-sig-line"></div><div class="ci-sig-label">'+label+'</div></div>';
+}
+
+// ── Also store JWT from admin when navigating here ──
+window.addEventListener('storage', function(e){
+  if (e.key === 'rrgolf_jwt') _jwt = e.newValue || '';
+});
+
+// Auto-load on open
+loadData();
+</script>
+</body>
+</html>
