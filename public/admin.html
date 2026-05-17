@@ -505,24 +505,39 @@ tr:hover td { background: #f8faf8; }
 
 <script>
 var NETLIFY_BASE = 'https://rr-golf.netlify.app';
-var ADMIN_KEY = 'bullyjudge';
+var ADMIN_KEY = ''; // set from login response, used for admin-config
+var _jwt = null;    // JWT from admin-login, used for admin-data
 
 // ════════════════════════════════
 // AUTH
 // ════════════════════════════════
-function doLogin() {
+async function doLogin() {
   var pw = document.getElementById('login-pw').value;
-  if (pw === ADMIN_KEY) {
+  var btn = document.querySelector('.btn-login');
+  btn.textContent = 'Signing in…'; btn.disabled = true;
+  try {
+    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    var data = await res.json();
+    if (!res.ok || !data.token) throw new Error('bad password');
+    _jwt = data.token;
+    ADMIN_KEY = pw; // also used for admin-config x-admin-key
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     initApp();
-  } else {
+  } catch(e) {
     document.getElementById('login-err').style.display = 'block';
     document.getElementById('login-pw').value = '';
     document.getElementById('login-pw').focus();
+  } finally {
+    btn.textContent = 'Enter Dashboard'; btn.disabled = false;
   }
 }
 function doLogout() {
+  _jwt = null; ADMIN_KEY = '';
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-pw').value = '';
@@ -676,21 +691,29 @@ function updateCounts(){
 }
 
 // ════════════════════════════════
-// REGISTRATIONS + SPONSORS (Stripe)
+// REGISTRATIONS + SPONSORS (admin-data)
 // ════════════════════════════════
 async function loadOrders(){
+  if (!_jwt) return;
+  var authHdr = { 'Authorization': 'Bearer ' + _jwt };
+  var emptyMsg = function(cols, icon, msg){
+    return '<tr><td colspan="'+cols+'" class="empty-table"><div class="empty-icon">'+icon+'</div>'+msg+'</td></tr>';
+  };
+  // Load registrations
   try {
-    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/get-orders', {
-      headers: { 'x-admin-key': ADMIN_KEY }
-    });
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    var data = await res.json();
-    renderRegistrations(data.registrations || data.orders || []);
-    renderSponsors(data.sponsors || []);
+    var rRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', { headers: authHdr });
+    var regs = rRes.ok ? await rRes.json() : [];
+    renderRegistrations(Array.isArray(regs) ? regs : (regs.items || []));
   } catch(e) {
-    var msg = '<tr><td colspan="7" class="empty-table"><div class="empty-icon">⚠️</div>Could not load — check get-orders function</td></tr>';
-    document.getElementById('reg-tbody').innerHTML = msg;
-    document.getElementById('sponsor-tbody').innerHTML = msg;
+    document.getElementById('reg-tbody').innerHTML = emptyMsg(7, '⚠️', 'Could not load registrations');
+  }
+  // Load sponsors
+  try {
+    var sRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=sponsors', { headers: authHdr });
+    var sps = sRes.ok ? await sRes.json() : [];
+    renderSponsors(Array.isArray(sps) ? sps : (sps.items || []));
+  } catch(e) {
+    document.getElementById('sponsor-tbody').innerHTML = emptyMsg(7, '⚠️', 'Could not load sponsors');
   }
 }
 
