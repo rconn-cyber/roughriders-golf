@@ -257,7 +257,10 @@ tr:hover td { background: #f8faf8; }
             <h1>Registrations</h1>
             <p>All golfer registrations. Updates automatically from Stripe.</p>
           </div>
-          <button class="btn btn-outline" onclick="loadOrders()">↺ Refresh</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" onclick="openManualEntry('registration')">+ Add Entry</button>
+            <button class="btn btn-outline" onclick="loadOrders()">↺ Refresh</button>
+          </div>
         </div>
         <div class="stats-row" id="reg-stats">
           <div class="stat-card"><div class="stat-label">Total Golfers</div><div class="stat-value" id="stat-golfers">—</div></div>
@@ -285,7 +288,10 @@ tr:hover td { background: #f8faf8; }
             <h1>Sponsors</h1>
             <p>All sponsorship submissions. Paid and invoiced.</p>
           </div>
-          <button class="btn btn-outline" onclick="loadOrders()">↺ Refresh</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" onclick="openManualEntry('sponsor')">+ Add Entry</button>
+            <button class="btn btn-outline" onclick="loadOrders()">↺ Refresh</button>
+          </div>
         </div>
         <div class="stats-row">
           <div class="stat-card"><div class="stat-label">Total Sponsors</div><div class="stat-value" id="stat-sp-count">—</div></div>
@@ -352,6 +358,149 @@ tr:hover td { background: #f8faf8; }
       </div>
 
     </main>
+  </div>
+</div>
+
+
+<!-- MANUAL ENTRY MODAL -->
+<div class="modal-overlay" id="manual-modal">
+  <div class="modal-box" style="max-width:640px;">
+    <div class="modal-header">
+      <span class="modal-title" id="manual-modal-title">Add Manual Entry</span>
+      <button class="modal-close" onclick="closeManualModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Type tabs -->
+      <div style="display:flex;gap:0;border:1.5px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:18px;">
+        <button id="mtab-registration" onclick="switchManualTab('registration')"
+          style="flex:1;padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border:none;cursor:pointer;background:#0f2318;color:#fff;transition:all .15s;">
+          🏌️ Golfer / Team
+        </button>
+        <button id="mtab-sponsor" onclick="switchManualTab('sponsor')"
+          style="flex:1;padding:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border:none;cursor:pointer;background:var(--w);color:var(--tm);transition:all .15s;">
+          🤝 Sponsor
+        </button>
+      </div>
+
+      <!-- Payment method (both types) -->
+      <div class="form-row" style="margin-bottom:15px;">
+        <div class="form-group">
+          <label class="form-label">Payment / Entry Type *</label>
+          <select class="form-input" id="me-payment-type" onchange="updateManualPaymentNote()">
+            <option value="comped">Comped (free entry)</option>
+            <option value="in-kind">In-Kind</option>
+            <option value="check">Check in the Mail</option>
+            <option value="cash">Cash</option>
+            <option value="paid">Already Paid (offline)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes <span>(check #, in-kind desc, etc.)</span></label>
+          <input class="form-input" id="me-notes" type="text" placeholder="e.g. Check #1042 · Member donation" maxlength="120">
+        </div>
+      </div>
+      <div id="me-payment-note" style="font-size:12px;color:var(--tl);margin:-8px 0 14px;padding:8px 12px;background:#f8faf6;border-radius:5px;display:none;"></div>
+
+      <!-- REGISTRATION fields -->
+      <div id="me-reg-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Entry Type</label>
+            <select class="form-input" id="me-reg-type" onchange="updateManualRegType()">
+              <option value="team">Team of 4 — $650</option>
+              <option value="individual">Individual — $165</option>
+              <option value="comped-team">Comped Team (4 players, $0)</option>
+              <option value="comped-individual">Comped Individual ($0)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Total Amount</label>
+            <input class="form-input" id="me-reg-amount" type="number" placeholder="650" min="0" step="5">
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gd);margin:14px 0 8px;">Player 1 (Primary Contact)</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input class="form-input" id="me-p1-fn" type="text" placeholder="First" maxlength="40">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name *</label>
+            <input class="form-input" id="me-p1-ln" type="text" placeholder="Last" maxlength="40">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" id="me-p1-email" type="email" placeholder="email@example.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input class="form-input" id="me-p1-phone" type="tel" placeholder="(813) 555-0100">
+          </div>
+        </div>
+        <div id="me-extra-players">
+          <!-- Players 2-4 injected by JS -->
+        </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label class="form-label">Add-ons <span>(select all that apply)</span></label>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;" id="me-addons">
+            <div class="benefit-toggle" onclick="this.classList.toggle('on')" data-addon="Super Ticket" data-price="50">⭐ Super Ticket — $50</div>
+            <div class="benefit-toggle" onclick="this.classList.toggle('on')" data-addon="Mulligan Pack" data-price="20">Mulligan Pack — $20</div>
+            <div class="benefit-toggle" onclick="this.classList.toggle('on')" data-addon="Closest to Pin" data-price="20">Closest to Pin — $20</div>
+            <div class="benefit-toggle" onclick="this.classList.toggle('on')" data-addon="Longest Drive" data-price="20">Longest Drive — $20</div>
+            <div class="benefit-toggle" onclick="this.classList.toggle('on')" data-addon="Hole Sponsor" data-price="250">Hole Sponsor — $250</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SPONSOR fields -->
+      <div id="me-sponsor-section" style="display:none;">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input class="form-input" id="me-sp-fn" type="text" maxlength="40">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name *</label>
+            <input class="form-input" id="me-sp-ln" type="text" maxlength="40">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" id="me-sp-email" type="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company / Organization</label>
+            <input class="form-input" id="me-sp-company" type="text" maxlength="80">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sponsorship Package(s) <span>— click to select</span></label>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;" id="me-sp-levels">
+            <!-- populated from STATE.levels + STATE.alacarte -->
+          </div>
+        </div>
+        <div class="form-row" style="margin-top:14px;">
+          <div class="form-group">
+            <label class="form-label">Total Amount</label>
+            <input class="form-input" id="me-sp-amount" type="number" placeholder="0" min="0" step="50">
+            <div class="form-hint">Auto-filled from selections. Override if needed.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Website</label>
+            <input class="form-input" id="me-sp-website" type="url" placeholder="https://example.com">
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeManualModal()">Cancel</button>
+      <button class="btn btn-primary" id="me-save-btn" onclick="saveManualEntry()">Save Entry</button>
+    </div>
   </div>
 </div>
 
@@ -1104,6 +1253,239 @@ function deleteBenFromModal(){
 document.querySelectorAll('.modal-overlay').forEach(function(ov){
   ov.addEventListener('click', function(e){ if(e.target===ov) ov.classList.remove('open'); });
 });
+
+
+// ════════════════════════════════
+// MANUAL ENTRY
+// ════════════════════════════════
+var _manualTab = 'registration';
+
+function openManualEntry(type) {
+  _manualTab = type || 'registration';
+  // Reset form
+  ['me-p1-fn','me-p1-ln','me-p1-email','me-p1-phone','me-sp-fn','me-sp-ln',
+   'me-sp-email','me-sp-company','me-sp-website','me-notes','me-reg-amount','me-sp-amount'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value = '';
+  });
+  document.getElementById('me-payment-type').value = 'comped';
+  document.getElementById('me-reg-type').value = 'team';
+  document.querySelectorAll('#me-addons .benefit-toggle').forEach(function(t){t.classList.remove('on');});
+  document.getElementById('me-payment-note').style.display = 'none';
+  // Build sponsor level toggles from current STATE
+  buildSpLevelToggles();
+  switchManualTab(_manualTab);
+  document.getElementById('manual-modal').classList.add('open');
+  setTimeout(function(){
+    var f = _manualTab === 'registration' ? document.getElementById('me-p1-fn') : document.getElementById('me-sp-fn');
+    if(f) f.focus();
+  }, 50);
+  updateManualRegType();
+}
+
+function closeManualModal() {
+  document.getElementById('manual-modal').classList.remove('open');
+}
+
+function switchManualTab(tab) {
+  _manualTab = tab;
+  var regBtn = document.getElementById('mtab-registration');
+  var spBtn  = document.getElementById('mtab-sponsor');
+  var regSec = document.getElementById('me-reg-section');
+  var spSec  = document.getElementById('me-sponsor-section');
+  if (tab === 'registration') {
+    regBtn.style.background = '#0f2318'; regBtn.style.color = '#fff';
+    spBtn.style.background  = 'var(--w)'; spBtn.style.color = 'var(--tm)';
+    regSec.style.display = ''; spSec.style.display = 'none';
+    document.getElementById('manual-modal-title').textContent = 'Add Golfer / Team Entry';
+  } else {
+    spBtn.style.background  = '#0f2318'; spBtn.style.color = '#fff';
+    regBtn.style.background = 'var(--w)'; regBtn.style.color = 'var(--tm)';
+    regSec.style.display = 'none'; spSec.style.display = '';
+    document.getElementById('manual-modal-title').textContent = 'Add Sponsor Entry';
+  }
+}
+
+function updateManualPaymentNote() {
+  var type = document.getElementById('me-payment-type').value;
+  var note = document.getElementById('me-payment-note');
+  var msgs = {
+    'comped':   'Entry will be recorded as comped ($0 collected). Notes field is a good place to record the reason.',
+    'in-kind':  'Enter a description of the in-kind contribution in the Notes field.',
+    'check':    'Enter the check number in the Notes field. Amount will be recorded as pending until deposited.',
+    'cash':     'Cash payment — amount will be recorded as collected.',
+    'paid':     'Use this if payment was collected outside the system (e.g. past event, direct transfer).',
+  };
+  if (msgs[type]) {
+    note.textContent = msgs[type];
+    note.style.display = 'block';
+  } else {
+    note.style.display = 'none';
+  }
+}
+
+function updateManualRegType() {
+  var type = document.getElementById('me-reg-type').value;
+  var amtEl = document.getElementById('me-reg-amount');
+  var prices = { 'team': 650, 'individual': 165, 'comped-team': 0, 'comped-individual': 0 };
+  if (amtEl && !amtEl.dataset.dirty) amtEl.value = prices[type] || '';
+  // Build extra player fields
+  var isTeam = (type === 'team' || type === 'comped-team');
+  var extra = document.getElementById('me-extra-players');
+  extra.innerHTML = '';
+  if (isTeam) {
+    for (var i = 2; i <= 4; i++) {
+      var div = document.createElement('div');
+      div.innerHTML =
+        '<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gd);margin:12px 0 8px;">Player '+i+'</div>'+
+        '<div class="form-row">'+
+          '<div class="form-group"><label class="form-label">First Name</label>'+
+            '<input class="form-input" id="me-p'+i+'-fn" type="text" placeholder="First" maxlength="40"></div>'+
+          '<div class="form-group"><label class="form-label">Last Name</label>'+
+            '<input class="form-input" id="me-p'+i+'-ln" type="text" placeholder="Last" maxlength="40"></div>'+
+        '</div>';
+      extra.appendChild(div);
+    }
+  }
+}
+
+document.getElementById('me-reg-amount').addEventListener('input', function(){ this.dataset.dirty='1'; });
+
+function buildSpLevelToggles() {
+  var container = document.getElementById('me-sp-levels');
+  var html = '';
+  sortBy(STATE.levels).forEach(function(lv){
+    html += '<div class="benefit-toggle" onclick="toggleSpLevel(this,'+lv.price+')" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'">'+
+      escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
+  });
+  sortBy(STATE.alacarte).forEach(function(ac){
+    html += '<div class="benefit-toggle" onclick="toggleSpLevel(this,'+ac.price+')" data-sp-name="'+escH(ac.name)+'" data-sp-price="'+ac.price+'">'+
+      escH(ac.name)+' — '+fmtMoney(ac.price)+'</div>';
+  });
+  container.innerHTML = html;
+}
+
+function toggleSpLevel(el, price) {
+  el.classList.toggle('on');
+  // Recalculate total from selected
+  var total = 0;
+  document.querySelectorAll('#me-sp-levels .benefit-toggle.on').forEach(function(t){
+    total += parseInt(t.dataset.spPrice)||0;
+  });
+  var amtEl = document.getElementById('me-sp-amount');
+  if (!amtEl.dataset.dirty) amtEl.value = total || '';
+}
+document.getElementById('me-sp-amount').addEventListener('input', function(){ this.dataset.dirty='1'; });
+
+async function saveManualEntry() {
+  if (!_jwt) { toast('Not authenticated'); return; }
+  var paymentType = document.getElementById('me-payment-type').value;
+  var notes       = document.getElementById('me-notes').value.trim();
+  var btn         = document.getElementById('me-save-btn');
+  btn.disabled    = true; btn.textContent = 'Saving…';
+
+  try {
+    if (_manualTab === 'registration') {
+      await saveManualRegistration(paymentType, notes);
+    } else {
+      await saveManualSponsor(paymentType, notes);
+    }
+    closeManualModal();
+    loadOrders();
+    toast('Entry saved ✓');
+  } catch(e) {
+    toast('Save failed: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Entry';
+  }
+}
+
+async function saveManualRegistration(paymentType, notes) {
+  var regType  = document.getElementById('me-reg-type').value;
+  var isTeam   = (regType === 'team' || regType === 'comped-team');
+  var amount   = parseFloat(document.getElementById('me-reg-amount').value) || 0;
+  var fn       = document.getElementById('me-p1-fn').value.trim();
+  var ln       = document.getElementById('me-p1-ln').value.trim();
+  if (!fn && !ln) throw new Error('Player 1 name is required');
+
+  var golfers  = [{ firstName: fn, lastName: ln,
+    email: document.getElementById('me-p1-email').value.trim(),
+    phone: document.getElementById('me-p1-phone').value.trim() }];
+
+  if (isTeam) {
+    for (var i = 2; i <= 4; i++) {
+      var pfn = document.getElementById('me-p'+i+'-fn');
+      var pln = document.getElementById('me-p'+i+'-ln');
+      if (pfn && pln && (pfn.value.trim() || pln.value.trim())) {
+        golfers.push({ firstName: pfn.value.trim(), lastName: pln.value.trim() });
+      }
+    }
+  }
+
+  var addons = [];
+  document.querySelectorAll('#me-addons .benefit-toggle.on').forEach(function(t){
+    addons.push({ name: t.dataset.addon, price: parseInt(t.dataset.price)||0 });
+  });
+
+  var record = {
+    firstName:    fn, lastName: ln,
+    email:        golfers[0].email,
+    phone:        golfers[0].phone,
+    golfers:      golfers,
+    playerCount:  golfers.length,
+    addons:       addons,
+    total:        amount,
+    status:       paymentType === 'check' ? 'pending' : paymentType === 'paid' ? 'paid' : paymentType,
+    paymentMethod: paymentType,
+    source:       'manual',
+    notes:        notes,
+    date:         new Date().toISOString(),
+    type:         'registration',
+  };
+
+  var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+    body: JSON.stringify(record),
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+}
+
+async function saveManualSponsor(paymentType, notes) {
+  var fn      = document.getElementById('me-sp-fn').value.trim();
+  var ln      = document.getElementById('me-sp-ln').value.trim();
+  if (!fn && !ln) throw new Error('Name is required');
+
+  var sponsorships = [];
+  document.querySelectorAll('#me-sp-levels .benefit-toggle.on').forEach(function(t){
+    sponsorships.push({ name: t.dataset.spName, price: parseInt(t.dataset.spPrice)||0 });
+  });
+
+  var amount = parseFloat(document.getElementById('me-sp-amount').value) || 0;
+
+  var record = {
+    firstName:    fn, lastName:  ln,
+    email:        document.getElementById('me-sp-email').value.trim(),
+    company:      document.getElementById('me-sp-company').value.trim(),
+    website:      document.getElementById('me-sp-website').value.trim(),
+    sponsorships: sponsorships,
+    package:      sponsorships.map(function(s){return s.name;}).join(', '),
+    total:        amount,
+    amount:       amount * 100, // store in cents like Stripe records for consistency
+    status:       paymentType === 'check' ? 'pending' : paymentType === 'paid' ? 'paid' : paymentType,
+    paymentMethod: paymentType,
+    source:       'manual',
+    notes:        notes,
+    date:         new Date().toISOString(),
+    type:         'sponsor',
+  };
+
+  var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=sponsors', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt },
+    body: JSON.stringify(record),
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+}
 
 // ════════════════════════════════
 // INIT
