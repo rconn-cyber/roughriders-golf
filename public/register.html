@@ -556,7 +556,8 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
   <p class="section-heading">Presenting Sponsorships</p>
   <p class="section-sub">Full tournament packages — click any card to select. Sponsorship is optional, skip to pay registration only.</p>
 
-  <div class="tiers">
+  <div class="tiers" id="tiers-container">
+    <!-- Populated by renderSponsorConfig() on load. Fallback defaults below are replaced if admin-config loads. -->
     <div class="tier title-tier selectable" data-id="title" data-name="Title Sponsor" data-price="7500">
       <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="tier-header">
@@ -635,72 +636,8 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
   <p class="section-heading">À La Carte &amp; Specialty</p>
   <p class="section-sub">Add individual opportunities to your package</p>
-  <div class="alacarte-grid">
-    <div class="alacarte-card selectable" data-id="bev-cart" data-name="Beverage Cart" data-price="1500">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Beverage Cart</span><span class="alacarte-price">$1,500</span></div>
-      <ul class="alacarte-benefits"><li>Logo on cart signage seen by all golfers all day</li><li>Brand mention at player check-in</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="cigar" data-name="Cigar Sponsor" data-price="500">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Cigar Sponsor</span><span class="alacarte-price">$500</span></div>
-      <ul class="alacarte-benefits"><li>Branded signage at cigar station</li><li>Optional product sampling / brand rep on-site</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="breakfast" data-name="Breakfast" data-price="750">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Breakfast</span><span class="alacarte-price">$750</span></div>
-      <ul class="alacarte-benefits"><li>Branded table signage at breakfast station</li><li>Verbal recognition during morning announcements</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="lunch" data-name="Lunch / Dinner" data-price="1250">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Lunch / Dinner</span><span class="alacarte-price">$1,250</span></div>
-      <ul class="alacarte-benefits"><li>Prominent branded signage at meal service</li><li>Verbal recognition &amp; thank-you during awards</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="long-drive-sp" data-name="Longest Drive Sponsor" data-price="400">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Longest Drive</span><span class="alacarte-price">$400</span></div>
-      <ul class="alacarte-benefits"><li>Branded tee sign at contest hole</li><li>Name announced when winner is presented</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="close-pin-sp" data-name="Closest to the Pin Sponsor" data-price="400">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Closest to the Pin</span><span class="alacarte-price">$400</span></div>
-      <ul class="alacarte-benefits"><li>Branded tee sign at contest hole</li><li>Name announced when winner is presented</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="putting" data-name="Putting Contest" data-price="500">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Putting Contest</span><span class="alacarte-price">$500</span></div>
-      <ul class="alacarte-benefits"><li>Branded signage at putting green</li><li>High-traffic area — visible to all participants</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="cooler" data-name="Cooler Bag" data-price="600">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Cooler Bag</span><span class="alacarte-price">$600</span></div>
-      <ul class="alacarte-benefits"><li>Logo imprinted on every player's cooler bag</li><li>Bags go home with golfers</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="tee-gift" data-name="Tee Gift" data-price="500">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Tee Gift</span><span class="alacarte-price">$500</span></div>
-      <ul class="alacarte-benefits"><li>Brand on item in every player's gift bag</li><li>Tangible takeaway extending reach beyond event day</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="range" data-name="Driving Range" data-price="500">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Driving Range</span><span class="alacarte-price">$500</span></div>
-      <ul class="alacarte-benefits"><li>Branded signage at warm-up range</li><li>First brand seen by every golfer before teeing off</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="golf-ball" data-name="Golf Ball Sponsor" data-price="500">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Golf Ball Sponsor</span><span class="alacarte-price">$500</span></div>
-      <ul class="alacarte-benefits"><li>Logo or name on branded balls given to all players</li><li>In-hand brand exposure every shot of the round</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="scorecard" data-name="Scorecard" data-price="350">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">Scorecard</span><span class="alacarte-price">$350</span></div>
-      <ul class="alacarte-benefits"><li>Logo printed on every player's scorecard</li><li>Handled repeatedly throughout the entire round</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
-    <div class="alacarte-card selectable" data-id="vip-tent" data-name="VIP Tent" data-price="1500">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="alacarte-card-top"><span class="alacarte-name">VIP Tent</span><span class="alacarte-price">$1,500</span></div>
-      <ul class="alacarte-benefits"><li>Branded signage &amp; banner at VIP hospitality area</li><li>Premium visibility — high-traffic gathering spot</li><li>Recognition at awards ceremony</li><li>Logo on tournament materials &amp; website</li></ul>
-    </div>
+  <div class="alacarte-grid" id="alacarte-container">
+    <!-- Populated by renderSponsorConfig() on load -->
   </div>
 
   <!-- ── SPONSOR CONTACT INFO + PAYMENT ── -->
@@ -1750,6 +1687,9 @@ document.addEventListener('DOMContentLoaded', function() {
     goPage(2);
   }
 
+  // Load sponsor config (levels + à la carte) from admin
+  loadSponsorConfig();
+
   // Load sponsor logos from admin data
   loadSponsorLogos();
 
@@ -1785,6 +1725,123 @@ async function loadSponsorLogos() {
     }).join('');
     strip.style.display = 'block';
   } catch(e) { /* logos are a nice-to-have, fail silently */ }
+}
+
+// ════════════════════════════════
+// SPONSOR CONFIG — load from admin-config Netlify function
+// Falls back to hardcoded defaults already in the DOM if fetch fails
+// ════════════════════════════════
+
+var THEME_CLASS_MAP = {
+  forest: 'title-tier',
+  gold:   'gold-tier',
+  silver: 'silver-tier',
+  bronze: 'bronze-tier',
+  green:  'green-tier',
+  navy:   'navy-tier',
+};
+
+var CHECK_SVG_WHITE = '<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+var CHECK_SVG_DARK  = '<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function escHtmlConfig(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function buildTierHTML(lv) {
+  var cls = THEME_CLASS_MAP[lv.theme] || 'title-tier';
+  var price = Number(lv.price).toLocaleString('en-US');
+  var badge = lv.badge ? '<div class="featured-pill">' + escHtmlConfig(lv.badge) + '</div>' : '';
+  var perks = (lv.benefits || []).map(function(b) {
+    return '<div class="perk"><span class="perk-dot"></span><span>' + escHtmlConfig(b) + '</span></div>';
+  }).join('');
+  return '<div class="tier ' + cls + ' selectable" data-id="' + escHtmlConfig(lv.id) + '" data-name="' + escHtmlConfig(lv.name) + '" data-price="' + lv.price + '">' +
+    '<div class="check-badge">' + CHECK_SVG_WHITE + '</div>' +
+    '<div class="tier-header">' +
+      '<div class="tier-label">' + escHtmlConfig(lv.name) + '</div>' +
+      '<div class="tier-price"><sup>$</sup>' + price + '</div>' +
+      badge +
+    '</div>' +
+    '<div class="tier-body">' + perks + '</div>' +
+  '</div>';
+}
+
+function buildAlaCarteHTML(ac) {
+  var price = Number(ac.price).toLocaleString('en-US');
+  var bullets = (ac.bullets || []).map(function(b) {
+    return '<li>' + escHtmlConfig(b) + '</li>';
+  }).join('');
+  return '<div class="alacarte-card selectable" data-id="' + escHtmlConfig(ac.id) + '" data-name="' + escHtmlConfig(ac.name) + '" data-price="' + ac.price + '">' +
+    '<div class="check-badge">' + CHECK_SVG_DARK + '</div>' +
+    '<div class="alacarte-card-top"><span class="alacarte-name">' + escHtmlConfig(ac.name) + '</span><span class="alacarte-price">$' + price + '</span></div>' +
+    '<ul class="alacarte-benefits">' + bullets + '</ul>' +
+  '</div>';
+}
+
+function renderSponsorConfig(config) {
+  // ── Render tiers ──
+  var tiersEl = document.getElementById('tiers-container');
+  if (tiersEl && config.levels && config.levels.length) {
+    var sorted = config.levels.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
+    tiersEl.innerHTML = sorted.map(buildTierHTML).join('');
+  }
+
+  // ── Render à la carte ──
+  var acEl = document.getElementById('alacarte-container');
+  if (acEl && config.alacarte && config.alacarte.length) {
+    var sortedAc = config.alacarte.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
+    acEl.innerHTML = sortedAc.map(buildAlaCarteHTML).join('');
+  }
+
+  // Re-attach click listeners to newly rendered .selectable elements
+  document.querySelectorAll('.selectable').forEach(function(el) {
+    el.addEventListener('click', function() {
+      var id   = this.dataset.id;
+      var name = this.dataset.name;
+      var base = parseInt(this.dataset.price);
+      if (this.classList.contains('selected')) {
+        this.classList.remove('selected');
+        if (id === 'hole') { holeQty = 1; var hq = document.getElementById('hole-qty'); if(hq) hq.textContent = '1'; }
+        delete sponsorSelections[id];
+      } else {
+        this.classList.add('selected');
+        var price = id === 'hole' ? base * holeQty : base;
+        var displayName = (id === 'hole' && holeQty > 1) ? 'Hole Sponsor x' + holeQty : name;
+        sponsorSelections[id] = { name: displayName, price: price };
+      }
+      updateSponsorTotal();
+    });
+  });
+
+  // Also rebuild BENEFITS_DATA from config so computeBenefits() stays accurate
+  if (config.levels) {
+    config.levels.forEach(function(lv) {
+      BENEFITS_DATA[lv.id] = { perks: lv.benefits || [] };
+    });
+  }
+  if (config.alacarte) {
+    config.alacarte.forEach(function(ac) {
+      BENEFITS_DATA[ac.id] = { perks: ac.bullets || [] };
+    });
+  }
+}
+
+async function loadSponsorConfig() {
+  try {
+    var res = await fetch(NETLIFY_BASE + '/.netlify/functions/admin-config', {
+      headers: { 'Cache-Control': 'no-cache' }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var config = await res.json();
+    if (config && (config.levels || config.alacarte)) {
+      renderSponsorConfig(config);
+    }
+  } catch(e) {
+    // Silently fall back — hardcoded HTML in DOM is already correct
+    console.log('admin-config unavailable, using defaults:', e.message);
+    // Still wire up click listeners on the hardcoded selectable elements
+    // (DOMContentLoaded handles this already via the existing listener block)
+  }
 }
 
 // ════════════════════════════════
