@@ -18,7 +18,7 @@ html { font-size: 15px; }
 body { font-family: 'DM Sans', sans-serif; background: #eef0ed; color: var(--td); line-height: 1.5; min-height: 100vh; }
 
 /* LOGIN */
-#login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--gd); }
+#login-screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--gd); z-index: 500; }
 .login-box { background: var(--w); border-radius: 10px; padding: 44px 36px; max-width: 340px; width: 92%; text-align: center; box-shadow: 0 28px 70px rgba(0,0,0,0.4); }
 .login-logo { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; color: var(--gd); margin-bottom: 3px; }
 .login-sub { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--tl); margin-bottom: 28px; }
