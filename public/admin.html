@@ -3,306 +3,202 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RR Golf — Admin Dashboard</title>
+<title>RR Golf — Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --green-dark: #0f2318; --green-mid: #1e4a2c; --green-light: #2d7a4a;
-  --green-pale: #c8e6d0; --gold: #b8940e; --gold-light: #e8c040;
-  --cream: #f8f4ed; --white: #ffffff;
-  --text-dark: #0a0a08; --text-mid: #2a2a26; --text-light: #555550;
-  --silver: #6a7478; --bronze: #8a5520; --red: #b02020;
-  --border: rgba(0,0,0,0.12);
-  --sidebar-w: 220px;
+  --gd: #0f2318; --gm: #1e4a2c; --gl: #2d7a4a; --gp: #c8e6d0;
+  --gold: #b8940e; --gold-l: #e8c040; --cream: #f8f4ed;
+  --w: #fff; --td: #0a0a08; --tm: #2a2a26; --tl: #555550;
+  --red: #b02020; --border: rgba(0,0,0,0.12);
 }
-html { font-size: 16px; }
-body { font-family: 'DM Sans', sans-serif; background: #f0f2ef; color: var(--text-dark); line-height: 1.5; min-height: 100vh; }
+html { font-size: 15px; }
+body { font-family: 'DM Sans', sans-serif; background: #eef0ed; color: var(--td); line-height: 1.5; min-height: 100vh; }
 
-/* ── LOGIN ── */
-#login-screen {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: var(--green-dark);
-}
-.login-box {
-  background: var(--white); border-radius: 10px; padding: 48px 40px;
-  max-width: 360px; width: 92%; text-align: center;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.4);
-}
-.login-logo { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--green-dark); margin-bottom: 4px; }
-.login-sub { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-light); margin-bottom: 32px; }
-.login-box input[type="password"] {
-  width: 100%; padding: 13px 16px; border: 2px solid var(--border); border-radius: 6px;
-  font-family: 'DM Sans', sans-serif; font-size: 16px; outline: none;
-  transition: border-color 0.15s; text-align: center; letter-spacing: 0.12em;
-  margin-bottom: 12px;
-}
-.login-box input:focus { border-color: var(--green-light); }
-.btn-login {
-  width: 100%; padding: 14px; background: var(--green-dark); color: #fff;
-  border: none; border-radius: 6px; font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-  cursor: pointer; transition: background 0.15s;
-}
-.btn-login:hover { background: var(--green-mid); }
-#login-err { font-size: 13px; color: var(--red); margin-top: 10px; display: none; }
+/* LOGIN */
+#login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--gd); }
+.login-box { background: var(--w); border-radius: 10px; padding: 44px 36px; max-width: 340px; width: 92%; text-align: center; box-shadow: 0 28px 70px rgba(0,0,0,0.4); }
+.login-logo { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; color: var(--gd); margin-bottom: 3px; }
+.login-sub { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--tl); margin-bottom: 28px; }
+.login-box input[type="password"] { width: 100%; padding: 12px 15px; border: 2px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 15px; outline: none; text-align: center; letter-spacing: 0.1em; margin-bottom: 11px; transition: border-color .15s; }
+.login-box input:focus { border-color: var(--gl); }
+.btn-login { width: 100%; padding: 13px; background: var(--gd); color: #fff; border: none; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+.btn-login:hover { background: var(--gm); }
+#login-err { font-size: 12px; color: var(--red); margin-top: 9px; display: none; }
 
-/* ── APP SHELL ── */
+/* SHELL */
 #app { display: none; min-height: 100vh; }
 
-/* ── TOPBAR ── */
-.topbar {
-  background: var(--green-dark); padding: 0 24px;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 56px; position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.35);
-}
-.topbar-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--white); }
-.topbar-sub { font-size: 11px; color: rgba(255,255,255,0.45); margin-left: 12px; letter-spacing: 0.08em; }
-.topbar-right { display: flex; align-items: center; gap: 16px; }
-.topbar-badge { font-size: 11px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); padding: 4px 10px; border-radius: 20px; }
-.btn-logout { font-size: 12px; color: rgba(255,255,255,0.45); background: none; border: 1px solid rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 4px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
-.btn-logout:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+/* TOPBAR */
+.topbar { background: var(--gd); padding: 0 22px; display: flex; align-items: center; justify-content: space-between; height: 54px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+.tb-left { display: flex; align-items: center; gap: 10px; }
+.tb-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: #fff; }
+.tb-sub { font-size: 11px; color: rgba(255,255,255,.4); letter-spacing: .06em; }
+.tb-right { display: flex; align-items: center; gap: 12px; }
+.save-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: rgba(255,255,255,.1); color: rgba(255,255,255,.6); transition: all .3s; }
+.save-badge.saving { background: rgba(184,148,14,.25); color: var(--gold-l); }
+.save-badge.ok { background: rgba(45,122,74,.3); color: #7ee8a2; }
+.save-badge.err { background: rgba(176,32,32,.3); color: #f8a0a0; }
+.btn-logout { font-size: 11px; color: rgba(255,255,255,.4); background: none; border: 1px solid rgba(255,255,255,.15); padding: 5px 11px; border-radius: 4px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.btn-logout:hover { color: #fff; border-color: rgba(255,255,255,.4); }
 
-/* ── LAYOUT ── */
+/* LAYOUT */
 .app-body { display: flex; }
-.sidebar {
-  width: var(--sidebar-w); background: var(--white); border-right: 1px solid var(--border);
-  min-height: calc(100vh - 56px); padding: 20px 0; flex-shrink: 0;
-  position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto;
-}
-.sidebar-section { padding: 0 12px; margin-bottom: 6px; }
-.sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-light); padding: 10px 12px 6px; }
-.nav-item {
-  display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 6px;
-  cursor: pointer; font-size: 13.5px; font-weight: 500; color: var(--text-mid);
-  transition: all 0.15s; margin-bottom: 2px;
-}
-.nav-item:hover { background: #f0f4f0; color: var(--green-dark); }
-.nav-item.active { background: var(--green-pale); color: var(--green-dark); font-weight: 700; }
-.nav-icon { font-size: 15px; flex-shrink: 0; width: 20px; text-align: center; }
-.nav-count { margin-left: auto; font-size: 11px; background: var(--green-dark); color: #fff; border-radius: 10px; padding: 2px 7px; font-weight: 700; }
+.sidebar { width: 210px; background: var(--w); border-right: 1px solid var(--border); min-height: calc(100vh - 54px); padding: 16px 0; flex-shrink: 0; position: sticky; top: 54px; height: calc(100vh - 54px); overflow-y: auto; }
+.sb-label { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--tl); padding: 10px 14px 5px; }
+.nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--tm); transition: all .15s; margin: 1px 8px; }
+.nav-item:hover { background: #f0f4f0; color: var(--gd); }
+.nav-item.active { background: var(--gp); color: var(--gd); font-weight: 700; }
+.nav-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+.nav-count { margin-left: auto; font-size: 10px; background: var(--gd); color: #fff; border-radius: 10px; padding: 1px 6px; font-weight: 700; }
+.nav-count.orange { background: var(--gold); }
 
-.main-content { flex: 1; padding: 28px; min-width: 0; }
+.main { flex: 1; padding: 24px; min-width: 0; }
 
-/* ── PANELS ── */
+/* PANELS */
 .panel { display: none; }
 .panel.active { display: block; }
 
-/* ── PAGE HEADER ── */
-.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; gap: 16px; flex-wrap: wrap; }
-.page-header-left h1 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 900; color: var(--green-dark); }
-.page-header-left p { font-size: 13px; color: var(--text-light); margin-top: 3px; }
+/* PAGE HEADER */
+.page-hdr { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 14px; flex-wrap: wrap; }
+.page-hdr-l h1 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; color: var(--gd); }
+.page-hdr-l p { font-size: 12px; color: var(--tl); margin-top: 2px; }
 
-/* ── BUTTONS ── */
-.btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border: none; border-radius: 5px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; letter-spacing: 0.03em; }
-.btn-primary { background: var(--green-dark); color: #fff; }
-.btn-primary:hover { background: var(--green-mid); }
-.btn-gold { background: var(--gold); color: #fff; }
-.btn-gold:hover { background: #9a7a08; }
-.btn-outline { background: var(--white); color: var(--text-mid); border: 1.5px solid var(--border); }
-.btn-outline:hover { border-color: var(--green-light); color: var(--green-dark); }
-.btn-danger { background: #fdf0ef; color: var(--red); border: 1.5px solid rgba(176,32,32,0.2); }
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 16px; border: none; border-radius: 5px; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .15s; letter-spacing: .02em; }
+.btn-primary { background: var(--gd); color: #fff; }
+.btn-primary:hover { background: var(--gm); }
+.btn-outline { background: var(--w); color: var(--tm); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--gl); color: var(--gd); }
+.btn-danger { background: #fdf0ef; color: var(--red); border: 1.5px solid rgba(176,32,32,.2); }
 .btn-danger:hover { background: var(--red); color: #fff; }
-.btn-sm { padding: 6px 12px; font-size: 12px; }
-.btn-xs { padding: 4px 9px; font-size: 11px; }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
 
-/* ── CARDS ── */
-.card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; }
-.card-header { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.card-header h2 { font-size: 14px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green-dark); }
-.card-body { padding: 22px; }
+/* CARDS */
+.card { background: var(--w); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; }
+.card-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-header h2 { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--gd); }
+.card-body { padding: 18px; }
 
-/* ════════════════════════════════
-   SPONSOR LEVEL BUILDER
-   ════════════════════════════════ */
+/* STAT CARDS */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--w); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+.stat-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--tl); margin-bottom: 4px; }
+.stat-value { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 900; color: var(--gd); }
+.stat-sub { font-size: 11px; color: var(--tl); margin-top: 2px; }
 
-/* Master Benefits Pool */
-.benefits-pool { display: flex; flex-wrap: wrap; gap: 8px; }
-.benefit-pill {
-  display: inline-flex; align-items: center; gap: 7px;
-  background: #f4f6f4; border: 1.5px solid var(--border); border-radius: 20px;
-  padding: 5px 12px 5px 10px; font-size: 12.5px; color: var(--text-mid); font-weight: 500;
-  cursor: default;
-}
-.benefit-pill .pill-actions { display: flex; gap: 4px; margin-left: 4px; }
-.pill-btn { background: none; border: none; cursor: pointer; font-size: 13px; padding: 0 2px; line-height: 1; opacity: 0.55; transition: opacity 0.15s; }
+/* TABLE */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--tl); padding: 8px 12px; border-bottom: 2px solid var(--border); background: #f8f9f6; }
+td { padding: 10px 12px; border-bottom: 1px solid rgba(0,0,0,.06); color: var(--tm); vertical-align: middle; }
+tr:hover td { background: #f8faf8; }
+.status-pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+.status-paid { background: #e8f5e9; color: #1b5e20; }
+.status-invoice { background: #fff8e1; color: #7a5c00; }
+.status-pending { background: #f3f0ff; color: #4a3080; }
+.status-cancelled { background: #fdf0ef; color: var(--red); }
+.empty-table { text-align: center; padding: 40px 20px; color: var(--tl); font-size: 13px; }
+.empty-icon { font-size: 32px; margin-bottom: 10px; opacity: .35; }
+
+/* SPONSOR LEVELS */
+.levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.level-card { background: var(--w); border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; transition: box-shadow .2s; }
+.level-card:hover { box-shadow: 0 6px 22px rgba(0,0,0,.1); }
+.lc-head { padding: 14px 16px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.lc-name { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: #fff; }
+.lc-price { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; color: rgba(255,255,255,.88); }
+.lc-badge-lbl { font-size: 9px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 2px; }
+.lc-body { padding: 12px 15px; }
+.lc-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; min-height: 22px; }
+.lc-tag { font-size: 10.5px; background: var(--gp); color: var(--gd); padding: 2px 7px; border-radius: 3px; }
+.lc-none { font-size: 11px; color: var(--tl); font-style: italic; }
+.lc-actions { display: flex; gap: 6px; }
+.add-card { border: 1.5px dashed rgba(0,0,0,.15); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 130px; cursor: pointer; gap: 6px; background: none; width: 100%; font-family: 'DM Sans', sans-serif; }
+.add-card:hover { background: #f4f8f4; border-color: var(--gl); }
+.add-card span:first-child { font-size: 24px; opacity: .3; }
+.add-card span:last-child { font-size: 12px; color: var(--tl); }
+
+/* ALACARTE */
+.ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.ac-card { background: var(--w); border: 1px solid var(--border); border-radius: 7px; padding: 12px 14px; }
+.ac-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+.ac-name { font-size: 13px; font-weight: 600; color: var(--td); }
+.ac-price { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; color: var(--gm); }
+.ac-cat { font-size: 10px; background: #f0f2ef; color: var(--tl); padding: 2px 7px; border-radius: 3px; text-transform: uppercase; letter-spacing: .06em; display: inline-block; margin-bottom: 6px; }
+.ac-bullets { font-size: 11px; color: var(--tm); list-style: none; padding: 0; margin-bottom: 8px; display: flex; flex-direction: column; gap: 2px; }
+.ac-bullets li::before { content: '· '; color: var(--gl); font-weight: 700; }
+.ac-acts { display: flex; gap: 5px; }
+.group-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--tl); margin: 16px 0 7px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+
+/* BENEFITS POOL */
+.pool-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+.benefit-pill { display: inline-flex; align-items: center; gap: 6px; background: #f4f6f4; border: 1px solid var(--border); border-radius: 20px; padding: 4px 11px; font-size: 12px; color: var(--tm); }
+.pill-btn { background: none; border: none; cursor: pointer; font-size: 12px; padding: 0 2px; line-height: 1; opacity: .5; }
 .pill-btn:hover { opacity: 1; }
-.pill-add-form { display: flex; gap: 8px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
-.pill-add-form input { padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 5px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.15s; flex: 1; min-width: 200px; }
-.pill-add-form input:focus { border-color: var(--green-light); }
+.pill-add-form { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.pill-add-form input { flex: 1; min-width: 180px; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 5px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; }
+.pill-add-form input:focus { border-color: var(--gl); }
 
-/* Sponsor Level Cards */
-.levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-.level-card {
-  background: var(--white); border: 2px solid var(--border); border-radius: 8px;
-  overflow: hidden; transition: box-shadow 0.2s;
-}
-.level-card:hover { box-shadow: 0 8px 28px rgba(0,0,0,0.1); }
-.level-card-head {
-  padding: 18px 20px; display: flex; align-items: center; justify-content: space-between;
-  gap: 10px;
-}
-.level-card-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--white); }
-.level-card-price { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--white); opacity: 0.9; }
-.level-card-body { padding: 14px 20px; }
-.level-card-benefits { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; min-height: 28px; }
-.level-benefit-tag {
-  font-size: 11px; background: var(--green-pale); color: var(--green-dark);
-  padding: 3px 9px; border-radius: 3px; font-weight: 500;
-}
-.level-no-benefits { font-size: 12px; color: var(--text-light); font-style: italic; }
-.level-card-actions { display: flex; gap: 8px; }
-
-/* Level color themes */
-.theme-title { background: linear-gradient(135deg, #0f2318, #1e4a2c); }
-.theme-gold   { background: linear-gradient(135deg, #3d2e0a, #6b4f16); }
-.theme-silver { background: linear-gradient(135deg, #2a2e30, #4a5255); }
-.theme-bronze { background: linear-gradient(135deg, #3d1e0a, #6b3316); }
-.theme-green  { background: linear-gradient(135deg, #0d3320, #1a5c35); }
-.theme-navy   { background: linear-gradient(135deg, #0d1f3c, #1a3464); }
-.theme-custom { background: linear-gradient(135deg, #2a2a2a, #4a4a4a); }
-
-/* Add-new card */
-.level-card-add {
-  background: var(--white); border: 2px dashed rgba(0,0,0,0.15); border-radius: 8px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: 160px; cursor: pointer; transition: all 0.15s; gap: 8px;
-  padding: 24px;
-}
-.level-card-add:hover { border-color: var(--green-light); background: #f4faf6; }
-.level-card-add-icon { font-size: 28px; opacity: 0.3; }
-.level-card-add-label { font-size: 13px; font-weight: 600; color: var(--text-light); }
-
-/* ── MODAL ── */
-.modal-overlay {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
-  z-index: 200; align-items: center; justify-content: center;
-  padding: 20px; overflow-y: auto;
-}
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.52); z-index: 200; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
 .modal-overlay.open { display: flex; }
-.modal-box {
-  background: var(--white); border-radius: 10px; width: 100%;
-  max-width: 600px; max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.35);
-  animation: modalIn 0.22s cubic-bezier(0.34,1.3,0.64,1);
-}
-@keyframes modalIn {
-  from { opacity: 0; transform: translateY(24px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-.modal-header {
-  padding: 22px 26px 18px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.modal-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 900; color: var(--green-dark); }
-.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-light); line-height: 1; padding: 0; transition: color 0.15s; }
-.modal-close:hover { color: var(--text-dark); }
-.modal-body { padding: 24px 26px; }
-.modal-footer { padding: 16px 26px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
-
-/* ── FORM FIELDS ── */
-.form-group { margin-bottom: 18px; }
+.modal-box { background: var(--w); border-radius: 10px; width: 100%; max-width: 580px; max-height: 92vh; overflow-y: auto; box-shadow: 0 28px 70px rgba(0,0,0,.32); animation: mIn .2s cubic-bezier(.34,1.3,.64,1); }
+@keyframes mIn { from { opacity:0; transform:translateY(20px) scale(.97); } to { opacity:1; transform:none; } }
+.modal-header { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; color: var(--gd); }
+.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--tl); line-height: 1; }
+.modal-close:hover { color: var(--td); }
+.modal-body { padding: 20px 22px; }
+.modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 9px; justify-content: flex-end; }
+.form-group { margin-bottom: 15px; }
 .form-group:last-child { margin-bottom: 0; }
-.form-label { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dark); margin-bottom: 6px; }
-.form-label span { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text-light); }
-.form-input {
-  width: 100%; padding: 11px 13px; border: 2px solid var(--border); border-radius: 5px;
-  font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--text-dark);
-  background: var(--white); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
-}
-.form-input:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(45,122,74,0.15); }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.form-hint { font-size: 11.5px; color: var(--text-light); margin-top: 5px; }
-
-/* Color theme picker */
-.theme-picker { display: flex; flex-wrap: wrap; gap: 8px; }
-.theme-swatch {
-  width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
-  border: 3px solid transparent; transition: all 0.15s; position: relative;
-}
+.form-label { display: block; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--td); margin-bottom: 5px; }
+.form-label span { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--tl); }
+.form-input { width: 100%; padding: 10px 12px; border: 2px solid var(--border); border-radius: 5px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--td); background: var(--w); outline: none; transition: border-color .15s; }
+.form-input:focus { border-color: var(--gl); box-shadow: 0 0 0 3px rgba(45,122,74,.12); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.form-hint { font-size: 11px; color: var(--tl); margin-top: 4px; }
+.theme-picker { display: flex; flex-wrap: wrap; gap: 7px; }
+.theme-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all .15s; }
+.theme-swatch:hover { transform: scale(1.1); }
 .theme-swatch.active { border-color: var(--gold); transform: scale(1.12); }
-.theme-swatch::after {
-  content: '✓'; position: absolute; inset: 0; display: flex; align-items: center;
-  justify-content: center; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0);
-  transition: color 0.15s;
-}
-.theme-swatch.active::after { color: rgba(255,255,255,0.9); }
-
-/* Benefits selector in modal */
-.benefits-selector { display: flex; flex-wrap: wrap; gap: 7px; }
-.benefit-toggle {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 13px; border-radius: 20px; cursor: pointer;
-  font-size: 12.5px; font-weight: 500; transition: all 0.15s;
-  border: 1.5px solid var(--border); background: var(--white); color: var(--text-mid);
-  user-select: none;
-}
-.benefit-toggle:hover { border-color: var(--green-light); color: var(--green-dark); }
-.benefit-toggle.on { background: var(--green-dark); border-color: var(--green-dark); color: #fff; }
-.benefit-toggle.on::before { content: '✓ '; }
-
-/* Featured badge toggle */
-.toggle-row { display: flex; align-items: center; gap: 10px; }
-.toggle-switch {
-  width: 42px; height: 24px; background: #ddd; border-radius: 12px;
-  cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0;
-}
-.toggle-switch.on { background: var(--green-light); }
-.toggle-switch::after {
-  content: ''; position: absolute; top: 3px; left: 3px;
-  width: 18px; height: 18px; background: #fff; border-radius: 50%;
-  transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-}
+.benefits-selector { display: flex; flex-wrap: wrap; gap: 6px; }
+.benefit-toggle { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all .12s; border: 1.5px solid var(--border); background: var(--w); color: var(--tm); user-select: none; }
+.benefit-toggle:hover { border-color: var(--gl); color: var(--gd); }
+.benefit-toggle.on { background: var(--gd); border-color: var(--gd); color: #fff; }
+.bullet-row { display: flex; gap: 7px; align-items: center; margin-bottom: 6px; }
+.bullet-row input { flex: 1; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 5px; font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none; }
+.bullet-row input:focus { border-color: var(--gl); }
+.toggle-switch { width: 38px; height: 20px; background: #ccc; border-radius: 10px; cursor: pointer; position: relative; transition: background .2s; flex-shrink: 0; border: none; }
+.toggle-switch.on { background: var(--gl); }
+.toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
 .toggle-switch.on::after { transform: translateX(18px); }
-.toggle-label { font-size: 13px; color: var(--text-mid); }
+.toggle-row { display: flex; align-items: center; gap: 9px; }
 
-/* ── EXPORT SECTION ── */
-.export-box {
-  background: #f4f6f4; border: 1.5px solid var(--border); border-radius: 6px;
-  padding: 16px 18px;
-}
-.export-box pre {
-  font-size: 11px; color: var(--text-mid); overflow-x: auto; white-space: pre-wrap;
-  word-break: break-all; max-height: 220px; overflow-y: auto;
-  font-family: 'SF Mono', 'Consolas', monospace; line-height: 1.5;
-}
-.export-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-
-/* ── TOAST ── */
-#toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-  background: var(--green-dark); color: #fff; padding: 12px 20px; border-radius: 6px;
-  font-size: 13px; font-weight: 600; z-index: 999; transition: transform 0.3s;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25); pointer-events: none;
-}
+/* TOAST */
+#toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(70px); background: var(--gd); color: #fff; padding: 10px 18px; border-radius: 6px; font-size: 12px; font-weight: 600; z-index: 999; transition: transform .28s; box-shadow: 0 6px 20px rgba(0,0,0,.22); pointer-events: none; }
 #toast.show { transform: translateX(-50%) translateY(0); }
 
-/* ── DRAG HANDLE ── */
-.drag-handle { cursor: grab; color: var(--text-light); font-size: 14px; padding: 0 4px; }
-.drag-handle:active { cursor: grabbing; }
-.level-card[draggable="true"] { cursor: grab; }
-.level-card.drag-over { outline: 2px dashed var(--gold); outline-offset: 2px; }
+/* DETAIL MODAL */
+.detail-row { display: flex; gap: 8px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,.06); font-size: 13px; }
+.detail-row:last-child { border-bottom: none; }
+.detail-label { font-weight: 600; color: var(--tm); min-width: 110px; flex-shrink: 0; }
+.detail-val { color: var(--td); }
 
-/* ── EMPTY STATE ── */
-.empty-state {
-  text-align: center; padding: 48px 24px;
-  color: var(--text-light); font-size: 14px;
-}
-.empty-state .es-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.35; }
-.empty-state strong { display: block; font-size: 16px; color: var(--text-mid); margin-bottom: 6px; }
-
-@media (max-width: 700px) {
+@media (max-width: 640px) {
   .sidebar { display: none; }
   .form-row { grid-template-columns: 1fr; }
-  .levels-grid { grid-template-columns: 1fr; }
+  .levels-grid, .ac-grid { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
 <body>
 
-<!-- ══════════ LOGIN ══════════ -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">⛳ RR Golf</div>
@@ -313,121 +209,143 @@ body { font-family: 'DM Sans', sans-serif; background: #f0f2ef; color: var(--tex
   </div>
 </div>
 
-<!-- ══════════ APP ══════════ -->
+<!-- APP -->
 <div id="app">
-
-  <!-- Topbar -->
   <div class="topbar">
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span class="topbar-title">⛳ RR Golf Admin</span>
-      <span class="topbar-sub">Sept 14, 2026 · Carrollwood CC</span>
+    <div class="tb-left">
+      <span class="tb-title">⛳ RR Golf Admin</span>
+      <span class="tb-sub">Sept 14, 2026 · Carrollwood CC</span>
     </div>
-    <div class="topbar-right">
-      <span class="topbar-badge" id="save-status">✓ Saved</span>
+    <div class="tb-right">
+      <span class="save-badge" id="save-badge">✓ Saved</span>
       <button class="btn-logout" onclick="doLogout()">Log out</button>
     </div>
   </div>
 
   <div class="app-body">
-
-    <!-- Sidebar -->
     <nav class="sidebar">
-      <div class="sidebar-label">Sponsorships</div>
-      <div class="sidebar-section">
-        <div class="nav-item active" onclick="showPanel('levels')" id="nav-levels">
-          <span class="nav-icon">🏆</span> Sponsor Levels
-          <span class="nav-count" id="count-levels">0</span>
-        </div>
-        <div class="nav-item" onclick="showPanel('benefits-pool')" id="nav-benefits-pool">
-          <span class="nav-icon">📋</span> Benefits Pool
-          <span class="nav-count" id="count-benefits">0</span>
-        </div>
-        <div class="nav-item" onclick="showPanel('export')" id="nav-export">
-          <span class="nav-icon">📤</span> Export to Site
-        </div>
+      <div class="sb-label">Tournament</div>
+      <div class="nav-item active" id="nav-registrations" onclick="showPanel('registrations')">
+        <span class="nav-icon">🏌️</span> Registrations
+        <span class="nav-count orange" id="cnt-regs">0</span>
+      </div>
+      <div class="nav-item" id="nav-sponsors" onclick="showPanel('sponsors')">
+        <span class="nav-icon">🤝</span> Sponsors
+        <span class="nav-count orange" id="cnt-sponsors">0</span>
+      </div>
+      <div class="sb-label">Sponsorship Setup</div>
+      <div class="nav-item" id="nav-levels" onclick="showPanel('levels')">
+        <span class="nav-icon">🏆</span> Sponsor Levels
+        <span class="nav-count" id="cnt-levels">0</span>
+      </div>
+      <div class="nav-item" id="nav-alacarte" onclick="showPanel('alacarte')">
+        <span class="nav-icon">🃏</span> À La Carte
+        <span class="nav-count" id="cnt-ac">0</span>
+      </div>
+      <div class="nav-item" id="nav-pool" onclick="showPanel('pool')">
+        <span class="nav-icon">📋</span> Benefits Pool
+        <span class="nav-count" id="cnt-pool">0</span>
       </div>
     </nav>
 
-    <!-- Main -->
-    <main class="main-content">
+    <main class="main">
 
-      <!-- ══ PANEL: SPONSOR LEVELS ══ -->
-      <div class="panel active" id="panel-levels">
-        <div class="page-header">
-          <div class="page-header-left">
-            <h1>Sponsor Levels</h1>
-            <p>Build and manage your sponsorship tiers. Drag to reorder. Changes are saved locally.</p>
+      <!-- REGISTRATIONS -->
+      <div class="panel active" id="panel-registrations">
+        <div class="page-hdr">
+          <div class="page-hdr-l">
+            <h1>Registrations</h1>
+            <p>All golfer registrations. Updates automatically from Stripe.</p>
           </div>
-          <button class="btn btn-primary" onclick="openLevelModal()">+ New Level</button>
+          <button class="btn btn-outline" onclick="loadOrders()">↺ Refresh</button>
         </div>
-
-        <div class="levels-grid" id="levels-grid">
-          <!-- populated by JS -->
+        <div class="stats-row" id="reg-stats">
+          <div class="stat-card"><div class="stat-label">Total Golfers</div><div class="stat-value" id="stat-golfers">—</div></div>
+          <div class="stat-card"><div class="stat-label">Teams</div><div class="stat-value" id="stat-teams">—</div></div>
+          <div class="stat-card"><div class="stat-label">Individuals</div><div class="stat-value" id="stat-indiv">—</div></div>
+          <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value" id="stat-reg-rev">—</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>Golfer Registrations</h2></div>
+          <div class="card-body" style="padding:0;">
+            <div class="tbl-wrap">
+              <table id="reg-table">
+                <thead><tr><th>Name</th><th>Email</th><th>Players</th><th>Add-ons</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody id="reg-tbody"><tr><td colspan="7" class="empty-table"><div class="empty-icon">🏌️</div>Loading registrations…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- ══ PANEL: BENEFITS POOL ══ -->
-      <div class="panel" id="panel-benefits-pool">
-        <div class="page-header">
-          <div class="page-header-left">
-            <h1>Benefits Pool</h1>
-            <p>Master list of all available benefits. Assign any of these to sponsor levels.</p>
+      <!-- SPONSORS -->
+      <div class="panel" id="panel-sponsors">
+        <div class="page-hdr">
+          <div class="page-hdr-l">
+            <h1>Sponsors</h1>
+            <p>All sponsorship submissions. Paid and invoiced.</p>
+          </div>
+          <button class="btn btn-outline" onclick="loadOrders()">↺ Refresh</button>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-label">Total Sponsors</div><div class="stat-value" id="stat-sp-count">—</div></div>
+          <div class="stat-card"><div class="stat-label">Paid</div><div class="stat-value" id="stat-sp-paid">—</div></div>
+          <div class="stat-card"><div class="stat-label">Invoiced</div><div class="stat-value" id="stat-sp-inv">—</div></div>
+          <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value" id="stat-sp-rev">—</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h2>Sponsor Submissions</h2></div>
+          <div class="card-body" style="padding:0;">
+            <div class="tbl-wrap">
+              <table id="sponsor-table">
+                <thead><tr><th>Company / Name</th><th>Email</th><th>Package</th><th>Amount</th><th>Status</th><th>Invoice</th><th>Date</th></tr></thead>
+                <tbody id="sponsor-tbody"><tr><td colspan="7" class="empty-table"><div class="empty-icon">🤝</div>Loading sponsors…</td></tr></tbody>
+              </table>
+            </div>
           </div>
         </div>
+      </div>
 
+      <!-- SPONSOR LEVELS -->
+      <div class="panel" id="panel-levels">
+        <div class="page-hdr">
+          <div class="page-hdr-l">
+            <h1>Sponsor Levels</h1>
+            <p>Changes save automatically and go live on register.html instantly.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openLevelModal(null)">+ New Level</button>
+        </div>
+        <div class="levels-grid" id="levels-grid"></div>
+      </div>
+
+      <!-- À LA CARTE -->
+      <div class="panel" id="panel-alacarte">
+        <div class="page-hdr">
+          <div class="page-hdr-l">
+            <h1>À La Carte Items</h1>
+            <p>Changes save automatically and go live on register.html instantly.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAcModal(null)">+ New Item</button>
+        </div>
+        <div id="ac-panel-body"></div>
+      </div>
+
+      <!-- BENEFITS POOL -->
+      <div class="panel" id="panel-pool">
+        <div class="page-hdr">
+          <div class="page-hdr-l">
+            <h1>Benefits Pool</h1>
+            <p>Master list of benefit text — assign any to any sponsor level.</p>
+          </div>
+        </div>
         <div class="card">
           <div class="card-header"><h2>All Benefits</h2></div>
           <div class="card-body">
-            <div class="benefits-pool" id="benefits-pool-list">
-              <!-- populated by JS -->
-            </div>
-            <div class="pill-add-form" id="benefit-add-form">
-              <input type="text" id="new-benefit-text" placeholder="e.g. Logo on sponsor banner · 4 golfers included" maxlength="80"
+            <div class="pool-wrap" id="pool-list"></div>
+            <div class="pill-add-form">
+              <input type="text" id="new-benefit-inp" placeholder="e.g. 4 golfers included · Logo on sponsor banner" maxlength="80"
                 onkeydown="if(event.key==='Enter')addBenefit()">
               <button class="btn btn-primary" onclick="addBenefit()">+ Add Benefit</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ══ PANEL: EXPORT ══ -->
-      <div class="panel" id="panel-export">
-        <div class="page-header">
-          <div class="page-header-left">
-            <h1>Export to Site</h1>
-            <p>Copy this JSON and paste into <code>register.html</code> to update the live sponsorship tiers.</p>
-          </div>
-          <button class="btn btn-outline" onclick="refreshExport()">↺ Refresh</button>
-        </div>
-
-        <div class="card" style="margin-bottom:20px;">
-          <div class="card-header"><h2>SPONSOR_LEVELS JSON</h2></div>
-          <div class="card-body">
-            <p style="font-size:13px;color:var(--text-light);margin-bottom:14px;">
-              Replace the <code>SPONSOR_LEVELS</code> variable in <code>register.html</code> with this object.
-              Each level's <code>benefits</code> array maps to the perk bullets shown on the sponsorship cards.
-            </p>
-            <div class="export-box">
-              <pre id="export-json">// Click "Refresh" to generate</pre>
-            </div>
-            <div class="export-actions">
-              <button class="btn btn-primary" onclick="copyExport()">📋 Copy JSON</button>
-              <button class="btn btn-outline" onclick="downloadExport()">⬇ Download .json</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><h2>HTML Snippet Preview</h2></div>
-          <div class="card-body">
-            <p style="font-size:13px;color:var(--text-light);margin-bottom:14px;">
-              Ready-to-paste HTML for the <code>.tiers</code> section in <code>register.html</code>.
-            </p>
-            <div class="export-box">
-              <pre id="export-html">// Click "Refresh" to generate</pre>
-            </div>
-            <div class="export-actions">
-              <button class="btn btn-primary" onclick="copyHtml()">📋 Copy HTML</button>
             </div>
           </div>
         </div>
@@ -437,15 +355,14 @@ body { font-family: 'DM Sans', sans-serif; background: #f0f2ef; color: var(--tex
   </div>
 </div>
 
-<!-- ══════════ LEVEL MODAL ══════════ -->
+<!-- LEVEL MODAL -->
 <div class="modal-overlay" id="level-modal">
   <div class="modal-box">
     <div class="modal-header">
-      <span class="modal-title" id="level-modal-title">New Sponsor Level</span>
+      <span class="modal-title" id="lm-title">New Sponsor Level</span>
       <button class="modal-close" onclick="closeLevelModal()">×</button>
     </div>
     <div class="modal-body">
-
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Level Name *</label>
@@ -456,59 +373,47 @@ body { font-family: 'DM Sans', sans-serif; background: #f0f2ef; color: var(--tex
           <input class="form-input" id="lm-price" type="number" placeholder="5000" min="0" step="50">
         </div>
       </div>
-
-      <div class="form-group">
-        <label class="form-label">Level ID <span>(used internally — lowercase, no spaces)</span></label>
-        <input class="form-input" id="lm-id" type="text" placeholder="e.g. gold" maxlength="24"
-          oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'')">
-        <div class="form-hint">Auto-generated from name if left blank. Must be unique.</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Color Theme</label>
-        <div class="theme-picker" id="lm-theme-picker">
-          <div class="theme-swatch theme-title active" data-theme="title" title="Forest Dark" style="background:linear-gradient(135deg,#0f2318,#1e4a2c);" onclick="pickTheme(this,'title')"></div>
-          <div class="theme-swatch theme-gold"   data-theme="gold"   title="Gold"       style="background:linear-gradient(135deg,#3d2e0a,#6b4f16);" onclick="pickTheme(this,'gold')"></div>
-          <div class="theme-swatch theme-silver" data-theme="silver" title="Silver"     style="background:linear-gradient(135deg,#2a2e30,#4a5255);" onclick="pickTheme(this,'silver')"></div>
-          <div class="theme-swatch theme-bronze" data-theme="bronze" title="Bronze"     style="background:linear-gradient(135deg,#3d1e0a,#6b3316);" onclick="pickTheme(this,'bronze')"></div>
-          <div class="theme-swatch theme-green"  data-theme="green"  title="Deep Green" style="background:linear-gradient(135deg,#0d3320,#1a5c35);" onclick="pickTheme(this,'green')"></div>
-          <div class="theme-swatch theme-navy"   data-theme="navy"   title="Navy"       style="background:linear-gradient(135deg,#0d1f3c,#1a3464);" onclick="pickTheme(this,'navy')"></div>
-        </div>
-      </div>
-
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Badge <span>(optional short label)</span></label>
-          <input class="form-input" id="lm-badge" type="text" placeholder="e.g. Top Tier" maxlength="20">
+          <label class="form-label">Level ID <span>(auto-filled)</span></label>
+          <input class="form-input" id="lm-id" type="text" placeholder="e.g. gold" maxlength="24"
+            oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'');this.dataset.dirty='1'">
+          <div class="form-hint">Unique · lowercase · no spaces</div>
         </div>
         <div class="form-group">
-          <label class="form-label">Sort Order <span>(lower = first)</span></label>
-          <input class="form-input" id="lm-order" type="number" placeholder="10" min="0" step="1">
+          <label class="form-label">Badge <span>(optional)</span></label>
+          <input class="form-input" id="lm-badge" type="text" placeholder="e.g. Top Tier" maxlength="20">
         </div>
       </div>
-
       <div class="form-group">
-        <label class="form-label" style="margin-bottom:10px;">Benefits <span>(select from pool or add new)</span></label>
-        <div class="benefits-selector" id="lm-benefits-selector">
-          <!-- populated dynamically -->
+        <label class="form-label">Color Theme</label>
+        <div class="theme-picker" id="lm-themes">
+          <div class="theme-swatch active" data-theme="forest" title="Forest" style="background:linear-gradient(135deg,#0f2318,#1e4a2c)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch" data-theme="gold"   title="Gold"   style="background:linear-gradient(135deg,#3d2e0a,#6b4f16)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch" data-theme="silver" title="Silver" style="background:linear-gradient(135deg,#2a2e30,#4a5255)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch" data-theme="bronze" title="Bronze" style="background:linear-gradient(135deg,#3d1e0a,#6b3316)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch" data-theme="green"  title="Green"  style="background:linear-gradient(135deg,#0d3320,#1a5c35)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch" data-theme="navy"   title="Navy"   style="background:linear-gradient(135deg,#0d1f3c,#1a3464)" onclick="pickTheme(this)"></div>
         </div>
-        <div style="margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <input class="form-input" id="lm-new-benefit" type="text" placeholder="Type a new benefit and press Enter"
-            style="flex:1;min-width:200px;font-size:13px;padding:8px 12px;"
-            maxlength="80" onkeydown="if(event.key==='Enter'){addBenefitFromModal();event.preventDefault();}">
-          <button class="btn btn-outline btn-sm" onclick="addBenefitFromModal()">+ Add to Pool</button>
-        </div>
-        <div class="form-hint">Click a benefit to toggle it on/off for this level.</div>
       </div>
-
       <div class="form-group">
-        <label class="form-label" style="margin-bottom:8px;">Options</label>
+        <label class="form-label" style="margin-bottom:8px;">Benefits <span>— click to toggle on/off for this level</span></label>
+        <div class="benefits-selector" id="lm-ben-sel"></div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+          <input class="form-input" id="lm-new-ben" type="text" placeholder="Type a new benefit and press Enter"
+            style="flex:1;min-width:180px;font-size:13px;padding:8px 11px;" maxlength="80"
+            onkeydown="if(event.key==='Enter'){addBenFromModal();event.preventDefault();}">
+          <button class="btn btn-outline btn-sm" onclick="addBenFromModal()">+ Add to Pool</button>
+        </div>
+        <div class="form-hint">New benefits are added to the pool and auto-selected here.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="margin-bottom:7px;">Options</label>
         <div class="toggle-row">
-          <div class="toggle-switch" id="lm-featured-toggle" onclick="this.classList.toggle('on')"></div>
-          <span class="toggle-label">Featured / Top Tier badge</span>
+          <button class="toggle-switch" id="lm-featured" onclick="this.classList.toggle('on')"></button>
+          <span style="font-size:13px;color:var(--tm);">Featured / Top Tier badge</span>
         </div>
       </div>
-
     </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeLevelModal()">Cancel</button>
@@ -517,41 +422,97 @@ body { font-family: 'DM Sans', sans-serif; background: #f0f2ef; color: var(--tex
   </div>
 </div>
 
-<!-- ══════════ BENEFIT EDIT MODAL ══════════ -->
-<div class="modal-overlay" id="benefit-edit-modal">
-  <div class="modal-box" style="max-width:420px;">
+<!-- ALACARTE MODAL -->
+<div class="modal-overlay" id="ac-modal">
+  <div class="modal-box">
     <div class="modal-header">
-      <span class="modal-title">Edit Benefit</span>
-      <button class="modal-close" onclick="closeBenefitEditModal()">×</button>
+      <span class="modal-title" id="ac-modal-title">New À La Carte Item</span>
+      <button class="modal-close" onclick="closeAcModal()">×</button>
     </div>
     <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Item Name *</label>
+          <input class="form-input" id="ac-name" type="text" placeholder="e.g. Beverage Cart" maxlength="50">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Price *</label>
+          <input class="form-input" id="ac-price" type="number" placeholder="500" min="0" step="50">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Item ID <span>(auto-filled)</span></label>
+          <input class="form-input" id="ac-id" type="text" placeholder="bev-cart" maxlength="30"
+            oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9-]/g,'');this.dataset.dirty='1'">
+          <div class="form-hint">Used as data-id in register.html</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-input" id="ac-cat">
+            <option>Food & Beverage</option>
+            <option>Contests</option>
+            <option>Branding</option>
+            <option>On-Course</option>
+            <option>Gifts & Swag</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
       <div class="form-group">
-        <label class="form-label">Benefit Text *</label>
-        <input class="form-input" id="bem-text" type="text" maxlength="80">
-        <div class="form-hint">This text appears as a bullet point on sponsorship cards.</div>
+        <label class="form-label">Benefit Bullets</label>
+        <div id="ac-bullets-list"></div>
+        <div style="display:flex;gap:8px;margin-top:6px;">
+          <input class="form-input" id="ac-new-bullet" type="text" placeholder="Add bullet point…" maxlength="120"
+            style="font-size:13px;padding:8px 11px;"
+            onkeydown="if(event.key==='Enter'){addBullet();event.preventDefault();}">
+          <button class="btn btn-outline btn-sm" onclick="addBullet()">+ Add</button>
+        </div>
+        <div class="form-hint">These appear as bullet points on the sponsorship card in register.html.</div>
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger btn-sm" onclick="deleteBenefitFromModal()">Delete</button>
-      <div style="flex:1;"></div>
-      <button class="btn btn-outline" onclick="closeBenefitEditModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveBenefitEdit()">Save</button>
+      <button class="btn btn-outline" onclick="closeAcModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAcItem()">Save Item</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════ TOAST ══════════ -->
+<!-- BENEFIT EDIT MODAL -->
+<div class="modal-overlay" id="ben-edit-modal">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <span class="modal-title">Edit Benefit</span>
+      <button class="modal-close" onclick="closeBenEditModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Benefit Text *</label>
+        <input class="form-input" id="ben-edit-text" type="text" maxlength="80">
+        <div class="form-hint">Appears as a bullet point on sponsorship cards.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-sm" onclick="deleteBenFromModal()">Delete</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-outline" onclick="closeBenEditModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBenEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
+var NETLIFY_BASE = 'https://rr-golf.netlify.app';
+var ADMIN_KEY = 'bullyjudge';
+
 // ════════════════════════════════
 // AUTH
 // ════════════════════════════════
-var ADMIN_PW = 'bullyjudge';
-
 function doLogin() {
   var pw = document.getElementById('login-pw').value;
-  if (pw === ADMIN_PW) {
+  if (pw === ADMIN_KEY) {
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     initApp();
@@ -561,587 +522,579 @@ function doLogin() {
     document.getElementById('login-pw').focus();
   }
 }
-
 function doLogout() {
   document.getElementById('app').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('login-pw').value = '';
 }
-
-document.getElementById('login-pw').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') doLogin();
-});
+document.getElementById('login-pw').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
 
 // ════════════════════════════════
 // STATE
 // ════════════════════════════════
 var STATE = {
-  benefits: [],   // [{ id, text }]
-  levels: []      // [{ id, name, price, theme, badge, order, featured, benefits: [id,...] }]
+  benefits: [],
+  levels: [],
+  alacarte: []
 };
 
 var THEMES = {
-  title:  'linear-gradient(135deg,#0f2318,#1e4a2c)',
+  forest: 'linear-gradient(135deg,#0f2318,#1e4a2c)',
   gold:   'linear-gradient(135deg,#3d2e0a,#6b4f16)',
   silver: 'linear-gradient(135deg,#2a2e30,#4a5255)',
   bronze: 'linear-gradient(135deg,#3d1e0a,#6b3316)',
   green:  'linear-gradient(135deg,#0d3320,#1a5c35)',
   navy:   'linear-gradient(135deg,#0d1f3c,#1a3464)',
 };
+var THEME_CLS = {
+  forest:'title-tier', gold:'gold-tier', silver:'silver-tier',
+  bronze:'bronze-tier', green:'green-tier', navy:'navy-tier'
+};
+var AC_CATS = ['Food & Beverage','Contests','Branding','On-Course','Gifts & Swag','Other'];
 
-// ── Default seed data (mirrors current register.html) ──
 var DEFAULT_BENEFITS = [
-  { id: 'b1',  text: '3 teams — 12 golfers' },
-  { id: 'b2',  text: '2 teams — 8 golfers' },
-  { id: 'b3',  text: '1 team — 4 golfers' },
-  { id: 'b4',  text: '12 super tickets' },
-  { id: 'b5',  text: '8 super tickets' },
-  { id: 'b6',  text: '4 super tickets' },
-  { id: 'b7',  text: '5 hole sponsor signs' },
-  { id: 'b8',  text: '3 hole sponsor signs' },
-  { id: 'b9',  text: '2 hole sponsor signs' },
-  { id: 'b10', text: '1 hole sponsor sign' },
-  { id: 'b11', text: 'Logo on sponsor banner' },
-  { id: 'b12', text: 'Website listing' },
-  { id: 'b13', text: 'Logo on tournament materials & banner' },
-  { id: 'b14', text: 'Logo on tournament materials' },
-  { id: 'b15', text: 'VIP hospitality access' },
-  { id: 'b16', text: 'Speaking opportunity' },
-  { id: 'b17', text: 'Verbal recognition at awards' },
-  { id: 'b18', text: 'Custom tee sign' },
-  { id: 'b19', text: 'Name & logo on-course' },
+  {id:'b1',text:'3 teams — 12 golfers'},{id:'b2',text:'2 teams — 8 golfers'},
+  {id:'b3',text:'1 team — 4 golfers'},{id:'b4',text:'12 super tickets'},
+  {id:'b5',text:'8 super tickets'},{id:'b6',text:'4 super tickets'},
+  {id:'b7',text:'5 hole sponsor signs'},{id:'b8',text:'3 hole sponsor signs'},
+  {id:'b9',text:'2 hole sponsor signs'},{id:'b10',text:'1 hole sponsor sign'},
+  {id:'b11',text:'Logo on sponsor banner'},{id:'b12',text:'Website listing'},
+  {id:'b13',text:'Logo on materials & banner'},{id:'b14',text:'Logo on tournament materials'},
+  {id:'b15',text:'VIP hospitality access'},{id:'b16',text:'Speaking opportunity'},
+  {id:'b17',text:'Verbal recognition at awards'},{id:'b18',text:'Custom tee sign'},
+  {id:'b19',text:'Name & logo on-course'},
 ];
-
 var DEFAULT_LEVELS = [
-  { id: 'title',  name: 'Title Sponsor',  price: 7500, theme: 'title',  badge: 'Top Tier', order: 1,  featured: true,  benefits: ['b1','b4','b7','b11','b12'] },
-  { id: 'gold',   name: 'Gold Sponsor',   price: 5000, theme: 'gold',   badge: '',         order: 2,  featured: false, benefits: ['b2','b5','b8','b13'] },
-  { id: 'silver', name: 'Silver Sponsor', price: 2500, theme: 'silver', badge: '',         order: 3,  featured: false, benefits: ['b3','b6','b9','b14'] },
-  { id: 'bronze', name: 'Bronze Sponsor', price: 1000, theme: 'bronze', badge: '',         order: 4,  featured: false, benefits: ['b3','b10','b14'] },
+  {id:'title', name:'Title Sponsor', price:7500,theme:'forest',badge:'Top Tier',featured:true, order:1,benefits:['b1','b4','b7','b11','b12']},
+  {id:'gold',  name:'Gold Sponsor',  price:5000,theme:'gold',  badge:'',       featured:false,order:2,benefits:['b2','b5','b8','b13']},
+  {id:'silver',name:'Silver Sponsor',price:2500,theme:'silver',badge:'',       featured:false,order:3,benefits:['b3','b6','b9','b14']},
+  {id:'bronze',name:'Bronze Sponsor',price:1000,theme:'bronze',badge:'',       featured:false,order:4,benefits:['b3','b10','b14']},
+];
+var DEFAULT_ALACARTE = [
+  {id:'bev-cart',name:'Beverage Cart',price:1500,cat:'Food & Beverage',order:1,bullets:['Logo on cart signage seen by all golfers','Brand mention at player check-in','Logo on tournament materials & website']},
+  {id:'cigar',name:'Cigar Sponsor',price:500,cat:'On-Course',order:2,bullets:['Branded signage at cigar station','Optional product sampling on-site','Logo on tournament materials & website']},
+  {id:'breakfast',name:'Breakfast',price:750,cat:'Food & Beverage',order:3,bullets:['Branded table signage at breakfast station','Verbal recognition during morning announcements','Logo on tournament materials & website']},
+  {id:'lunch',name:'Lunch / Dinner',price:1250,cat:'Food & Beverage',order:4,bullets:['Prominent branded signage at meal service','Verbal recognition & thank-you during awards','Logo on tournament materials & website']},
+  {id:'long-drive-sp',name:'Longest Drive',price:400,cat:'Contests',order:5,bullets:['Branded tee sign at contest hole','Name announced when winner is presented','Logo on tournament materials & website']},
+  {id:'close-pin-sp',name:'Closest to Pin',price:400,cat:'Contests',order:6,bullets:['Branded tee sign at contest hole','Name announced when winner is presented','Logo on tournament materials & website']},
+  {id:'putting',name:'Putting Contest',price:500,cat:'Contests',order:7,bullets:['Branded signage at putting green','High-traffic area — visible to all participants','Logo on tournament materials & website']},
+  {id:'cooler',name:'Cooler Bag',price:600,cat:'Gifts & Swag',order:8,bullets:['Logo imprinted on every player\'s cooler bag','Bags go home with golfers','Logo on tournament materials & website']},
+  {id:'tee-gift',name:'Tee Gift',price:500,cat:'Gifts & Swag',order:9,bullets:['Brand on item in every player\'s gift bag','Tangible takeaway extending reach beyond event day','Logo on tournament materials & website']},
+  {id:'range',name:'Driving Range',price:500,cat:'On-Course',order:10,bullets:['Branded signage at warm-up range','First brand seen by every golfer before teeing off','Logo on tournament materials & website']},
+  {id:'golf-ball',name:'Golf Ball Sponsor',price:500,cat:'Branding',order:11,bullets:['Logo or name on branded balls given to all players','In-hand brand exposure every shot of the round','Logo on tournament materials & website']},
+  {id:'scorecard',name:'Scorecard',price:350,cat:'Branding',order:12,bullets:['Logo printed on every player\'s scorecard','Handled repeatedly throughout the entire round','Logo on tournament materials & website']},
+  {id:'vip-tent',name:'VIP Tent',price:1500,cat:'On-Course',order:13,bullets:['Branded signage & banner at VIP hospitality area','Premium visibility — high-traffic gathering spot','Recognition at awards ceremony','Logo on tournament materials & website']},
 ];
 
-function loadState() {
+function genId(p){ return p+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+function slugify(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24)||'item'; }
+function sortBy(arr){ return arr.slice().sort(function(a,b){return (a.order||0)-(b.order||0);}); }
+function escH(s){ var d=document.createElement('div');d.textContent=String(s);return d.innerHTML; }
+function fmtMoney(n){ return '$'+Number(n).toLocaleString('en-US'); }
+function benText(id){ var b=STATE.benefits.find(function(x){return x.id===id;}); return b?b.text:''; }
+
+// ════════════════════════════════
+// NETLIFY BLOBS SYNC — auto-save
+// ════════════════════════════════
+var saveTimer;
+function scheduleSave(){
+  setSaveBadge('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(doSave, 1200);
+}
+function setSaveBadge(state, msg){
+  var el = document.getElementById('save-badge');
+  if (!el) return;
+  el.className = 'save-badge ' + state;
+  el.textContent = state==='saving' ? '⏳ Saving…' : state==='ok' ? '✓ Saved' : state==='err' ? '⚠ Save failed' : '✓ Saved';
+}
+async function doSave(){
   try {
-    var raw = localStorage.getItem('rrgolf_admin_state');
-    if (raw) {
-      var parsed = JSON.parse(raw);
-      STATE.benefits = parsed.benefits || DEFAULT_BENEFITS;
-      STATE.levels   = parsed.levels   || DEFAULT_LEVELS;
-    } else {
-      STATE.benefits = JSON.parse(JSON.stringify(DEFAULT_BENEFITS));
-      STATE.levels   = JSON.parse(JSON.stringify(DEFAULT_LEVELS));
-    }
+    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
+      body: JSON.stringify({ benefits: STATE.benefits, levels: STATE.levels, alacarte: STATE.alacarte })
+    });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    setSaveBadge('ok');
+    setTimeout(function(){ setSaveBadge('idle'); }, 3000);
   } catch(e) {
-    STATE.benefits = JSON.parse(JSON.stringify(DEFAULT_BENEFITS));
-    STATE.levels   = JSON.parse(JSON.stringify(DEFAULT_LEVELS));
+    setSaveBadge('err');
+    toast('Save failed: '+e.message);
   }
 }
-
-function saveState() {
-  localStorage.setItem('rrgolf_admin_state', JSON.stringify(STATE));
-  setSaveStatus('✓ Saved');
-}
-
-function setSaveStatus(msg) {
-  var el = document.getElementById('save-status');
-  if (el) el.textContent = msg;
-}
-
-function genId(prefix) {
-  return prefix + '_' + Date.now().toString(36);
-}
-
-function slugify(s) {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').substring(0,24);
+async function loadConfig(){
+  try {
+    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-config', {
+      headers: { 'x-admin-key': ADMIN_KEY }
+    });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    var data = await res.json();
+    if (data.levels && data.levels.length) STATE.levels = data.levels;
+    else STATE.levels = JSON.parse(JSON.stringify(DEFAULT_LEVELS));
+    if (data.benefits && data.benefits.length) STATE.benefits = data.benefits;
+    else STATE.benefits = JSON.parse(JSON.stringify(DEFAULT_BENEFITS));
+    if (data.alacarte && data.alacarte.length) STATE.alacarte = data.alacarte;
+    else STATE.alacarte = JSON.parse(JSON.stringify(DEFAULT_ALACARTE));
+  } catch(e) {
+    STATE.levels   = JSON.parse(JSON.stringify(DEFAULT_LEVELS));
+    STATE.benefits = JSON.parse(JSON.stringify(DEFAULT_BENEFITS));
+    STATE.alacarte = JSON.parse(JSON.stringify(DEFAULT_ALACARTE));
+    toast('Could not load saved config — using defaults');
+  }
 }
 
 // ════════════════════════════════
 // PANEL NAV
 // ════════════════════════════════
-function showPanel(name) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'export') refreshExport();
-}
-
-// ════════════════════════════════
-// COUNTS
-// ════════════════════════════════
-function updateCounts() {
-  var cl = document.getElementById('count-levels');
-  var cb = document.getElementById('count-benefits');
-  if (cl) cl.textContent = STATE.levels.length;
-  if (cb) cb.textContent = STATE.benefits.length;
-}
-
-// ════════════════════════════════
-// RENDER: BENEFIT POOL
-// ════════════════════════════════
-function renderBenefitsPool() {
-  var container = document.getElementById('benefits-pool-list');
-  if (!container) return;
-  if (!STATE.benefits.length) {
-    container.innerHTML = '<div class="empty-state" style="padding:20px 0;"><div class="es-icon">📋</div><strong>No benefits yet</strong>Add your first benefit below.</div>';
-    return;
-  }
-  container.innerHTML = STATE.benefits.map(function(b) {
-    return '<div class="benefit-pill" id="pill-' + b.id + '">' +
-      '<span>' + escHtml(b.text) + '</span>' +
-      '<div class="pill-actions">' +
-        '<button class="pill-btn" title="Edit" onclick="openBenefitEditModal(\'' + b.id + '\')">✏️</button>' +
-        '<button class="pill-btn" title="Delete" onclick="deleteBenefit(\'' + b.id + '\')">✕</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-  updateCounts();
-}
-
-function addBenefit() {
-  var inp = document.getElementById('new-benefit-text');
-  var text = inp.value.trim();
-  if (!text) { inp.focus(); return; }
-  if (STATE.benefits.find(b => b.text.toLowerCase() === text.toLowerCase())) {
-    showToast('That benefit already exists');
-    return;
-  }
-  STATE.benefits.push({ id: genId('b'), text: text });
-  inp.value = '';
-  saveState();
-  renderBenefitsPool();
-  showToast('Benefit added ✓');
-}
-
-// ── Benefit Edit Modal ──
-var _editingBenefitId = null;
-
-function openBenefitEditModal(id) {
-  var b = STATE.benefits.find(x => x.id === id);
-  if (!b) return;
-  _editingBenefitId = id;
-  document.getElementById('bem-text').value = b.text;
-  document.getElementById('benefit-edit-modal').classList.add('open');
-  setTimeout(function(){ document.getElementById('bem-text').focus(); }, 50);
-}
-
-function closeBenefitEditModal() {
-  _editingBenefitId = null;
-  document.getElementById('benefit-edit-modal').classList.remove('open');
-}
-
-function saveBenefitEdit() {
-  var text = document.getElementById('bem-text').value.trim();
-  if (!text) { document.getElementById('bem-text').focus(); return; }
-  var b = STATE.benefits.find(x => x.id === _editingBenefitId);
-  if (!b) return;
-  b.text = text;
-  saveState();
-  renderBenefitsPool();
-  closeBenefitEditModal();
-  showToast('Benefit updated ✓');
-}
-
-function deleteBenefitFromModal() {
-  if (!confirm('Delete this benefit? It will be removed from all levels.')) return;
-  deleteBenefit(_editingBenefitId);
-  closeBenefitEditModal();
-}
-
-function deleteBenefit(id) {
-  if (!id) return;
-  STATE.benefits = STATE.benefits.filter(b => b.id !== id);
-  // Remove from all levels
-  STATE.levels.forEach(function(lv) {
-    lv.benefits = lv.benefits.filter(bid => bid !== id);
-  });
-  saveState();
-  renderBenefitsPool();
-  renderLevels();
-  showToast('Benefit deleted');
-}
-
-// ════════════════════════════════
-// RENDER: LEVELS GRID
-// ════════════════════════════════
-function renderLevels() {
-  var grid = document.getElementById('levels-grid');
-  if (!grid) return;
-  var sorted = STATE.levels.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
-
-  var html = sorted.map(function(lv) {
-    var theme = THEMES[lv.theme] || THEMES.title;
-    var benefitTags = lv.benefits.map(function(bid) {
-      var b = STATE.benefits.find(x => x.id === bid);
-      return b ? '<span class="level-benefit-tag">' + escHtml(b.text) + '</span>' : '';
-    }).join('');
-    var priceStr = '$' + Number(lv.price).toLocaleString('en-US');
-    return '<div class="level-card" id="lcard-' + lv.id + '" draggable="true" ondragstart="dragStart(event,\'' + lv.id + '\')" ondragover="dragOver(event)" ondrop="dragDrop(event,\'' + lv.id + '\')" ondragleave="dragLeave(event)">' +
-      '<div class="level-card-head" style="background:' + theme + ';">' +
-        '<div>' +
-          (lv.badge ? '<div style="font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:3px;">' + escHtml(lv.badge) + '</div>' : '') +
-          '<div class="level-card-name">' + escHtml(lv.name) + '</div>' +
-        '</div>' +
-        '<div class="level-card-price">' + priceStr + '</div>' +
-      '</div>' +
-      '<div class="level-card-body">' +
-        '<div class="level-card-benefits">' +
-          (benefitTags || '<span class="level-no-benefits">No benefits assigned</span>') +
-        '</div>' +
-        '<div class="level-card-actions">' +
-          '<button class="btn btn-outline btn-sm" onclick="openLevelModal(\'' + lv.id + '\')">✏️ Edit</button>' +
-          '<button class="btn btn-danger btn-sm" onclick="deleteLevel(\'' + lv.id + '\')">✕ Delete</button>' +
-        '</div>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-
-  html += '<div class="level-card-add" onclick="openLevelModal()">' +
-    '<div class="level-card-add-icon">＋</div>' +
-    '<div class="level-card-add-label">Add New Level</div>' +
-  '</div>';
-
-  grid.innerHTML = html;
-  updateCounts();
-}
-
-function deleteLevel(id) {
-  if (!confirm('Delete this sponsor level?')) return;
-  STATE.levels = STATE.levels.filter(lv => lv.id !== id);
-  saveState();
-  renderLevels();
-  showToast('Level deleted');
-}
-
-// ════════════════════════════════
-// LEVEL MODAL
-// ════════════════════════════════
-var _editingLevelId = null;
-var _modalTheme = 'title';
-var _modalBenefits = []; // currently selected benefit IDs in modal
-
-function openLevelModal(id) {
-  _editingLevelId = id || null;
-  _modalTheme = 'title';
-  _modalBenefits = [];
-
-  var lv = id ? STATE.levels.find(x => x.id === id) : null;
-
-  // Set title
-  document.getElementById('level-modal-title').textContent = lv ? 'Edit Sponsor Level' : 'New Sponsor Level';
-
-  // Populate fields
-  document.getElementById('lm-name').value    = lv ? lv.name    : '';
-  document.getElementById('lm-price').value   = lv ? lv.price   : '';
-  document.getElementById('lm-id').value      = lv ? lv.id      : '';
-  document.getElementById('lm-badge').value   = lv ? (lv.badge  || '') : '';
-  document.getElementById('lm-order').value   = lv ? (lv.order  || 10) : (STATE.levels.length + 1) * 10;
-
-  // Theme
-  _modalTheme = lv ? (lv.theme || 'title') : 'title';
-  document.querySelectorAll('#lm-theme-picker .theme-swatch').forEach(function(sw) {
-    sw.classList.toggle('active', sw.dataset.theme === _modalTheme);
-  });
-
-  // Featured toggle
-  var tog = document.getElementById('lm-featured-toggle');
-  tog.classList.toggle('on', !!(lv && lv.featured));
-
-  // Selected benefits
-  _modalBenefits = lv ? lv.benefits.slice() : [];
-
-  // Auto-fill ID from name if new
-  if (!lv) {
-    document.getElementById('lm-name').addEventListener('input', autoFillId);
-  } else {
-    document.getElementById('lm-name').removeEventListener('input', autoFillId);
-  }
-
-  renderModalBenefitsSelector();
-  document.getElementById('level-modal').classList.add('open');
-  setTimeout(function(){ document.getElementById('lm-name').focus(); }, 50);
-}
-
-function autoFillId() {
-  var name = document.getElementById('lm-name').value;
-  var idEl = document.getElementById('lm-id');
-  if (!idEl.dataset.dirty) {
-    idEl.value = slugify(name);
-  }
-}
-
-document.getElementById('lm-id').addEventListener('input', function() {
-  this.dataset.dirty = '1';
-});
-
-function closeLevelModal() {
-  document.getElementById('level-modal').classList.remove('open');
-  _editingLevelId = null;
-  document.getElementById('lm-name').removeEventListener('input', autoFillId);
-  delete document.getElementById('lm-id').dataset.dirty;
-}
-
-function pickTheme(el, theme) {
-  _modalTheme = theme;
-  document.querySelectorAll('#lm-theme-picker .theme-swatch').forEach(sw => sw.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function renderModalBenefitsSelector() {
-  var container = document.getElementById('lm-benefits-selector');
-  if (!container) return;
-  if (!STATE.benefits.length) {
-    container.innerHTML = '<span style="font-size:12px;color:var(--text-light);font-style:italic;">No benefits in pool yet — add some below.</span>';
-    return;
-  }
-  container.innerHTML = STATE.benefits.map(function(b) {
-    var on = _modalBenefits.includes(b.id);
-    return '<div class="benefit-toggle' + (on ? ' on' : '') + '" onclick="toggleModalBenefit(\'' + b.id + '\',this)">' +
-      escHtml(b.text) +
-    '</div>';
-  }).join('');
-}
-
-function toggleModalBenefit(id, el) {
-  var idx = _modalBenefits.indexOf(id);
-  if (idx === -1) {
-    _modalBenefits.push(id);
-    el.classList.add('on');
-  } else {
-    _modalBenefits.splice(idx, 1);
-    el.classList.remove('on');
-  }
-}
-
-function addBenefitFromModal() {
-  var inp = document.getElementById('lm-new-benefit');
-  var text = inp.value.trim();
-  if (!text) { inp.focus(); return; }
-  if (STATE.benefits.find(b => b.text.toLowerCase() === text.toLowerCase())) {
-    // Benefit exists — just toggle it on if not already
-    var existing = STATE.benefits.find(b => b.text.toLowerCase() === text.toLowerCase());
-    if (!_modalBenefits.includes(existing.id)) {
-      _modalBenefits.push(existing.id);
-    }
-    inp.value = '';
-    renderModalBenefitsSelector();
-    return;
-  }
-  var newB = { id: genId('b'), text: text };
-  STATE.benefits.push(newB);
-  _modalBenefits.push(newB.id);
-  inp.value = '';
-  saveState();
-  renderBenefitsPool();
-  renderModalBenefitsSelector();
-  showToast('Benefit added to pool & selected ✓');
-}
-
-function saveLevel() {
-  var name  = document.getElementById('lm-name').value.trim();
-  var price = parseInt(document.getElementById('lm-price').value, 10);
-  var rawId = document.getElementById('lm-id').value.trim();
-  var id    = rawId || slugify(name);
-  var badge = document.getElementById('lm-badge').value.trim();
-  var order = parseInt(document.getElementById('lm-order').value, 10) || 10;
-  var featured = document.getElementById('lm-featured-toggle').classList.contains('on');
-
-  if (!name) { document.getElementById('lm-name').focus(); showToast('Level name is required'); return; }
-  if (!price || price < 0) { document.getElementById('lm-price').focus(); showToast('Price is required'); return; }
-  if (!id) { document.getElementById('lm-id').focus(); showToast('Level ID is required'); return; }
-
-  // Check ID uniqueness (unless editing same)
-  var conflict = STATE.levels.find(lv => lv.id === id && lv.id !== _editingLevelId);
-  if (conflict) { showToast('That ID is already in use — choose another'); document.getElementById('lm-id').focus(); return; }
-
-  if (_editingLevelId) {
-    // Edit existing
-    var lv = STATE.levels.find(x => x.id === _editingLevelId);
-    if (lv) {
-      // If ID changed, update all references
-      if (_editingLevelId !== id) {
-        lv.id = id;
-      }
-      lv.name     = name;
-      lv.price    = price;
-      lv.theme    = _modalTheme;
-      lv.badge    = badge;
-      lv.order    = order;
-      lv.featured = featured;
-      lv.benefits = _modalBenefits.slice();
-    }
-  } else {
-    STATE.levels.push({
-      id: id, name: name, price: price,
-      theme: _modalTheme, badge: badge, order: order,
-      featured: featured, benefits: _modalBenefits.slice()
-    });
-  }
-
-  saveState();
-  renderLevels();
-  closeLevelModal();
-  showToast((_editingLevelId ? 'Level updated' : 'Level created') + ' ✓');
-}
-
-// ════════════════════════════════
-// DRAG TO REORDER
-// ════════════════════════════════
-var _dragId = null;
-
-function dragStart(e, id) {
-  _dragId = id;
-  e.dataTransfer.effectAllowed = 'move';
-}
-function dragOver(e) {
-  e.preventDefault();
-  e.currentTarget.classList.add('drag-over');
-}
-function dragLeave(e) {
-  e.currentTarget.classList.remove('drag-over');
-}
-function dragDrop(e, targetId) {
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
-  if (!_dragId || _dragId === targetId) return;
-
-  var fromLv  = STATE.levels.find(x => x.id === _dragId);
-  var toLv    = STATE.levels.find(x => x.id === targetId);
-  if (!fromLv || !toLv) return;
-
-  // Swap order values
-  var tmp = fromLv.order;
-  fromLv.order = toLv.order;
-  toLv.order   = tmp;
-
-  _dragId = null;
-  saveState();
-  renderLevels();
-}
-
-// ════════════════════════════════
-// EXPORT
-// ════════════════════════════════
-function buildExportObject() {
-  var sorted = STATE.levels.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
-  var obj = {};
-  sorted.forEach(function(lv) {
-    obj[lv.id] = {
-      name:     lv.name,
-      price:    lv.price,
-      theme:    lv.theme,
-      badge:    lv.badge || null,
-      featured: lv.featured,
-      benefits: lv.benefits.map(function(bid) {
-        var b = STATE.benefits.find(x => x.id === bid);
-        return b ? b.text : null;
-      }).filter(Boolean)
-    };
-  });
-  return obj;
-}
-
-function buildHtmlSnippet() {
-  var sorted = STATE.levels.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
-  var themeClass = { title:'title-tier', gold:'gold-tier', silver:'silver-tier', bronze:'bronze-tier', green:'green-tier', navy:'navy-tier' };
-  var strokeColor = { title:'white', gold:'white', silver:'white', bronze:'white', green:'white', navy:'white' };
-
-  return sorted.map(function(lv) {
-    var tc = themeClass[lv.theme] || 'title-tier';
-    var sc = strokeColor[lv.theme] || 'white';
-    var price = Number(lv.price).toLocaleString('en-US');
-    var benefitLines = lv.benefits.map(function(bid) {
-      var b = STATE.benefits.find(x => x.id === bid);
-      return b ? '        <div class="perk"><span class="perk-dot"></span><span>' + escHtml(b.text) + '</span></div>' : '';
-    }).filter(Boolean).join('\n');
-    var badgeHtml = lv.badge ? '\n        <div class="featured-pill">' + escHtml(lv.badge) + '</div>' : '';
-    return '    <div class="tier ' + tc + ' selectable" data-id="' + lv.id + '" data-name="' + escHtml(lv.name) + '" data-price="' + lv.price + '">\n' +
-      '      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="' + sc + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>\n' +
-      '      <div class="tier-header">\n' +
-      '        <div class="tier-label">' + escHtml(lv.name) + '</div>\n' +
-      '        <div class="tier-price"><sup>$</sup>' + price + '</div>' + badgeHtml + '\n' +
-      '      </div>\n' +
-      '      <div class="tier-body">\n' + benefitLines + '\n' +
-      '      </div>\n' +
-      '    </div>';
-  }).join('\n');
-}
-
-function refreshExport() {
-  var obj = buildExportObject();
-  document.getElementById('export-json').textContent =
-    'var SPONSOR_LEVELS = ' + JSON.stringify(obj, null, 2) + ';';
-  document.getElementById('export-html').textContent =
-    '<!-- TIERS (paste inside <div class="tiers"> in register.html) -->\n' + buildHtmlSnippet();
-}
-
-function copyExport() {
-  var text = document.getElementById('export-json').textContent;
-  copyToClipboard(text, 'JSON copied to clipboard ✓');
-}
-
-function copyHtml() {
-  var text = document.getElementById('export-html').textContent;
-  copyToClipboard(text, 'HTML copied to clipboard ✓');
-}
-
-function downloadExport() {
-  var obj = buildExportObject();
-  var blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'sponsor-levels.json';
-  a.click();
-}
-
-function copyToClipboard(text, msg) {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(function(){ showToast(msg); });
-  } else {
-    var ta = document.createElement('textarea');
-    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta); ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    showToast(msg);
-  }
+function showPanel(name){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  document.getElementById('panel-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
 }
 
 // ════════════════════════════════
 // TOAST
 // ════════════════════════════════
-var _toastTimer = null;
-function showToast(msg) {
-  var el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2600);
+var toastT;
+function toast(msg){
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(function(){el.classList.remove('show');},2600);
 }
 
 // ════════════════════════════════
-// UTILS
+// COUNTS
 // ════════════════════════════════
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function updateCounts(){
+  var el=function(id){return document.getElementById(id);};
+  if(el('cnt-levels')) el('cnt-levels').textContent=STATE.levels.length;
+  if(el('cnt-ac'))     el('cnt-ac').textContent=STATE.alacarte.length;
+  if(el('cnt-pool'))   el('cnt-pool').textContent=STATE.benefits.length;
+}
+
+// ════════════════════════════════
+// REGISTRATIONS + SPONSORS (Stripe)
+// ════════════════════════════════
+async function loadOrders(){
+  try {
+    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/get-orders', {
+      headers: { 'x-admin-key': ADMIN_KEY }
+    });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    var data = await res.json();
+    renderRegistrations(data.registrations || data.orders || []);
+    renderSponsors(data.sponsors || []);
+  } catch(e) {
+    var msg = '<tr><td colspan="7" class="empty-table"><div class="empty-icon">⚠️</div>Could not load — check get-orders function</td></tr>';
+    document.getElementById('reg-tbody').innerHTML = msg;
+    document.getElementById('sponsor-tbody').innerHTML = msg;
+  }
+}
+
+function renderRegistrations(orders){
+  var regs = orders.filter(function(o){ return o.type === 'registration' || o.golfers; });
+  var tbody = document.getElementById('reg-tbody');
+  if (!regs.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-table"><div class="empty-icon">🏌️</div>No registrations yet</td></tr>';
+    updateRegStats(regs); return;
+  }
+  tbody.innerHTML = regs.map(function(r){
+    var name = (r.firstName||'') + ' ' + (r.lastName||'');
+    var players = r.playerCount || (r.golfers && r.golfers.length) || 1;
+    var addons = (r.addons||[]).map(function(a){return a.name||a;}).join(', ') || '—';
+    var amt = r.amount ? fmtMoney(r.amount/100) : (r.total ? fmtMoney(r.total) : '—');
+    var status = r.status || r.paymentStatus || 'paid';
+    var date = r.created ? new Date(r.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.date || '—');
+    return '<tr><td><strong>'+escH(name.trim()||'—')+'</strong></td><td>'+escH(r.email||'—')+'</td><td>'+players+'</td><td style="font-size:11px;color:var(--tl)">'+escH(addons)+'</td><td>'+amt+'</td><td><span class="status-pill status-'+escH(status)+'">'+escH(status)+'</span></td><td>'+escH(date)+'</td></tr>';
+  }).join('');
+  updateRegStats(regs);
+  document.getElementById('cnt-regs').textContent = regs.length;
+}
+
+function updateRegStats(regs){
+  var totalGolfers=0, teams=0, indiv=0, rev=0;
+  regs.forEach(function(r){
+    var p = r.playerCount || (r.golfers && r.golfers.length) || 1;
+    totalGolfers += p;
+    if (p===4) teams++; else indiv++;
+    rev += r.amount ? r.amount/100 : (r.total||0);
+  });
+  var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  s('stat-golfers',totalGolfers||'0');
+  s('stat-teams',teams||'0');
+  s('stat-indiv',indiv||'0');
+  s('stat-reg-rev',fmtMoney(rev));
+}
+
+function renderSponsors(sponsors){
+  var tbody = document.getElementById('sponsor-tbody');
+  if (!sponsors.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-table"><div class="empty-icon">🤝</div>No sponsor submissions yet</td></tr>';
+    updateSponsorStats(sponsors); return;
+  }
+  tbody.innerHTML = sponsors.map(function(s){
+    var name = s.company || ((s.firstName||'') + ' ' + (s.lastName||'')).trim() || '—';
+    var pkg = (s.sponsorships||[]).map(function(x){return x.name||x;}).join(', ') || s.package || '—';
+    var amt = s.amount ? fmtMoney(s.amount/100) : (s.total ? fmtMoney(s.total) : '—');
+    var status = s.status || s.paymentStatus || 'paid';
+    var inv = s.invoiceUrl ? '<a href="'+escH(s.invoiceUrl)+'" target="_blank" style="color:var(--gl);font-size:11px;">View</a>' : '—';
+    var date = s.created ? new Date(s.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (s.date||'—');
+    return '<tr><td><strong>'+escH(name)+'</strong></td><td>'+escH(s.email||'—')+'</td><td style="font-size:11px">'+escH(pkg)+'</td><td>'+amt+'</td><td><span class="status-pill status-'+escH(status)+'">'+escH(status)+'</span></td><td>'+inv+'</td><td>'+escH(date)+'</td></tr>';
+  }).join('');
+  updateSponsorStats(sponsors);
+  document.getElementById('cnt-sponsors').textContent = sponsors.length;
+}
+
+function updateSponsorStats(sponsors){
+  var paid=0, inv=0, rev=0;
+  sponsors.forEach(function(s){
+    var st = s.status||s.paymentStatus||'paid';
+    if(st==='paid') paid++; else if(st==='invoice'||st==='invoiced') inv++;
+    rev += s.amount ? s.amount/100 : (s.total||0);
+  });
+  var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  set('stat-sp-count',sponsors.length||'0');
+  set('stat-sp-paid',paid);
+  set('stat-sp-inv',inv);
+  set('stat-sp-rev',fmtMoney(rev));
+}
+
+// ════════════════════════════════
+// RENDER: SPONSOR LEVELS
+// ════════════════════════════════
+function renderLevels(){
+  var grid = document.getElementById('levels-grid');
+  if (!grid) return;
+  var html = sortBy(STATE.levels).map(function(lv){
+    var thm = THEMES[lv.theme]||THEMES.forest;
+    var tags = lv.benefits.map(function(bid){ var t=benText(bid); return t?'<span class="lc-tag">'+escH(t)+'</span>':''; }).join('');
+    return '<div class="level-card">'+
+      '<div class="lc-head" style="background:'+thm+'">'+
+        '<div>'+(lv.badge?'<div class="lc-badge-lbl">'+escH(lv.badge)+'</div>':'')+
+          '<div class="lc-name">'+escH(lv.name)+'</div></div>'+
+        '<div class="lc-price">'+fmtMoney(lv.price)+'</div>'+
+      '</div>'+
+      '<div class="lc-body">'+
+        '<div class="lc-tags">'+(tags||'<span class="lc-none">No benefits — click Edit</span>')+'</div>'+
+        '<div class="lc-actions">'+
+          '<button class="btn btn-outline btn-sm" onclick="openLevelModal(\''+lv.id+'\')">✏ Edit</button>'+
+          '<button class="btn btn-danger btn-sm" onclick="deleteLevel(\''+lv.id+'\')">✕ Delete</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  html += '<button class="add-card" onclick="openLevelModal(null)"><span>＋</span><span>Add new level</span></button>';
+  grid.innerHTML = html;
+  updateCounts();
+}
+
+function deleteLevel(id){
+  if (!confirm('Delete this sponsor level?')) return;
+  STATE.levels = STATE.levels.filter(function(l){return l.id!==id;});
+  scheduleSave(); renderLevels(); toast('Level deleted');
+}
+
+// ════════════════════════════════
+// LEVEL MODAL
+// ════════════════════════════════
+var _editLvId = null, _mTheme = 'forest', _mBens = [];
+
+function openLevelModal(id){
+  _editLvId = id;
+  var lv = id ? STATE.levels.find(function(x){return x.id===id;}) : null;
+  _mTheme = lv ? (lv.theme||'forest') : 'forest';
+  _mBens  = lv ? lv.benefits.slice() : [];
+  document.getElementById('lm-title').textContent = lv ? 'Edit Sponsor Level' : 'New Sponsor Level';
+  document.getElementById('lm-name').value  = lv ? lv.name  : '';
+  document.getElementById('lm-price').value = lv ? lv.price : '';
+  document.getElementById('lm-id').value    = lv ? lv.id    : '';
+  document.getElementById('lm-badge').value = lv ? (lv.badge||'') : '';
+  delete document.getElementById('lm-id').dataset.dirty;
+  var feat = document.getElementById('lm-featured');
+  feat.className = 'toggle-switch' + (lv&&lv.featured?' on':'');
+  // Theme swatches
+  document.querySelectorAll('#lm-themes .theme-swatch').forEach(function(sw){
+    sw.classList.toggle('active', sw.dataset.theme===_mTheme);
+  });
+  // Benefits selector
+  renderBenSelector();
+  document.getElementById('level-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('lm-name').focus(); }, 40);
+  // Auto-fill ID from name on create
+  if (!lv) {
+    document.getElementById('lm-name').oninput = function(){
+      var idEl = document.getElementById('lm-id');
+      if (!idEl.dataset.dirty) idEl.value = slugify(this.value);
+    };
+  } else {
+    document.getElementById('lm-name').oninput = null;
+  }
+}
+
+function renderBenSelector(){
+  var sel = document.getElementById('lm-ben-sel');
+  sel.innerHTML = STATE.benefits.map(function(b){
+    var on = _mBens.includes(b.id);
+    return '<div class="benefit-toggle'+(on?' on':'')+'" onclick="toggleBen(this,\''+b.id+'\')">'+escH(b.text)+'</div>';
+  }).join('');
+}
+
+function toggleBen(el, id){
+  var idx = _mBens.indexOf(id);
+  if (idx===-1){ _mBens.push(id); el.classList.add('on'); }
+  else { _mBens.splice(idx,1); el.classList.remove('on'); }
+}
+
+function pickTheme(el){
+  _mTheme = el.dataset.theme;
+  document.querySelectorAll('#lm-themes .theme-swatch').forEach(function(s){s.classList.remove('active');});
+  el.classList.add('active');
+}
+
+function addBenFromModal(){
+  var inp = document.getElementById('lm-new-ben');
+  var text = inp.value.trim();
+  if (!text) { inp.focus(); return; }
+  var ex = STATE.benefits.find(function(b){return b.text.toLowerCase()===text.toLowerCase();});
+  var bid = ex ? ex.id : genId('b');
+  if (!ex) STATE.benefits.push({id:bid,text:text});
+  if (!_mBens.includes(bid)) _mBens.push(bid);
+  inp.value = '';
+  renderBenSelector();
+  toast('Added to pool & selected ✓');
+}
+
+function closeLevelModal(){
+  document.getElementById('level-modal').classList.remove('open');
+  document.getElementById('lm-name').oninput = null;
+}
+
+function saveLevel(){
+  var name  = document.getElementById('lm-name').value.trim();
+  var price = parseInt(document.getElementById('lm-price').value, 10);
+  var id    = document.getElementById('lm-id').value.trim() || slugify(name);
+  var badge = document.getElementById('lm-badge').value.trim();
+  var feat  = document.getElementById('lm-featured').classList.contains('on');
+  if (!name)  { document.getElementById('lm-name').focus();  toast('Name is required'); return; }
+  if (!price) { document.getElementById('lm-price').focus(); toast('Price is required'); return; }
+  if (!id)    { toast('Could not generate ID'); return; }
+  var dup = STATE.levels.find(function(l){return l.id===id && l.id!==_editLvId;});
+  if (dup) { document.getElementById('lm-id').focus(); toast('That ID is already in use'); return; }
+  if (_editLvId) {
+    var lv = STATE.levels.find(function(x){return x.id===_editLvId;});
+    if (lv){ lv.id=id;lv.name=name;lv.price=price;lv.theme=_mTheme;lv.badge=badge;lv.featured=feat;lv.benefits=_mBens.slice(); }
+  } else {
+    STATE.levels.push({id:id,name:name,price:price,theme:_mTheme,badge:badge,featured:feat,order:(STATE.levels.length+1)*10,benefits:_mBens.slice()});
+  }
+  closeLevelModal();
+  scheduleSave(); renderLevels();
+  toast((_editLvId?'Level updated':'Level created')+' — saving to site…');
+}
+
+// ════════════════════════════════
+// RENDER: À LA CARTE
+// ════════════════════════════════
+function renderAlaCarte(){
+  var body = document.getElementById('ac-panel-body');
+  if (!body) return;
+  var groups = {};
+  sortBy(STATE.alacarte).forEach(function(ac){
+    var c = ac.cat||'Other';
+    if (!groups[c]) groups[c]=[];
+    groups[c].push(ac);
+  });
+  var html = '';
+  AC_CATS.forEach(function(cat){
+    if (!groups[cat]||!groups[cat].length) return;
+    html += '<div class="group-label">'+escH(cat)+'</div><div class="ac-grid">';
+    html += groups[cat].map(function(ac){
+      var buls = (ac.bullets||[]).map(function(b){return '<li>'+escH(b)+'</li>';}).join('');
+      return '<div class="ac-card">'+
+        '<div class="ac-top"><span class="ac-name">'+escH(ac.name)+'</span><span class="ac-price">'+fmtMoney(ac.price)+'</span></div>'+
+        '<span class="ac-cat">'+escH(ac.cat||'Other')+'</span>'+
+        '<ul class="ac-bullets">'+buls+'</ul>'+
+        '<div class="ac-acts">'+
+          '<button class="btn btn-outline btn-sm" onclick="openAcModal(\''+ac.id+'\')">✏ Edit</button>'+
+          '<button class="btn btn-danger btn-sm" onclick="deleteAcItem(\''+ac.id+'\')">✕ Delete</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+    html += '</div>';
+  });
+  body.innerHTML = html;
+  updateCounts();
+}
+
+function deleteAcItem(id){
+  if (!confirm('Delete this item?')) return;
+  STATE.alacarte = STATE.alacarte.filter(function(x){return x.id!==id;});
+  scheduleSave(); renderAlaCarte(); toast('Item deleted');
+}
+
+// ════════════════════════════════
+// ALACARTE MODAL
+// ════════════════════════════════
+var _editAcId = null, _mBullets = [];
+
+function openAcModal(id){
+  _editAcId = id;
+  var ac = id ? STATE.alacarte.find(function(x){return x.id===id;}) : null;
+  _mBullets = ac ? ac.bullets.slice() : [];
+  document.getElementById('ac-modal-title').textContent = ac ? 'Edit À La Carte Item' : 'New À La Carte Item';
+  document.getElementById('ac-name').value  = ac ? ac.name  : '';
+  document.getElementById('ac-price').value = ac ? ac.price : '';
+  document.getElementById('ac-id').value    = ac ? ac.id    : '';
+  delete document.getElementById('ac-id').dataset.dirty;
+  var catSel = document.getElementById('ac-cat');
+  if (ac && ac.cat) catSel.value = ac.cat;
+  if (!ac) {
+    document.getElementById('ac-name').oninput = function(){
+      var idEl = document.getElementById('ac-id');
+      if (!idEl.dataset.dirty) idEl.value = slugify(this.value);
+    };
+  } else {
+    document.getElementById('ac-name').oninput = null;
+  }
+  renderBulletsList();
+  document.getElementById('ac-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('ac-name').focus(); }, 40);
+}
+
+function renderBulletsList(){
+  var list = document.getElementById('ac-bullets-list');
+  list.innerHTML = _mBullets.map(function(txt,i){
+    return '<div class="bullet-row">'+
+      '<input type="text" maxlength="120" value="'+escH(txt)+'" oninput="_mBullets['+i+']=this.value">'+
+      (i>0?'<button class="btn btn-outline btn-sm" title="Move up" onclick="moveBulletUp('+i+')">↑</button>':'')+
+      '<button class="btn btn-danger btn-sm" onclick="removeBullet('+i+')">✕</button>'+
+    '</div>';
+  }).join('');
+}
+
+function addBullet(){
+  var inp = document.getElementById('ac-new-bullet');
+  var t = inp.value.trim();
+  if (!t) { inp.focus(); return; }
+  _mBullets.push(t); inp.value = '';
+  renderBulletsList();
+}
+function removeBullet(i){ _mBullets.splice(i,1); renderBulletsList(); }
+function moveBulletUp(i){ var t=_mBullets[i];_mBullets[i]=_mBullets[i-1];_mBullets[i-1]=t; renderBulletsList(); }
+
+function closeAcModal(){
+  document.getElementById('ac-modal').classList.remove('open');
+  document.getElementById('ac-name').oninput = null;
+}
+
+function saveAcItem(){
+  var name  = document.getElementById('ac-name').value.trim();
+  var price = parseInt(document.getElementById('ac-price').value,10);
+  var id    = document.getElementById('ac-id').value.trim() || slugify(name);
+  var cat   = document.getElementById('ac-cat').value;
+  if (!name)  { document.getElementById('ac-name').focus();  toast('Name is required'); return; }
+  if (!price) { document.getElementById('ac-price').focus(); toast('Price is required'); return; }
+  var dup = STATE.alacarte.find(function(x){return x.id===id&&x.id!==_editAcId;});
+  if (dup) { document.getElementById('ac-id').focus(); toast('That ID is already in use'); return; }
+  if (_editAcId) {
+    var ac = STATE.alacarte.find(function(x){return x.id===_editAcId;});
+    if (ac){ ac.id=id;ac.name=name;ac.price=price;ac.cat=cat;ac.bullets=_mBullets.slice(); }
+  } else {
+    STATE.alacarte.push({id:id,name:name,price:price,cat:cat,order:(STATE.alacarte.length+1)*10,bullets:_mBullets.slice()});
+  }
+  closeAcModal();
+  scheduleSave(); renderAlaCarte();
+  toast((_editAcId?'Item updated':'Item created')+' — saving to site…');
+}
+
+// ════════════════════════════════
+// RENDER: BENEFITS POOL
+// ════════════════════════════════
+function renderPool(){
+  var list = document.getElementById('pool-list');
+  if (!list) return;
+  if (!STATE.benefits.length) {
+    list.innerHTML = '<span style="font-size:12px;color:var(--tl);font-style:italic">No benefits yet — add one below.</span>';
+    return;
+  }
+  list.innerHTML = STATE.benefits.map(function(b){
+    return '<div class="benefit-pill">'+
+      '<span>'+escH(b.text)+'</span>'+
+      '<span style="display:flex;gap:2px;margin-left:4px">'+
+        '<button class="pill-btn" title="Edit" onclick="openBenEditModal(\''+b.id+'\')">✏️</button>'+
+        '<button class="pill-btn" title="Delete" onclick="deleteBenefit(\''+b.id+'\')">✕</button>'+
+      '</span>'+
+    '</div>';
+  }).join('');
+  updateCounts();
+}
+
+function addBenefit(){
+  var inp = document.getElementById('new-benefit-inp');
+  var text = inp.value.trim();
+  if (!text){ inp.focus(); return; }
+  if (STATE.benefits.find(function(b){return b.text.toLowerCase()===text.toLowerCase();})){toast('Already exists'); return;}
+  STATE.benefits.push({id:genId('b'),text:text});
+  inp.value='';
+  scheduleSave(); renderPool(); toast('Benefit added ✓');
+}
+
+function deleteBenefit(id){
+  if (!confirm('Delete this benefit? It will be removed from all levels.')) return;
+  STATE.benefits = STATE.benefits.filter(function(b){return b.id!==id;});
+  STATE.levels.forEach(function(lv){lv.benefits=lv.benefits.filter(function(bid){return bid!==id;});});
+  scheduleSave(); renderPool(); renderLevels(); toast('Benefit deleted');
+}
+
+// ════════════════════════════════
+// BENEFIT EDIT MODAL
+// ════════════════════════════════
+var _editBenId = null;
+
+function openBenEditModal(id){
+  _editBenId = id;
+  var b = STATE.benefits.find(function(x){return x.id===id;});
+  document.getElementById('ben-edit-text').value = b ? b.text : '';
+  document.getElementById('ben-edit-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('ben-edit-text').focus(); }, 40);
+}
+function closeBenEditModal(){
+  _editBenId = null;
+  document.getElementById('ben-edit-modal').classList.remove('open');
+}
+function saveBenEdit(){
+  var text = document.getElementById('ben-edit-text').value.trim();
+  if (!text){ document.getElementById('ben-edit-text').focus(); return; }
+  var b = STATE.benefits.find(function(x){return x.id===_editBenId;});
+  if (b) b.text = text;
+  scheduleSave(); renderPool(); renderBenSelector(); closeBenEditModal(); toast('Benefit updated ✓');
+}
+function deleteBenFromModal(){
+  if (!confirm('Delete this benefit? Removes from all levels.')) return;
+  deleteBenefit(_editBenId);
+  closeBenEditModal();
 }
 
 // Close modals on overlay click
-document.querySelectorAll('.modal-overlay').forEach(function(ov) {
-  ov.addEventListener('click', function(e) {
-    if (e.target === ov) {
-      ov.classList.remove('open');
-    }
-  });
+document.querySelectorAll('.modal-overlay').forEach(function(ov){
+  ov.addEventListener('click', function(e){ if(e.target===ov) ov.classList.remove('open'); });
 });
 
 // ════════════════════════════════
 // INIT
 // ════════════════════════════════
-function initApp() {
-  loadState();
-  renderBenefitsPool();
+async function initApp(){
+  setSaveBadge('saving', 'Loading…');
+  await loadConfig();
   renderLevels();
+  renderAlaCarte();
+  renderPool();
   updateCounts();
+  setSaveBadge('ok');
+  setTimeout(function(){setSaveBadge('idle');},2000);
+  loadOrders();
 }
 </script>
 </body>
