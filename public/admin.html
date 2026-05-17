@@ -404,9 +404,14 @@ tr:hover td { background: #f8faf8; }
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Add-ons <span>(edit as comma-separated list)</span></label>
-          <input class="form-input" id="em-addons-text" type="text" placeholder="Super Ticket, Mulligan Pack">
-          <div class="form-hint">Current add-ons shown as text — edit freely.</div>
+          <label class="form-label">Add-ons <span>— click to toggle</span></label>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:2px;" id="em-addons-picker">
+            <div class="benefit-toggle" data-addon="Super Ticket" data-price="50" onclick="this.classList.toggle('on');recalcEditRegAmount()">⭐ Super Ticket — $50</div>
+            <div class="benefit-toggle" data-addon="Mulligan Pack" data-price="20" onclick="this.classList.toggle('on');recalcEditRegAmount()">Mulligan Pack — $20</div>
+            <div class="benefit-toggle" data-addon="Closest to Pin" data-price="20" onclick="this.classList.toggle('on');recalcEditRegAmount()">Closest to Pin — $20</div>
+            <div class="benefit-toggle" data-addon="Longest Drive" data-price="20" onclick="this.classList.toggle('on');recalcEditRegAmount()">Longest Drive — $20</div>
+            <div class="benefit-toggle" data-addon="Hole Sponsor" data-price="250" onclick="this.classList.toggle('on');recalcEditRegAmount()">Hole Sponsor — $250</div>
+          </div>
         </div>
       </div>
 
@@ -432,16 +437,15 @@ tr:hover td { background: #f8faf8; }
             <input class="form-input" id="em-sp-company" type="text" maxlength="80">
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Package <span>(edit as text)</span></label>
-            <input class="form-input" id="em-sp-package" type="text" placeholder="Gold Sponsor, VIP Tent">
-            <div class="form-hint">Current sponsorships shown as text — edit freely.</div>
+        <div class="form-group">
+          <label class="form-label">Sponsorship Package(s) <span>— click to toggle</span></label>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:2px;" id="em-sp-picker">
+            <!-- populated from STATE.levels + STATE.alacarte when modal opens -->
           </div>
-          <div class="form-group">
-            <label class="form-label">Amount ($)</label>
-            <input class="form-input" id="em-sp-amount" type="number" min="0" step="50">
-          </div>
+        </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label class="form-label">Amount ($) <span>— auto-fills from selections</span></label>
+          <input class="form-input" id="em-sp-amount" type="number" min="0" step="50">
         </div>
         <div class="form-group">
           <label class="form-label">Website</label>
@@ -1434,17 +1438,34 @@ function openEditEntry(type, idx) {
     document.getElementById('em-phone').value   = r.phone     || '';
     document.getElementById('em-players').value = r.playerCount || (r.golfers && r.golfers.length) || 1;
     document.getElementById('em-amount').value  = r.total || (r.amount ? r.amount/100 : '');
-    var addonNames = (r.addons||[]).map(function(a){return a.name||a;}).join(', ');
-    document.getElementById('em-addons-text').value = addonNames;
+    // Pre-select add-on toggles
+    var currentAddons = (r.addons||[]).map(function(a){return (a.name||a).toLowerCase().trim();});
+    document.querySelectorAll('#em-addons-picker .benefit-toggle').forEach(function(t){
+      var name = (t.dataset.addon||'').toLowerCase().trim();
+      t.classList.toggle('on', currentAddons.some(function(a){return a===name||a.indexOf(name)>=0||name.indexOf(a)>=0;}));
+    });
   } else {
     document.getElementById('em-sp-fn').value      = r.firstName || '';
     document.getElementById('em-sp-ln').value      = r.lastName  || '';
     document.getElementById('em-sp-email').value   = r.email     || '';
     document.getElementById('em-sp-company').value = r.company   || '';
     document.getElementById('em-sp-website').value = r.website   || '';
-    var pkgNames = (r.sponsorships||[]).map(function(x){return x.name||x;}).join(', ') || r.package || '';
-    document.getElementById('em-sp-package').value = pkgNames;
     document.getElementById('em-sp-amount').value  = r.total || (r.amount ? r.amount/100 : '');
+    delete document.getElementById('em-sp-amount').dataset.dirty;
+    // Build sponsor package picker from STATE and pre-select current ones
+    var currentPkgs = (r.sponsorships||[]).map(function(x){return (x.name||x).toLowerCase().trim();});
+    if (r.package) currentPkgs = currentPkgs.concat(r.package.split(',').map(function(s){return s.trim().toLowerCase();}));
+    var picker = document.getElementById('em-sp-picker');
+    var html = '';
+    sortBy(STATE.levels).forEach(function(lv){
+      var on = currentPkgs.some(function(p){return p===lv.name.toLowerCase()||p.indexOf(lv.name.toLowerCase())>=0;});
+      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount()">'+escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
+    });
+    sortBy(STATE.alacarte).forEach(function(ac){
+      var on = currentPkgs.some(function(p){return p===ac.name.toLowerCase()||p.indexOf(ac.name.toLowerCase())>=0;});
+      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(ac.name)+'" data-sp-price="'+ac.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount()">'+escH(ac.name)+' — '+fmtMoney(ac.price)+'</div>';
+    });
+    picker.innerHTML = html;
   }
 
   // Shared
@@ -1457,6 +1478,26 @@ function openEditEntry(type, idx) {
     var f = type === 'registration' ? document.getElementById('em-fn') : document.getElementById('em-sp-fn');
     if(f) f.focus();
   }, 40);
+}
+
+
+function recalcEditRegAmount() {
+  var base = parseInt(document.getElementById('em-players').value)||1;
+  var regPrice = base === 4 ? 650 : base * 165;
+  var addonsTotal = 0;
+  document.querySelectorAll('#em-addons-picker .benefit-toggle.on').forEach(function(t){
+    addonsTotal += parseInt(t.dataset.price)||0;
+  });
+  document.getElementById('em-amount').value = regPrice + addonsTotal;
+}
+
+function recalcEditSpAmount() {
+  if (document.getElementById('em-sp-amount').dataset.dirty) return;
+  var total = 0;
+  document.querySelectorAll('#em-sp-picker .benefit-toggle.on').forEach(function(t){
+    total += parseInt(t.dataset.spPrice)||0;
+  });
+  document.getElementById('em-sp-amount').value = total || '';
 }
 
 function closeEditModal() {
@@ -1476,8 +1517,10 @@ async function saveEditEntry() {
 
     if (_editType === 'registration') {
       var amount = parseFloat(document.getElementById('em-amount').value) || 0;
-      var addonText = document.getElementById('em-addons-text').value.trim();
-      var addons = addonText ? addonText.split(',').map(function(s){return {name:s.trim()};}).filter(function(a){return a.name;}) : [];
+      var addons = [];
+      document.querySelectorAll('#em-addons-picker .benefit-toggle.on').forEach(function(t){
+        addons.push({ name: t.dataset.addon, price: parseInt(t.dataset.price)||0 });
+      });
       var players = parseInt(document.getElementById('em-players').value)||1;
       Object.assign(updated, {
         firstName:   document.getElementById('em-fn').value.trim(),
@@ -1500,8 +1543,11 @@ async function saveEditEntry() {
       }
     } else {
       var spAmount = parseFloat(document.getElementById('em-sp-amount').value) || 0;
-      var pkgText = document.getElementById('em-sp-package').value.trim();
-      var sponsorships = pkgText ? pkgText.split(',').map(function(s){return {name:s.trim()};}).filter(function(x){return x.name;}) : [];
+      var sponsorships = [];
+      document.querySelectorAll('#em-sp-picker .benefit-toggle.on').forEach(function(t){
+        sponsorships.push({ name: t.dataset.spName, price: parseInt(t.dataset.spPrice)||0 });
+      });
+      var pkgText = sponsorships.map(function(s){return s.name;}).join(', ');
       Object.assign(updated, {
         firstName:    document.getElementById('em-sp-fn').value.trim(),
         lastName:     document.getElementById('em-sp-ln').value.trim(),
@@ -1723,6 +1769,7 @@ function toggleSpLevel(el, price) {
   if (!amtEl.dataset.dirty) amtEl.value = total || '';
 }
 document.getElementById('me-sp-amount').addEventListener('input', function(){ this.dataset.dirty='1'; });
+document.getElementById('em-sp-amount').addEventListener('input', function(){ this.dataset.dirty='1'; });
 
 async function saveManualEntry() {
   if (!_jwt) { toast('Not authenticated'); return; }
