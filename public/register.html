@@ -258,6 +258,69 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 .selectable.selected .check-badge svg { opacity: 1; transform: scale(1); }
 
 /* HOLE SPONSOR */
+/* Featured hole sponsor at bottom */
+.featured-hole {
+  background: linear-gradient(135deg, #0f2318 0%, #1e4a2c 100%) !important;
+  border: none !important;
+  border-radius: 10px;
+  margin-top: 20px;
+  padding: 0 !important;
+  overflow: hidden;
+}
+.featured-hole .check-badge {
+  background: var(--gold) !important;
+  border-color: var(--gold) !important;
+}
+.hole-featured-inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 28px;
+  flex-wrap: wrap;
+}
+.hole-featured-left { flex: 1; min-width: 200px; }
+.hole-featured-right { flex-shrink: 0; text-align: center; }
+.hole-featured-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.5);
+  margin-bottom: 5px;
+}
+.hole-featured-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.hole-featured-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,.65);
+  line-height: 1.5;
+}
+.hole-featured-price {
+  font-family: var(--font-serif);
+  font-size: 36px;
+  font-weight: 900;
+  color: #fff;
+}
+.featured-hole .perk-tag {
+  background: rgba(255,255,255,.12) !important;
+  color: rgba(255,255,255,.85) !important;
+  border-color: rgba(255,255,255,.15) !important;
+}
+.featured-hole .hole-qty-label { color: rgba(255,255,255,.6); }
+.featured-hole .qty-btn {
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  border-color: rgba(255,255,255,.2);
+}
+.featured-hole .qty-btn:hover { background: rgba(255,255,255,.2); }
+.featured-hole .qty-display { color: #fff; border-color: rgba(255,255,255,.2); }
+.featured-hole.selected { border: 2.5px solid var(--gold) !important; }
+
 .hole-sponsor { background: var(--white); border: 2px solid transparent; border-left: 4px solid var(--green-light); border-radius: 5px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.07); padding: 24px 28px; display: flex; align-items: flex-start; gap: 28px; margin-bottom: 48px; flex-wrap: wrap; transition: border-color 0.18s, box-shadow 0.18s; cursor: pointer; user-select: none; position: relative; }
 .hole-sponsor.selected { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.2); }
 .hole-sponsor .check-badge { border-color: rgba(0,0,0,0.2); }
@@ -577,27 +640,38 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
   <p class="section-heading">Sponsorship Opportunities</p>
   <p class="section-sub">Click any card to select. All levels sorted by investment. Sponsorship is optional — skip to pay registration only.</p>
 
-  <!-- Hole Sponsor — standalone with qty controls -->
-  <div class="hole-sponsor selectable" data-id="hole" data-name="Hole Sponsor" data-price="250" style="margin-bottom:20px;">
-    <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div class="hole-price-block"><div class="hole-label">⛳ Hole Sponsor — Per hole</div><div class="hole-price">$250</div></div>
-    <div class="hole-perks">
-      <span class="perk-tag">Custom tee sign</span><span class="perk-tag">Name &amp; logo on-course</span>
-      <span class="perk-tag">Sponsor board</span><span class="perk-tag">Website listing</span>
-    </div>
-    <div class="hole-qty-row">
-      <span class="hole-qty-label">Number of holes:</span>
-      <div class="qty-controls">
-        <button class="qty-btn" id="hole-minus">−</button>
-        <div class="qty-display" id="hole-qty">1</div>
-        <button class="qty-btn" id="hole-plus">+</button>
-      </div>
-    </div>
-  </div>
-
   <!-- All sponsor levels — populated dynamically from admin-config -->
   <div class="tiers" id="tiers-container">
     <!-- Populated by renderSponsorConfig() on load -->
+  </div>
+
+  <!-- Hole Sponsor — featured standalone at bottom -->
+  <div class="hole-sponsor selectable featured-hole" data-id="hole" data-name="Hole Sponsor" data-price="250">
+    <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="hole-featured-inner">
+      <div class="hole-featured-left">
+        <div class="hole-featured-eyebrow">⛳ On-Course Visibility</div>
+        <div class="hole-featured-title">Hole Sponsor</div>
+        <div class="hole-featured-sub">Your branded tee sign on the course — seen by every golfer all day</div>
+        <div class="hole-perks" style="margin-top:10px;">
+          <span class="perk-tag">Custom tee sign</span>
+          <span class="perk-tag">Name &amp; logo on-course</span>
+          <span class="perk-tag">Sponsor board</span>
+          <span class="perk-tag">Website listing</span>
+        </div>
+      </div>
+      <div class="hole-featured-right">
+        <div class="hole-featured-price">$250<span style="font-size:14px;font-weight:500;opacity:.7;margin-left:4px;">/ hole</span></div>
+        <div class="hole-qty-row" style="margin-top:12px;justify-content:center;">
+          <span class="hole-qty-label">Holes:</span>
+          <div class="qty-controls">
+            <button class="qty-btn" id="hole-minus">−</button>
+            <div class="qty-display" id="hole-qty">1</div>
+            <button class="qty-btn" id="hole-plus">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ── SPONSOR CONTACT INFO + PAYMENT ── -->
