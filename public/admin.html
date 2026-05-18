@@ -1149,7 +1149,7 @@ var _loadedRegs = [];
 var _loadedSponsors = [];
 
 function renderRegistrations(orders){
-  _loadedRegs = orders.filter(function(o){ return o.type === 'registration' || o.golfers; });
+  _loadedRegs = (orders || []).filter(function(o){ return o && (o.type === 'registration' || o.golfers); });
   var tbody = document.getElementById('reg-tbody');
   if (!_loadedRegs.length) {
     tbody.innerHTML = '<tr><td colspan="8" class="empty-table"><div class="empty-icon">🏌️</div>No registrations yet</td></tr>';
@@ -1197,7 +1197,8 @@ function updateRegStats(regs){
 }
 
 function renderSponsors(sponsors){
-  _loadedSponsors = sponsors;
+  _loadedSponsors = (sponsors || []).filter(function(s){ return s && typeof s === 'object'; });
+  sponsors = _loadedSponsors;
   var tbody = document.getElementById('sponsor-tbody');
   if (!sponsors.length) {
     tbody.innerHTML = '<tr><td colspan="8" class="empty-table"><div class="empty-icon">🤝</div>No sponsor submissions yet</td></tr>';
