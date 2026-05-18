@@ -1,8 +1,11 @@
 // netlify/functions/admin-config.js
 // GET  — public — returns sponsor config for register.html
-// POST — requires x-admin-key — saves sponsor config from admin
+// POST — requires x-admin-key header matching ADMIN_PASSWORD env var
 
-const ADMIN_KEY = process.env.ADMIN_KEY;
+// Uses same auth as admin-login.js (ADMIN_PASSWORD env var)
+// Uses same Blobs pattern as admin-data.js (REST API with NETLIFY_TOKEN)
+
+const ADMIN_KEY = process.env.ADMIN_PASSWORD; // same env var as admin-login
 const STORE_KEY = 'golf-admin/sponsor-config';
 
 const CORS = {
@@ -37,7 +40,6 @@ async function blobGet(key) {
 async function blobSet(key, value) {
   const body = typeof value === 'string' ? value : JSON.stringify(value);
   const len  = Buffer.byteLength(body);
-  // Step 1: get presigned upload URL
   const metaR = await fetch(`${getApiBase()}/${encodeURIComponent(key)}`, {
     method: 'PUT',
     headers: { ...authHeader(), 'Content-Length': String(len) },
@@ -48,7 +50,6 @@ async function blobSet(key, value) {
   }
   const meta = await metaR.json();
   if (!meta.url) throw new Error('No presigned URL in response');
-  // Step 2: upload to presigned URL
   const upR = await fetch(meta.url, {
     method: 'PUT',
     body,
@@ -75,15 +76,16 @@ exports.handler = async function(event) {
     }
   }
 
-  // ── POST: admin only ──
+  // ── POST: requires password ──
   if (event.httpMethod === 'POST') {
     const k = (event.headers || {})['x-admin-key'] || '';
     if (!ADMIN_KEY || k !== ADMIN_KEY) {
+      console.log('Auth failed — key provided:', k ? 'yes' : 'no', '— ADMIN_KEY set:', !!ADMIN_KEY);
       return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
     }
     try {
       const body = event.body || '{}';
-      JSON.parse(body); // validate JSON
+      JSON.parse(body);
       await blobSet(STORE_KEY, body);
       return { statusCode: 200, headers: CORS, body: JSON.stringify({ success: true }) };
     } catch (e) {
