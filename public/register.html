@@ -426,6 +426,16 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 .tier.teal-tier .tier-price,.tier.rust-tier .tier-price,.tier.indigo-tier .tier-price { color: #fff; }
 
 /* Sponsor team/player rows */
+.sp-team-header { display:flex;align-items:center;gap:8px;padding:10px 0 4px;border-top:1px dashed rgba(0,0,0,.1);margin-top:6px; }
+.sp-team-header:first-child { border-top:none;margin-top:0;padding-top:0; }
+.sp-team-name-inp {
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:#0f2318;background:transparent;border:none;border-bottom:2px solid #0f2318;
+  padding:2px 4px;outline:none;min-width:80px;max-width:160px;
+  cursor:text;
+}
+.sp-team-name-inp:focus { background:#f0faf4;border-radius:3px 3px 0 0; }
 .sp-team-label { font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green-dark,#0f2318);padding:8px 0 4px;border-top:1px dashed rgba(0,0,0,.1);margin-top:4px; }
 .sp-team-label:first-child { border-top:none;margin-top:0;padding-top:0; }
 .sp-player-row { display:flex;align-items:center;gap:8px;padding:4px 0; }
@@ -1485,6 +1495,7 @@ function updateSponsorTotal() {
 // SPONSOR TEAM / PLAYER NAMES
 // ════════════════════════════════
 var _spFormPlayers = []; // [{fn, ln, email}]
+var _spTeamNames    = []; // ['Team 1', 'Team 2', ...]
 var _spIncludedSlots = 0;
 
 function getIncludedGolferSlots() {
@@ -1528,6 +1539,12 @@ function updateSpTeamSection() {
     _spFormPlayers.push({ fn:'', ln:'', email:'' });
   }
 
+  // Init team names
+  var numTeams = Math.ceil(slots / 4);
+  while (_spTeamNames.length < numTeams) {
+    _spTeamNames.push('Team ' + (_spTeamNames.length + 1));
+  }
+
   renderSpPlayersList(slots);
 }
 
@@ -1535,14 +1552,19 @@ function renderSpPlayersList(includedCount) {
   var list = document.getElementById('sp-players-list');
   if (!list) return;
   var html = '';
+  var showTeamDividers = _spFormPlayers.length > 4 || includedCount > 4;
   for (var i = 0; i < _spFormPlayers.length; i++) {
     var p = _spFormPlayers[i];
-    var teamNum = Math.floor(i / 4) + 1;
+    var teamIdx = Math.floor(i / 4);
     var posInTeam = i % 4;
-    // Team divider label (only for multi-team packages)
-    if (includedCount > 4) {
-      if (i === 0) html += '<div class="sp-team-label">Team 1</div>';
-      else if (posInTeam === 0) html += '<div class="sp-team-label">Team ' + teamNum + '</div>';
+    // Team name header — editable input
+    if (showTeamDividers && posInTeam === 0) {
+      var tName = _spTeamNames[teamIdx] || ('Team ' + (teamIdx + 1));
+      html += '<div class="sp-team-header">' +
+        '<input class="sp-team-name-inp" type="text" value="' + escSp(tName) + '"' +
+          ' placeholder="Team ' + (teamIdx+1) + '"' +
+          ' oninput="_spTeamNames[' + teamIdx + ']=this.value">' +
+      '</div>';
     }
     var isExtra = includedCount > 0 && i >= includedCount;
     var numStyle = isExtra ? 'background:#b8940e' : '';
@@ -1570,6 +1592,8 @@ function addSpPlayerRow() {
 }
 
 function addSpTeamBlock() {
+  var nextNum = Math.floor(_spFormPlayers.length / 4) + 1;
+  _spTeamNames.push('Team ' + nextNum);
   for (var i = 0; i < 4; i++) _spFormPlayers.push({ fn:'', ln:'', email:'' });
   renderSpPlayersList(_spIncludedSlots);
   setTimeout(function(){
@@ -1585,7 +1609,17 @@ function removeSpPlayerRow(idx) {
 }
 
 function getSpPlayers() {
-  return _spFormPlayers.filter(function(p){ return p.fn || p.ln || p.email; });
+  // Return players with their team name attached
+  return _spFormPlayers.map(function(p, i) {
+    var teamIdx = Math.floor(i / 4);
+    var teamName = _spTeamNames[teamIdx] || ('Team ' + (teamIdx + 1));
+    return { fn: p.fn, ln: p.ln, email: p.email, team: teamName, slot: i + 1 };
+  }).filter(function(p){ return p.fn || p.ln || p.email; });
+}
+
+function getSpTeams() {
+  // Return team names array
+  return _spTeamNames.slice();
 }
 
 function handleSpLogoUpload(input) {
