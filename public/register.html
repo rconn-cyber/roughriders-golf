@@ -519,11 +519,33 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
   </div>
 </header>
 
-<!-- Sponsor logo strip -->
-<div id="sponsor-logo-strip" style="background:#fff;border-bottom:1px solid rgba(0,0,0,0.07);padding:20px 20px 24px;display:none;">
-  <div style="max-width:680px;margin:0 auto;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-light);text-align:center;margin-bottom:14px;">Thank you to our sponsors</div>
-    <div id="sponsor-logos" style="display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;"></div>
+<!-- Event highlights + Sponsor logo strip -->
+<div style="background:#fff;border-bottom:1px solid rgba(0,0,0,0.07);padding:22px 20px 24px;">
+  <div style="max-width:720px;margin:0 auto;">
+
+    <!-- Event highlights -->
+    <div style="text-align:center;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid rgba(0,0,0,0.07);">
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 28px;margin-bottom:12px;">
+        <span style="font-size:14px;font-weight:700;color:#0f2318;">🍳 Breakfast</span>
+        <span style="font-size:14px;font-weight:700;color:#0f2318;">🍽 Lunch</span>
+        <span style="font-size:14px;font-weight:700;color:#0f2318;">🎟 Raffles</span>
+        <span style="font-size:14px;font-weight:700;color:#0f2318;">🎒 Swag Bags</span>
+        <span style="font-size:14px;font-weight:700;color:#0f2318;">🏆 Prizes</span>
+        <span style="font-size:14px;font-weight:700;color:#0f2318;">⛳ Hole Contests</span>
+      </div>
+      <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#0f2318;margin-bottom:12px;">And Much More!</div>
+      <div style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:600;color:#555;">📅 Registration: <strong style="color:#0f2318;">10:00 AM</strong></span>
+        <span style="font-size:12px;font-weight:600;color:#555;">🏌️ Shot Gun: <strong style="color:#0f2318;">11:30 AM</strong></span>
+      </div>
+    </div>
+
+    <!-- Sponsor logos -->
+    <div id="sponsor-logo-strip" style="display:none;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-light);text-align:center;margin-bottom:14px;">Thank you to our sponsors</div>
+      <div id="sponsor-logos" style="display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap;"></div>
+    </div>
+
   </div>
 </div>
 
@@ -2049,7 +2071,7 @@ function renderSponsorLogos(sponsors) {
     html += url ? '<a href="' + url + '" target="_blank" rel="noopener" style="text-decoration:none;">' + inner + '</a>' : inner;
   }
   logoContainer.innerHTML = html;
-  strip.style.display = 'block';
+  strip.style.display = 'block'; // show the inner logos section
 }
 
 
