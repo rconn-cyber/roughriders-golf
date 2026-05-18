@@ -1034,12 +1034,38 @@ function setSaveBadge(state, msg){
   el.className = 'save-badge ' + state;
   el.textContent = state==='saving' ? '⏳ Saving…' : state==='ok' ? '✓ Saved' : state==='err' ? '⚠ Save failed' : '✓ Saved';
 }
+function buildPublicSponsors() {
+  // Build a public-safe list from _loadedSponsors for register.html logo strip
+  // Only paid/invoiced sponsors, only name/company/website/logoData fields
+  return (_loadedSponsors || [])
+    .filter(function(s){ return s && (s.status === 'paid' || s.status === 'invoice' || s.status === 'invoiced'); })
+    .sort(function(a, b){
+      var aAmt = a.total || (a.amount > 10000 ? a.amount/100 : a.amount) || 0;
+      var bAmt = b.total || (b.amount > 10000 ? b.amount/100 : b.amount) || 0;
+      return bAmt - aAmt;
+    })
+    .map(function(s){
+      return {
+        company:   s.company  || null,
+        firstName: s.firstName|| null,
+        lastName:  s.lastName || null,
+        website:   s.website  || null,
+        logoData:  s.logoData || null,
+      };
+    });
+}
+
 async function doSave(){
   try {
     var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-config', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
-      body: JSON.stringify({ benefits: STATE.benefits, levels: STATE.levels, alacarte: STATE.alacarte })
+      body: JSON.stringify({
+        benefits: STATE.benefits,
+        levels: STATE.levels,
+        alacarte: STATE.alacarte,
+        publicSponsors: buildPublicSponsors()
+      })
     });
     if (!res.ok) throw new Error('HTTP '+res.status);
     setSaveBadge('ok');
