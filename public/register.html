@@ -220,6 +220,15 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 .tier.bronze-tier .tier-label { color: #e8c4a0; }
 .tier-price { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 900; color: var(--white); line-height: 1; }
 .tier-price sup { font-size: 15px; vertical-align: super; font-weight: 400; opacity: 0.7; }
+.tier-category {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  margin-top: 2px;
+}
 .featured-pill { position: absolute; top: 10px; right: 36px; background: var(--gold); color: var(--green-dark); font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; }
 .tier-body { padding: 18px; flex: 1; }
 .perk { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 9px; font-size: 13px; color: var(--text-mid); }
@@ -229,6 +238,18 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 .tier.gold-tier   .perk-dot { background: #c9a84c; }
 .tier.silver-tier .perk-dot { background: var(--silver); }
 .tier.bronze-tier .perk-dot { background: var(--bronze); }
+
+/* ── Green tier ── */
+.tier.green-tier .tier-header { background: linear-gradient(135deg, #0d3320, #1a5c35); }
+.tier.green-tier .tier-label  { color: #a0e0b0; }
+.tier.green-tier .tier-price  { color: #fff; }
+.tier.green-tier .perk-dot    { background: #2d7a4a; }
+
+/* ── Navy tier ── */
+.tier.navy-tier .tier-header { background: linear-gradient(135deg, #0d1f3c, #1a3464); }
+.tier.navy-tier .tier-label  { color: #a0b8e0; }
+.tier.navy-tier .tier-price  { color: #fff; }
+.tier.navy-tier .perk-dot    { background: #2d5a9e; }
 .perk strong { color: var(--text-dark); font-weight: 500; }
 .check-badge { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4); background: transparent; display: flex; align-items: center; justify-content: center; transition: all 0.18s; z-index: 2; }
 .check-badge svg { opacity: 0; transform: scale(0.5); transition: all 0.18s; }
@@ -553,71 +574,13 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
 <!-- ══════════ PAGE 2: SPONSORSHIP ══════════ -->
 <div class="page" id="page-1">
-  <p class="section-heading">Presenting Sponsorships</p>
-  <p class="section-sub">Full tournament packages — click any card to select. Sponsorship is optional, skip to pay registration only.</p>
+  <p class="section-heading">Sponsorship Opportunities</p>
+  <p class="section-sub">Click any card to select. All levels sorted by investment. Sponsorship is optional — skip to pay registration only.</p>
 
-  <div class="tiers" id="tiers-container">
-    <!-- Populated by renderSponsorConfig() on load. Fallback defaults below are replaced if admin-config loads. -->
-    <div class="tier title-tier selectable" data-id="title" data-name="Title Sponsor" data-price="7500">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="tier-header">
-        <div class="tier-label">Title Sponsor</div>
-        <div class="tier-price"><sup>$</sup>7,500</div>
-        <div class="featured-pill">Top Tier</div>
-      </div>
-      <div class="tier-body">
-        <div class="perk"><span class="perk-dot"></span><span><strong>3 teams</strong> — 12 golfers</span></div>
-        <div class="perk"><span class="perk-dot"></span><span><strong>12</strong> super tickets</span></div>
-        <div class="perk"><span class="perk-dot"></span><span><strong>5</strong> hole sponsor signs</span></div>
-        <div class="perk"><span class="perk-dot"></span><span>Logo on sponsor banner</span></div>
-        <div class="perk"><span class="perk-dot"></span><span>Website listing</span></div>
-      </div>
-    </div>
-    <div class="tier gold-tier selectable" data-id="gold" data-name="Gold Sponsor" data-price="5000">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="tier-header">
-        <div class="tier-label">Gold Sponsor</div>
-        <div class="tier-price"><sup>$</sup>5,000</div>
-      </div>
-      <div class="tier-body">
-        <div class="perk"><span class="perk-dot"></span><span><strong>2 teams</strong> — 8 golfers</span></div>
-        <div class="perk"><span class="perk-dot"></span><span><strong>8</strong> super tickets</span></div>
-        <div class="perk"><span class="perk-dot"></span><span><strong>3</strong> hole sponsor signs</span></div>
-        <div class="perk"><span class="perk-dot"></span><span>Logo on materials &amp; banner</span></div>
-      </div>
-    </div>
-    <div class="tier silver-tier selectable" data-id="silver" data-name="Silver Sponsor" data-price="2500">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="tier-header">
-        <div class="tier-label">Silver Sponsor</div>
-        <div class="tier-price"><sup>$</sup>2,500</div>
-      </div>
-      <div class="tier-body">
-        <div class="perk"><span class="perk-dot"></span><span><strong>1 team</strong> — 4 golfers</span></div>
-        <div class="perk"><span class="perk-dot"></span><span><strong>4</strong> super tickets</span></div>
-        <div class="perk"><span class="perk-dot"></span><span><strong>2</strong> hole sponsor signs</span></div>
-        <div class="perk"><span class="perk-dot"></span><span>Logo on tournament materials</span></div>
-      </div>
-    </div>
-    <div class="tier bronze-tier selectable" data-id="bronze" data-name="Bronze Sponsor" data-price="1000">
-      <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="tier-header">
-        <div class="tier-label">Bronze Sponsor</div>
-        <div class="tier-price"><sup>$</sup>1,000</div>
-      </div>
-      <div class="tier-body">
-        <div class="perk"><span class="perk-dot"></span><span><strong>1 team</strong> — 4 golfers</span></div>
-        <div class="perk"><span class="perk-dot"></span><span><strong>1</strong> hole sponsor sign</span></div>
-        <div class="perk"><span class="perk-dot"></span><span>Logo on tournament materials</span></div>
-      </div>
-    </div>
-  </div>
-
-  <p class="section-heading">Hole Sponsor</p>
-  <p class="section-sub">On-course visibility without a full package</p>
-  <div class="hole-sponsor selectable" data-id="hole" data-name="Hole Sponsor" data-price="250">
+  <!-- Hole Sponsor — standalone with qty controls -->
+  <div class="hole-sponsor selectable" data-id="hole" data-name="Hole Sponsor" data-price="250" style="margin-bottom:20px;">
     <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="#1a3320" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div class="hole-price-block"><div class="hole-label">Per hole</div><div class="hole-price">$250</div></div>
+    <div class="hole-price-block"><div class="hole-label">⛳ Hole Sponsor — Per hole</div><div class="hole-price">$250</div></div>
     <div class="hole-perks">
       <span class="perk-tag">Custom tee sign</span><span class="perk-tag">Name &amp; logo on-course</span>
       <span class="perk-tag">Sponsor board</span><span class="perk-tag">Website listing</span>
@@ -632,11 +595,8 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
     </div>
   </div>
 
-  <hr class="divider">
-
-  <p class="section-heading">À La Carte &amp; Specialty</p>
-  <p class="section-sub">Add individual opportunities to your package</p>
-  <div class="alacarte-grid" id="alacarte-container">
+  <!-- All sponsor levels — populated dynamically from admin-config -->
+  <div class="tiers" id="tiers-container">
     <!-- Populated by renderSponsorConfig() on load -->
   </div>
 
@@ -1751,7 +1711,13 @@ function escHtmlConfig(s) {
 function buildTierHTML(lv) {
   var cls = THEME_CLASS_MAP[lv.theme] || 'title-tier';
   var price = Number(lv.price).toLocaleString('en-US');
-  var badge = lv.badge ? '<div class="featured-pill">' + escHtmlConfig(lv.badge) + '</div>' : '';
+  // featured pill for featured levels, category badge for others
+  var badgeHtml = '';
+  if (lv.featured && lv.badge) {
+    badgeHtml = '<div class="featured-pill">' + escHtmlConfig(lv.badge) + '</div>';
+  } else if (lv.badge) {
+    badgeHtml = '<div class="tier-category">' + escHtmlConfig(lv.badge) + '</div>';
+  }
   var perks = (lv.benefits || []).map(function(b) {
     return '<div class="perk"><span class="perk-dot"></span><span>' + escHtmlConfig(b) + '</span></div>';
   }).join('');
@@ -1760,7 +1726,7 @@ function buildTierHTML(lv) {
     '<div class="tier-header">' +
       '<div class="tier-label">' + escHtmlConfig(lv.name) + '</div>' +
       '<div class="tier-price"><sup>$</sup>' + price + '</div>' +
-      badge +
+      badgeHtml +
     '</div>' +
     '<div class="tier-body">' + perks + '</div>' +
   '</div>';
@@ -1779,21 +1745,25 @@ function buildAlaCarteHTML(ac) {
 }
 
 function renderSponsorConfig(config) {
-  // ── Render tiers ──
   var tiersEl = document.getElementById('tiers-container');
-  if (tiersEl && config.levels && config.levels.length) {
-    var sorted = config.levels.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
-    tiersEl.innerHTML = sorted.map(buildTierHTML).join('');
+  if (!tiersEl) return;
+
+  // Merge levels + alacarte (legacy), sort by price descending
+  var all = (config.levels || []).slice();
+  // Legacy: if alacarte still present in old config, merge in
+  (config.alacarte || []).forEach(function(ac) {
+    if (!all.find(function(l){return l.id===ac.id;})) {
+      all.push({ id:ac.id, name:ac.name, price:ac.price, theme:ac.theme||'green',
+        badge:ac.cat||'', featured:false, benefits:ac.bullets||[] });
+    }
+  });
+  all.sort(function(a,b){ return b.price - a.price; });
+
+  if (all.length) {
+    tiersEl.innerHTML = all.map(buildTierHTML).join('');
   }
 
-  // ── Render à la carte ──
-  var acEl = document.getElementById('alacarte-container');
-  if (acEl && config.alacarte && config.alacarte.length) {
-    var sortedAc = config.alacarte.slice().sort(function(a,b){ return (a.order||0)-(b.order||0); });
-    acEl.innerHTML = sortedAc.map(buildAlaCarteHTML).join('');
-  }
-
-  // Re-attach click listeners to newly rendered .selectable elements
+  // Re-attach click listeners
   document.querySelectorAll('.selectable').forEach(function(el) {
     el.addEventListener('click', function() {
       var id   = this.dataset.id;
@@ -1813,17 +1783,10 @@ function renderSponsorConfig(config) {
     });
   });
 
-  // Also rebuild BENEFITS_DATA from config so computeBenefits() stays accurate
-  if (config.levels) {
-    config.levels.forEach(function(lv) {
-      BENEFITS_DATA[lv.id] = { perks: lv.benefits || [] };
-    });
-  }
-  if (config.alacarte) {
-    config.alacarte.forEach(function(ac) {
-      BENEFITS_DATA[ac.id] = { perks: ac.bullets || [] };
-    });
-  }
+  // Rebuild BENEFITS_DATA
+  all.forEach(function(lv) {
+    BENEFITS_DATA[lv.id] = { perks: lv.benefits || [] };
+  });
 }
 
 async function loadSponsorConfig() {
