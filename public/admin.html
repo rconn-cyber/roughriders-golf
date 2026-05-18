@@ -710,13 +710,31 @@ tr:hover td { background: #f8faf8; }
       </div>
       <div class="form-group">
         <label class="form-label">Color Theme</label>
-        <div class="theme-picker" id="lm-themes">
-          <div class="theme-swatch active" data-theme="forest" title="Forest" style="background:linear-gradient(135deg,#0f2318,#1e4a2c)" onclick="pickTheme(this)"></div>
-          <div class="theme-swatch" data-theme="gold"   title="Gold"   style="background:linear-gradient(135deg,#3d2e0a,#6b4f16)" onclick="pickTheme(this)"></div>
-          <div class="theme-swatch" data-theme="silver" title="Silver" style="background:linear-gradient(135deg,#2a2e30,#4a5255)" onclick="pickTheme(this)"></div>
-          <div class="theme-swatch" data-theme="bronze" title="Bronze" style="background:linear-gradient(135deg,#3d1e0a,#6b3316)" onclick="pickTheme(this)"></div>
-          <div class="theme-swatch" data-theme="green"  title="Green"  style="background:linear-gradient(135deg,#0d3320,#1a5c35)" onclick="pickTheme(this)"></div>
-          <div class="theme-swatch" data-theme="navy"   title="Navy"   style="background:linear-gradient(135deg,#0d1f3c,#1a3464)" onclick="pickTheme(this)"></div>
+        <div class="theme-picker" id="lm-themes" style="display:flex;flex-wrap:wrap;gap:7px;">
+          <!-- Greens -->
+          <div class="theme-swatch active" data-theme="forest"      title="Forest Dark"   style="background:linear-gradient(135deg,#0f2318,#1e4a2c)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="green"       title="Deep Green"    style="background:linear-gradient(135deg,#0d3320,#1a5c35)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="sage"        title="Sage"          style="background:linear-gradient(135deg,#2a4a2a,#4a7a4a)" onclick="pickTheme(this)"></div>
+          <!-- Golds / Browns -->
+          <div class="theme-swatch"        data-theme="gold"        title="Gold"          style="background:linear-gradient(135deg,#3d2e0a,#6b4f16)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="bronze"      title="Bronze"        style="background:linear-gradient(135deg,#3d1e0a,#6b3316)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="amber"       title="Amber"         style="background:linear-gradient(135deg,#4a2e00,#7a5200)" onclick="pickTheme(this)"></div>
+          <!-- Blues / Navys -->
+          <div class="theme-swatch"        data-theme="navy"        title="Navy"          style="background:linear-gradient(135deg,#0d1f3c,#1a3464)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="blue"        title="Blue"          style="background:linear-gradient(135deg,#0a2a4a,#1a4a7a)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="slate"       title="Slate Blue"    style="background:linear-gradient(135deg,#1a2a3a,#2a4a5a)" onclick="pickTheme(this)"></div>
+          <!-- Grays -->
+          <div class="theme-swatch"        data-theme="silver"      title="Silver"        style="background:linear-gradient(135deg,#2a2e30,#4a5255)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="charcoal"    title="Charcoal"      style="background:linear-gradient(135deg,#1a1a1a,#3a3a3a)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="steel"       title="Steel"         style="background:linear-gradient(135deg,#2a3540,#3a4a55)" onclick="pickTheme(this)"></div>
+          <!-- Reds / Purples -->
+          <div class="theme-swatch"        data-theme="crimson"     title="Crimson"       style="background:linear-gradient(135deg,#3a0a0a,#6a1a1a)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="burgundy"    title="Burgundy"      style="background:linear-gradient(135deg,#2a0a14,#5a1a2a)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="purple"      title="Purple"        style="background:linear-gradient(135deg,#1e0a3a,#3a1a6a)" onclick="pickTheme(this)"></div>
+          <!-- Custom hex -->
+          <div class="theme-swatch"        data-theme="teal"        title="Teal"          style="background:linear-gradient(135deg,#0a2a2a,#0a4a4a)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="rust"        title="Rust"          style="background:linear-gradient(135deg,#3a1a0a,#6a2a0a)" onclick="pickTheme(this)"></div>
+          <div class="theme-swatch"        data-theme="indigo"      title="Indigo"        style="background:linear-gradient(135deg,#0a0a3a,#1a1a6a)" onclick="pickTheme(this)"></div>
         </div>
       </div>
       <div class="form-group">
@@ -897,12 +915,24 @@ var STATE = {
 };
 
 var THEMES = {
-  forest: 'linear-gradient(135deg,#0f2318,#1e4a2c)',
-  gold:   'linear-gradient(135deg,#3d2e0a,#6b4f16)',
-  silver: 'linear-gradient(135deg,#2a2e30,#4a5255)',
-  bronze: 'linear-gradient(135deg,#3d1e0a,#6b3316)',
-  green:  'linear-gradient(135deg,#0d3320,#1a5c35)',
-  navy:   'linear-gradient(135deg,#0d1f3c,#1a3464)',
+  forest:   'linear-gradient(135deg,#0f2318,#1e4a2c)',
+  green:    'linear-gradient(135deg,#0d3320,#1a5c35)',
+  sage:     'linear-gradient(135deg,#2a4a2a,#4a7a4a)',
+  gold:     'linear-gradient(135deg,#3d2e0a,#6b4f16)',
+  bronze:   'linear-gradient(135deg,#3d1e0a,#6b3316)',
+  amber:    'linear-gradient(135deg,#4a2e00,#7a5200)',
+  navy:     'linear-gradient(135deg,#0d1f3c,#1a3464)',
+  blue:     'linear-gradient(135deg,#0a2a4a,#1a4a7a)',
+  slate:    'linear-gradient(135deg,#1a2a3a,#2a4a5a)',
+  silver:   'linear-gradient(135deg,#2a2e30,#4a5255)',
+  charcoal: 'linear-gradient(135deg,#1a1a1a,#3a3a3a)',
+  steel:    'linear-gradient(135deg,#2a3540,#3a4a55)',
+  crimson:  'linear-gradient(135deg,#3a0a0a,#6a1a1a)',
+  burgundy: 'linear-gradient(135deg,#2a0a14,#5a1a2a)',
+  purple:   'linear-gradient(135deg,#1e0a3a,#3a1a6a)',
+  teal:     'linear-gradient(135deg,#0a2a2a,#0a4a4a)',
+  rust:     'linear-gradient(135deg,#3a1a0a,#6a2a0a)',
+  indigo:   'linear-gradient(135deg,#0a0a3a,#1a1a6a)',
 };
 var THEME_CLS = {
   forest:'title-tier', gold:'gold-tier', silver:'silver-tier',
