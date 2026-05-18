@@ -1813,25 +1813,23 @@ async function loadSponsorLogos() {
 // Falls back to hardcoded defaults already in the DOM if fetch fails
 // ════════════════════════════════
 
+// Direct color map — theme name → hex color for tier header
+var THEME_COLOR_MAP = {
+  forest:   '#1e4a2c', green:    '#2d8a4a', lime:     '#5a9e2a',
+  teal:     '#0a7a7a', cyan:     '#0099aa', navy:     '#1a3464',
+  blue:     '#1a5aaa', skyblue:  '#2a7acc', gold:     '#b8940e',
+  amber:    '#cc7700', orange:   '#cc5500', bronze:   '#6b3316',
+  brown:    '#7a4010', rust:     '#8a3010', crimson:  '#aa1a1a',
+  red:      '#cc2222', pink:     '#cc2266', magenta:  '#aa1a88',
+  purple:   '#6a1aaa', violet:   '#7a2acc', indigo:   '#3a1a9a',
+  burgundy: '#7a1a3a', silver:   '#6a7a7a', slate:    '#4a5a6a',
+  steel:    '#3a4a5a', charcoal: '#3a3a3a', black:    '#1a1a1a',
+  sage:     '#4a7a5a',
+};
+// Legacy class map for backwards compat
 var THEME_CLASS_MAP = {
-  forest:   'title-tier',
-  gold:     'gold-tier',
-  silver:   'silver-tier',
-  bronze:   'bronze-tier',
-  green:    'green-tier',
-  navy:     'navy-tier',
-  sage:     'sage-tier',
-  amber:    'amber-tier',
-  blue:     'blue-tier',
-  slate:    'slate-tier',
-  charcoal: 'charcoal-tier',
-  steel:    'steel-tier',
-  crimson:  'crimson-tier',
-  burgundy: 'burgundy-tier',
-  purple:   'purple-tier',
-  teal:     'teal-tier',
-  rust:     'rust-tier',
-  indigo:   'indigo-tier',
+  forest:'title-tier', gold:'gold-tier', silver:'silver-tier',
+  bronze:'bronze-tier', green:'green-tier', navy:'navy-tier',
 };
 
 var CHECK_SVG_WHITE = '<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -1842,9 +1840,11 @@ function escHtmlConfig(s) {
 }
 
 function buildTierHTML(lv) {
+  // Use direct hex color if available, fall back to CSS class
+  var headerColor = THEME_COLOR_MAP[lv.theme] || null;
   var cls = THEME_CLASS_MAP[lv.theme] || 'title-tier';
+  var headerStyle = headerColor ? ' style="background:' + headerColor + '"' : '';
   var price = Number(lv.price).toLocaleString('en-US');
-  // featured pill for featured levels, category badge for others
   var badgeHtml = '';
   if (lv.featured && lv.badge) {
     badgeHtml = '<div class="featured-pill">' + escHtmlConfig(lv.badge) + '</div>';
@@ -1856,7 +1856,7 @@ function buildTierHTML(lv) {
   }).join('');
   return '<div class="tier ' + cls + ' selectable" data-id="' + escHtmlConfig(lv.id) + '" data-name="' + escHtmlConfig(lv.name) + '" data-price="' + lv.price + '">' +
     '<div class="check-badge">' + CHECK_SVG_WHITE + '</div>' +
-    '<div class="tier-header">' +
+    '<div class="tier-header"' + headerStyle + '>' +
       '<div class="tier-label">' + escHtmlConfig(lv.name) + '</div>' +
       '<div class="tier-price"><sup>$</sup>' + price + '</div>' +
       badgeHtml +
