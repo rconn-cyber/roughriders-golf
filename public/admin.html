@@ -732,9 +732,13 @@ tr:hover td { background: #f8faf8; }
       </div>
       <div class="form-group">
         <label class="form-label" style="margin-bottom:7px;">Options</label>
-        <div class="toggle-row">
+        <div class="toggle-row" style="margin-bottom:10px;">
           <button class="toggle-switch" id="lm-featured" onclick="this.classList.toggle('on')"></button>
           <span style="font-size:13px;color:var(--tm);">Featured / Top Tier badge</span>
+        </div>
+        <div class="toggle-row">
+          <button class="toggle-switch" id="lm-hidden" onclick="this.classList.toggle('on')"></button>
+          <span style="font-size:13px;color:var(--tm);">Hide from registration page</span>
         </div>
       </div>
     </div>
@@ -936,6 +940,7 @@ var DEFAULT_LEVELS = [
   {id:'long-drive-sp',name:'Longest Drive',price:400,theme:'navy', badge:'Contest',        featured:false,order:150,benefits:['b15','b12']},
   {id:'close-pin-sp',name:'Closest to Pin',price:400,theme:'navy', badge:'Contest',        featured:false,order:160,benefits:['b15','b12']},
   {id:'scorecard',name:'Scorecard',       price:350, theme:'silver',badge:'Branding',      featured:false,order:170,benefits:['b12']},
+  {id:'hole',     name:'Hole Sponsor',      price:250, theme:'green', badge:'On-Course',     featured:true, order:180,benefits:['b16','b17','b12']},
 ];
 var DEFAULT_ALACARTE = [];
 
@@ -1209,6 +1214,7 @@ function renderLevels(){
       '<div class="lc-body">'+
         '<div class="lc-tags">'+(tags||'<span class="lc-none">No benefits — click Edit</span>')+'</div>'+
         '<div class="lc-actions">'+
+          (lv.hidden ? '<span style="font-size:10px;background:#f0f2ef;color:var(--tl);padding:2px 7px;border-radius:3px;font-weight:600;letter-spacing:.04em;margin-right:4px;">HIDDEN</span>' : '')+
           '<button class="btn btn-outline btn-sm" onclick="openLevelModal(\''+lv.id+'\')">✏ Edit</button>'+
           '<button class="btn btn-danger btn-sm" onclick="deleteLevel(\''+lv.id+'\')">✕ Delete</button>'+
         '</div>'+
@@ -1245,6 +1251,8 @@ function openLevelModal(id){
   delete document.getElementById('lm-id').dataset.dirty;
   var feat = document.getElementById('lm-featured');
   feat.className = 'toggle-switch' + (lv&&lv.featured?' on':'');
+  var hidd = document.getElementById('lm-hidden');
+  hidd.className = 'toggle-switch' + (lv&&lv.hidden?' on':'');
   // Theme swatches
   document.querySelectorAll('#lm-themes .theme-swatch').forEach(function(sw){
     sw.classList.toggle('active', sw.dataset.theme===_mTheme);
@@ -1308,6 +1316,7 @@ function saveLevel(){
   var id    = document.getElementById('lm-id').value.trim() || slugify(name);
   var badge = document.getElementById('lm-badge').value.trim();
   var feat  = document.getElementById('lm-featured').classList.contains('on');
+  var hidden = document.getElementById('lm-hidden').classList.contains('on');
   if (!name)  { document.getElementById('lm-name').focus();  toast('Name is required'); return; }
   if (!price) { document.getElementById('lm-price').focus(); toast('Price is required'); return; }
   if (!id)    { toast('Could not generate ID'); return; }
@@ -1315,9 +1324,9 @@ function saveLevel(){
   if (dup) { document.getElementById('lm-id').focus(); toast('That ID is already in use'); return; }
   if (_editLvId) {
     var lv = STATE.levels.find(function(x){return x.id===_editLvId;});
-    if (lv){ lv.id=id;lv.name=name;lv.price=price;lv.theme=_mTheme;lv.badge=badge;lv.featured=feat;lv.benefits=_mBens.slice(); }
+    if (lv){ lv.id=id;lv.name=name;lv.price=price;lv.theme=_mTheme;lv.badge=badge;lv.featured=feat;lv.hidden=hidden;lv.benefits=_mBens.slice(); }
   } else {
-    STATE.levels.push({id:id,name:name,price:price,theme:_mTheme,badge:badge,featured:feat,order:(STATE.levels.length+1)*10,benefits:_mBens.slice()});
+    STATE.levels.push({id:id,name:name,price:price,theme:_mTheme,badge:badge,featured:feat,hidden:hidden,order:(STATE.levels.length+1)*10,benefits:_mBens.slice()});
   }
   closeLevelModal();
   scheduleSave(); renderLevels();
