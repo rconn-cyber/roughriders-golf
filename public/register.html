@@ -402,6 +402,28 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
   .total-chips { display: none; }
 }
 @media (max-width: 400px) { .tiers { grid-template-columns: 1fr; } }
+
+/* ── Extended tier color themes ── */
+.tier.sage-tier     .tier-header { background: linear-gradient(135deg,#2a4a2a,#4a7a4a); }
+.tier.amber-tier    .tier-header { background: linear-gradient(135deg,#4a2e00,#7a5200); }
+.tier.blue-tier     .tier-header { background: linear-gradient(135deg,#0a2a4a,#1a4a7a); }
+.tier.slate-tier    .tier-header { background: linear-gradient(135deg,#1a2a3a,#2a4a5a); }
+.tier.charcoal-tier .tier-header { background: linear-gradient(135deg,#1a1a1a,#3a3a3a); }
+.tier.steel-tier    .tier-header { background: linear-gradient(135deg,#2a3540,#3a4a55); }
+.tier.crimson-tier  .tier-header { background: linear-gradient(135deg,#3a0a0a,#6a1a1a); }
+.tier.burgundy-tier .tier-header { background: linear-gradient(135deg,#2a0a14,#5a1a2a); }
+.tier.purple-tier   .tier-header { background: linear-gradient(135deg,#1e0a3a,#3a1a6a); }
+.tier.teal-tier     .tier-header { background: linear-gradient(135deg,#0a2a2a,#0a4a4a); }
+.tier.rust-tier     .tier-header { background: linear-gradient(135deg,#3a1a0a,#6a2a0a); }
+.tier.indigo-tier   .tier-header { background: linear-gradient(135deg,#0a0a3a,#1a1a6a); }
+.tier.sage-tier .tier-label,.tier.amber-tier .tier-label,.tier.blue-tier .tier-label,
+.tier.slate-tier .tier-label,.tier.charcoal-tier .tier-label,.tier.steel-tier .tier-label,
+.tier.crimson-tier .tier-label,.tier.burgundy-tier .tier-label,.tier.purple-tier .tier-label,
+.tier.teal-tier .tier-label,.tier.rust-tier .tier-label,.tier.indigo-tier .tier-label { color: rgba(255,255,255,0.75); }
+.tier.sage-tier .tier-price,.tier.amber-tier .tier-price,.tier.blue-tier .tier-price,
+.tier.slate-tier .tier-price,.tier.charcoal-tier .tier-price,.tier.steel-tier .tier-price,
+.tier.crimson-tier .tier-price,.tier.burgundy-tier .tier-price,.tier.purple-tier .tier-price,
+.tier.teal-tier .tier-price,.tier.rust-tier .tier-price,.tier.indigo-tier .tier-price { color: #fff; }
 </style>
 </head>
 <body>
@@ -574,14 +596,14 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
           </div>
         </div>
 
-        <!-- Hole Sponsor — flat rate add-on -->
-        <div class="addon-item" onclick="toggleAddonFlat(this, 250, 'Hole Sponsor')" style="grid-column:1/-1;border-color:rgba(45,122,74,0.3);">
+        <!-- Hole Sponsor — flat rate add-on (price updated from admin-config) -->
+        <div class="addon-item" id="hole-addon-item" onclick="toggleAddonFlat(this, 250, 'Hole Sponsor')" style="grid-column:1/-1;border-color:rgba(45,122,74,0.3);">
           <div class="addon-left">
             <div class="addon-name">⛳ Hole Sponsor</div>
-            <div class="addon-desc">Custom tee sign on one hole · Name &amp; logo on-course · Sponsor board · Website listing</div>
+            <div class="addon-desc" id="hole-addon-desc">Custom tee sign on one hole · Name &amp; logo on-course · Sponsor board · Website listing</div>
           </div>
           <div class="addon-right">
-            <div class="addon-price">$250</div>
+            <div class="addon-price" id="hole-addon-price">$250</div>
             <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
         </div>
@@ -1792,12 +1814,24 @@ async function loadSponsorLogos() {
 // ════════════════════════════════
 
 var THEME_CLASS_MAP = {
-  forest: 'title-tier',
-  gold:   'gold-tier',
-  silver: 'silver-tier',
-  bronze: 'bronze-tier',
-  green:  'green-tier',
-  navy:   'navy-tier',
+  forest:   'title-tier',
+  gold:     'gold-tier',
+  silver:   'silver-tier',
+  bronze:   'bronze-tier',
+  green:    'green-tier',
+  navy:     'navy-tier',
+  sage:     'sage-tier',
+  amber:    'amber-tier',
+  blue:     'blue-tier',
+  slate:    'slate-tier',
+  charcoal: 'charcoal-tier',
+  steel:    'steel-tier',
+  crimson:  'crimson-tier',
+  burgundy: 'burgundy-tier',
+  purple:   'purple-tier',
+  teal:     'teal-tier',
+  rust:     'rust-tier',
+  indigo:   'indigo-tier',
 };
 
 var CHECK_SVG_WHITE = '<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -1904,20 +1938,35 @@ function renderSponsorConfig(config) {
 }
 
 function updateFeaturedHoleCard(lv) {
+  var price = lv.price || 250;
+  var priceStr = '$' + Number(price).toLocaleString('en-US');
+
+  // Update featured hole card (Step 2)
   var card = document.querySelector('.featured-hole');
-  if (!card) return;
-  // Update price
-  var priceEl = card.querySelector('.hole-featured-price');
-  if (priceEl) priceEl.innerHTML = '$' + Number(lv.price).toLocaleString('en-US') +
-    '<span style="font-size:14px;font-weight:500;opacity:.7;margin-left:4px;">/ hole</span>';
-  // Update data-price for checkout
-  card.dataset.price = lv.price;
-  // Update perks
-  var perksEl = card.querySelector('.hole-perks');
-  if (perksEl && lv.benefits && lv.benefits.length) {
-    perksEl.innerHTML = lv.benefits.map(function(b) {
-      return '<span class="perk-tag">' + b.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
-    }).join('');
+  if (card) {
+    var priceEl = card.querySelector('.hole-featured-price');
+    if (priceEl) priceEl.innerHTML = priceStr +
+      '<span style="font-size:14px;font-weight:500;opacity:.7;margin-left:4px;">/ hole</span>';
+    card.dataset.price = price;
+    var perksEl = card.querySelector('.hole-perks');
+    if (perksEl && lv.benefits && lv.benefits.length) {
+      perksEl.innerHTML = lv.benefits.map(function(b) {
+        return '<span class="perk-tag">' + escHtmlConfig(b) + '</span>';
+      }).join('');
+    }
+  }
+
+  // Update Step 1 add-on item price + description
+  var addonItem = document.getElementById('hole-addon-item');
+  if (addonItem) {
+    // Update onclick price
+    addonItem.setAttribute('onclick', "toggleAddonFlat(this, " + price + ", 'Hole Sponsor')");
+    var addonPriceEl = document.getElementById('hole-addon-price');
+    if (addonPriceEl) addonPriceEl.textContent = priceStr;
+    var addonDescEl = document.getElementById('hole-addon-desc');
+    if (addonDescEl && lv.benefits && lv.benefits.length) {
+      addonDescEl.textContent = lv.benefits.join(' · ');
+    }
   }
 }
 
