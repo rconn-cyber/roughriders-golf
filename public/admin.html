@@ -336,10 +336,7 @@ tr:hover td { background: #f8faf8; }
             <h1>Sponsor Levels</h1>
             <p>All tiers and à la carte items — sorted by price. Changes save automatically and go live instantly.</p>
           </div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-outline" onclick="openAcModal(null)">+ À La Carte Item</button>
-            <button class="btn btn-primary" onclick="openLevelModal(null)">+ Sponsor Level</button>
-          </div>
+          <button class="btn btn-primary" onclick="openLevelModal(null)">+ New Level</button>
         </div>
         <div class="levels-grid" id="levels-grid"></div>
       </div>
@@ -448,7 +445,7 @@ tr:hover td { background: #f8faf8; }
         <div class="form-group">
           <label class="form-label">Sponsorship Package(s) <span>— click to toggle</span></label>
           <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:2px;" id="em-sp-picker">
-            <!-- populated from STATE.levels + STATE.alacarte when modal opens -->
+            <!-- populated from STATE.levels when modal opens -->
           </div>
         </div>
         <div class="form-group" style="margin-top:12px;">
@@ -657,7 +654,7 @@ tr:hover td { background: #f8faf8; }
         <div class="form-group">
           <label class="form-label">Sponsorship Package(s) <span>— click to select</span></label>
           <div style="display:flex;flex-wrap:wrap;gap:7px;" id="me-sp-levels">
-            <!-- populated from STATE.levels + STATE.alacarte -->
+            <!-- populated from STATE.levels -->
           </div>
         </div>
         <div class="form-row" style="margin-top:14px;">
@@ -922,26 +919,25 @@ var DEFAULT_BENEFITS = [
   {id:'b19',text:'Name & logo on-course'},
 ];
 var DEFAULT_LEVELS = [
-  {id:'title', name:'Title Sponsor', price:7500,theme:'forest',badge:'Top Tier',featured:true, order:1,benefits:['b1','b4','b7','b11','b12']},
-  {id:'gold',  name:'Gold Sponsor',  price:5000,theme:'gold',  badge:'',       featured:false,order:2,benefits:['b2','b5','b8','b13']},
-  {id:'silver',name:'Silver Sponsor',price:2500,theme:'silver',badge:'',       featured:false,order:3,benefits:['b3','b6','b9','b14']},
-  {id:'bronze',name:'Bronze Sponsor',price:1000,theme:'bronze',badge:'',       featured:false,order:4,benefits:['b3','b10','b14']},
+  {id:'title', name:'Title Sponsor',      price:7500,theme:'forest',badge:'Top Tier',      featured:true, order:10, benefits:['b1','b4','b7','b11','b12']},
+  {id:'gold',  name:'Gold Sponsor',       price:5000,theme:'gold',  badge:'',              featured:false,order:20, benefits:['b2','b5','b8','b13']},
+  {id:'silver',name:'Silver Sponsor',     price:2500,theme:'silver',badge:'',              featured:false,order:30, benefits:['b3','b6','b9','b14']},
+  {id:'vip-tent',name:'VIP Tent',         price:1500,theme:'green', badge:'On-Course',     featured:false,order:40, benefits:['b18']},
+  {id:'bev-cart',name:'Beverage Cart',    price:1500,theme:'bronze',badge:'Food & Bev',    featured:false,order:50, benefits:['b11','b12','b17']},
+  {id:'bronze',name:'Bronze Sponsor',     price:1000,theme:'bronze',badge:'',              featured:false,order:60, benefits:['b3','b10','b14']},
+  {id:'lunch', name:'Lunch / Dinner',     price:1250,theme:'bronze',badge:'Food & Bev',    featured:false,order:70, benefits:['b15','b11','b12']},
+  {id:'breakfast',name:'Breakfast',       price:750, theme:'bronze',badge:'Food & Bev',    featured:false,order:80, benefits:['b16','b15','b12']},
+  {id:'cooler',name:'Cooler Bag',         price:600, theme:'gold',  badge:'Gifts & Swag',  featured:false,order:90, benefits:['b12']},
+  {id:'putting',name:'Putting Contest',   price:500, theme:'navy',  badge:'Contest',       featured:false,order:100,benefits:['b12','b17']},
+  {id:'cigar', name:'Cigar Sponsor',      price:500, theme:'green', badge:'On-Course',     featured:false,order:110,benefits:['b12']},
+  {id:'tee-gift',name:'Tee Gift',         price:500, theme:'gold',  badge:'Gifts & Swag',  featured:false,order:120,benefits:['b12']},
+  {id:'golf-ball',name:'Golf Ball Sponsor',price:500,theme:'green', badge:'Branding',      featured:false,order:130,benefits:['b12']},
+  {id:'range', name:'Driving Range',      price:500, theme:'green', badge:'On-Course',     featured:false,order:140,benefits:['b12','b17']},
+  {id:'long-drive-sp',name:'Longest Drive',price:400,theme:'navy', badge:'Contest',        featured:false,order:150,benefits:['b15','b12']},
+  {id:'close-pin-sp',name:'Closest to Pin',price:400,theme:'navy', badge:'Contest',        featured:false,order:160,benefits:['b15','b12']},
+  {id:'scorecard',name:'Scorecard',       price:350, theme:'silver',badge:'Branding',      featured:false,order:170,benefits:['b12']},
 ];
-var DEFAULT_ALACARTE = [
-  {id:'bev-cart',name:'Beverage Cart',price:1500,cat:'Food & Beverage',order:1,bullets:['Logo on cart signage seen by all golfers','Brand mention at player check-in','Logo on tournament materials & website']},
-  {id:'cigar',name:'Cigar Sponsor',price:500,cat:'On-Course',order:2,bullets:['Branded signage at cigar station','Optional product sampling on-site','Logo on tournament materials & website']},
-  {id:'breakfast',name:'Breakfast',price:750,cat:'Food & Beverage',order:3,bullets:['Branded table signage at breakfast station','Verbal recognition during morning announcements','Logo on tournament materials & website']},
-  {id:'lunch',name:'Lunch / Dinner',price:1250,cat:'Food & Beverage',order:4,bullets:['Prominent branded signage at meal service','Verbal recognition & thank-you during awards','Logo on tournament materials & website']},
-  {id:'long-drive-sp',name:'Longest Drive',price:400,cat:'Contests',order:5,bullets:['Branded tee sign at contest hole','Name announced when winner is presented','Logo on tournament materials & website']},
-  {id:'close-pin-sp',name:'Closest to Pin',price:400,cat:'Contests',order:6,bullets:['Branded tee sign at contest hole','Name announced when winner is presented','Logo on tournament materials & website']},
-  {id:'putting',name:'Putting Contest',price:500,cat:'Contests',order:7,bullets:['Branded signage at putting green','High-traffic area — visible to all participants','Logo on tournament materials & website']},
-  {id:'cooler',name:'Cooler Bag',price:600,cat:'Gifts & Swag',order:8,bullets:['Logo imprinted on every player\'s cooler bag','Bags go home with golfers','Logo on tournament materials & website']},
-  {id:'tee-gift',name:'Tee Gift',price:500,cat:'Gifts & Swag',order:9,bullets:['Brand on item in every player\'s gift bag','Tangible takeaway extending reach beyond event day','Logo on tournament materials & website']},
-  {id:'range',name:'Driving Range',price:500,cat:'On-Course',order:10,bullets:['Branded signage at warm-up range','First brand seen by every golfer before teeing off','Logo on tournament materials & website']},
-  {id:'golf-ball',name:'Golf Ball Sponsor',price:500,cat:'Branding',order:11,bullets:['Logo or name on branded balls given to all players','In-hand brand exposure every shot of the round','Logo on tournament materials & website']},
-  {id:'scorecard',name:'Scorecard',price:350,cat:'Branding',order:12,bullets:['Logo printed on every player\'s scorecard','Handled repeatedly throughout the entire round','Logo on tournament materials & website']},
-  {id:'vip-tent',name:'VIP Tent',price:1500,cat:'On-Course',order:13,bullets:['Branded signage & banner at VIP hospitality area','Premium visibility — high-traffic gathering spot','Recognition at awards ceremony','Logo on tournament materials & website']},
-];
+var DEFAULT_ALACARTE = [];
 
 function genId(p){ return p+'_'+Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
 function slugify(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24)||'item'; }
@@ -991,8 +987,40 @@ async function loadConfig(){
     else STATE.levels = JSON.parse(JSON.stringify(DEFAULT_LEVELS));
     if (data.benefits && data.benefits.length) STATE.benefits = data.benefits;
     else STATE.benefits = JSON.parse(JSON.stringify(DEFAULT_BENEFITS));
-    if (data.alacarte && data.alacarte.length) STATE.alacarte = data.alacarte;
-    else STATE.alacarte = JSON.parse(JSON.stringify(DEFAULT_ALACARTE));
+    // Migrate any existing alacarte items into levels (one-time migration)
+    STATE.alacarte = [];
+    if (data.alacarte && data.alacarte.length) {
+      data.alacarte.forEach(function(ac) {
+        // Skip if already in levels
+        if (STATE.levels.find(function(l){return l.id===ac.id;})) return;
+        // Convert bullets to benefit IDs — add new benefits to pool if needed
+        var benIds = [];
+        (ac.bullets||[]).forEach(function(bt) {
+          var existing = STATE.benefits.find(function(b){return b.text.toLowerCase()===bt.toLowerCase();});
+          if (existing) {
+            if (!benIds.includes(existing.id)) benIds.push(existing.id);
+          } else {
+            var newId = 'b_'+ac.id+'_'+benIds.length;
+            STATE.benefits.push({id:newId, text:bt});
+            benIds.push(newId);
+          }
+        });
+        STATE.levels.push({
+          id:       ac.id,
+          name:     ac.name,
+          price:    ac.price,
+          theme:    ac.theme || 'green',
+          badge:    ac.cat  || '',
+          featured: false,
+          order:    ac.order || 999,
+          benefits: benIds
+        });
+      });
+      // Re-sort by price after migration
+      STATE.levels.sort(function(a,b){return b.price - a.price;});
+      // Save migrated state back
+      scheduleSave();
+    }
   } catch(e) {
     STATE.levels   = JSON.parse(JSON.stringify(DEFAULT_LEVELS));
     STATE.benefits = JSON.parse(JSON.stringify(DEFAULT_BENEFITS));
@@ -1027,8 +1055,7 @@ function toast(msg){
 // ════════════════════════════════
 function updateCounts(){
   var el=function(id){return document.getElementById(id);};
-  var total = STATE.levels.length + STATE.alacarte.length;
-  if(el('cnt-levels')) el('cnt-levels').textContent=total;
+  if(el('cnt-levels')) el('cnt-levels').textContent=STATE.levels.length;
   if(el('cnt-pool'))   el('cnt-pool').textContent=STATE.benefits.length;
 }
 
@@ -1162,64 +1189,28 @@ function updateSponsorStats(sponsors){
 // ════════════════════════════════
 // RENDER: SPONSOR LEVELS
 // ════════════════════════════════
-function allLevelsSorted(){
-  // Merge STATE.levels and STATE.alacarte into one unified list, sorted by price desc
-  var all = [];
-  STATE.levels.forEach(function(lv){
-    all.push(Object.assign({}, lv, {_source:'level'}));
-  });
-  STATE.alacarte.forEach(function(ac){
-    // Convert alacarte to level shape: bullets become benefit tags
-    all.push({
-      id: ac.id, name: ac.name, price: ac.price,
-      theme: ac.theme || (function(cat){
-        var m={'Food & Beverage':'bronze','Contests':'navy','Branding':'silver','On-Course':'green','Gifts & Swag':'gold'};
-        return m[cat] || 'green';
-      })(ac.cat || ''),
-      badge: ac.cat || '',
-      featured: false,
-      benefits: [], // bullets stored separately
-      bullets: ac.bullets || [],
-      order: ac.order || 999,
-      _source: 'alacarte'
-    });
-  });
-  // Sort by price descending
-  return all.sort(function(a,b){ return b.price - a.price; });
-}
-
 function renderLevels(){
   var grid = document.getElementById('levels-grid');
   if (!grid) return;
-  var all = allLevelsSorted();
-  var html = all.map(function(lv){
+  // Sort all levels by price descending
+  var sorted = STATE.levels.slice().sort(function(a,b){return b.price - a.price;});
+  var html = sorted.map(function(lv){
     var thm = THEMES[lv.theme]||THEMES.forest;
-    var tags;
-    if (lv._source === 'alacarte') {
-      tags = (lv.bullets||[]).map(function(b){ return '<span class="lc-tag">'+escH(b)+'</span>'; }).join('');
-    } else {
-      tags = (lv.benefits||[]).map(function(bid){ var t=benText(bid); return t?'<span class="lc-tag">'+escH(t)+'</span>':''; }).join('');
-    }
-    var editFn = lv._source === 'alacarte'
-      ? 'openAcModal(\''+lv.id+'\')'
-      : 'openLevelModal(\''+lv.id+'\')';
-    var delFn = lv._source === 'alacarte'
-      ? 'deleteAcItem(\''+lv.id+'\')'
-      : 'deleteLevel(\''+lv.id+'\')';
-    var catBadge = (lv._source === 'alacarte' && lv.badge)
-      ? '<div class="lc-badge-lbl" style="font-size:8px;opacity:.6;">'+escH(lv.badge)+'</div>'
-      : (lv.badge ? '<div class="lc-badge-lbl">'+escH(lv.badge)+'</div>' : '');
+    var tags = (lv.benefits||[]).map(function(bid){
+      var t=benText(bid); return t?'<span class="lc-tag">'+escH(t)+'</span>':'';
+    }).join('');
+    var badge = lv.badge ? '<div class="lc-badge-lbl">'+escH(lv.badge)+'</div>' : '';
     return '<div class="level-card">'+
       '<div class="lc-head" style="background:'+thm+'">'+
-        '<div>'+catBadge+
+        '<div>'+badge+
           '<div class="lc-name">'+escH(lv.name)+'</div></div>'+
         '<div class="lc-price">'+fmtMoney(lv.price)+'</div>'+
       '</div>'+
       '<div class="lc-body">'+
         '<div class="lc-tags">'+(tags||'<span class="lc-none">No benefits — click Edit</span>')+'</div>'+
         '<div class="lc-actions">'+
-          '<button class="btn btn-outline btn-sm" onclick="'+editFn+'">✏ Edit</button>'+
-          '<button class="btn btn-danger btn-sm" onclick="'+delFn+'">✕ Delete</button>'+
+          '<button class="btn btn-outline btn-sm" onclick="openLevelModal(\''+lv.id+'\')">✏ Edit</button>'+
+          '<button class="btn btn-danger btn-sm" onclick="deleteLevel(\''+lv.id+'\')">✕ Delete</button>'+
         '</div>'+
       '</div>'+
     '</div>';
@@ -1228,6 +1219,7 @@ function renderLevels(){
   grid.innerHTML = html;
   updateCounts();
 }
+
 
 function deleteLevel(id){
   if (!confirm('Delete this sponsor level?')) return;
@@ -1335,42 +1327,6 @@ function saveLevel(){
 // ════════════════════════════════
 // RENDER: À LA CARTE
 // ════════════════════════════════
-function renderAlaCarte(){
-  var body = document.getElementById('ac-panel-body');
-  if (!body) return;
-  var groups = {};
-  sortBy(STATE.alacarte).forEach(function(ac){
-    var c = ac.cat||'Other';
-    if (!groups[c]) groups[c]=[];
-    groups[c].push(ac);
-  });
-  var html = '';
-  AC_CATS.forEach(function(cat){
-    if (!groups[cat]||!groups[cat].length) return;
-    html += '<div class="group-label">'+escH(cat)+'</div><div class="ac-grid">';
-    html += groups[cat].map(function(ac){
-      var buls = (ac.bullets||[]).map(function(b){return '<li>'+escH(b)+'</li>';}).join('');
-      return '<div class="ac-card">'+
-        '<div class="ac-top"><span class="ac-name">'+escH(ac.name)+'</span><span class="ac-price">'+fmtMoney(ac.price)+'</span></div>'+
-        '<span class="ac-cat">'+escH(ac.cat||'Other')+'</span>'+
-        '<ul class="ac-bullets">'+buls+'</ul>'+
-        '<div class="ac-acts">'+
-          '<button class="btn btn-outline btn-sm" onclick="openAcModal(\''+ac.id+'\')">✏ Edit</button>'+
-          '<button class="btn btn-danger btn-sm" onclick="deleteAcItem(\''+ac.id+'\')">✕ Delete</button>'+
-        '</div>'+
-      '</div>';
-    }).join('');
-    html += '</div>';
-  });
-  body.innerHTML = html;
-  updateCounts();
-}
-
-function deleteAcItem(id){
-  if (!confirm('Delete this item?')) return;
-  STATE.alacarte = STATE.alacarte.filter(function(x){return x.id!==id;});
-  scheduleSave(); renderLevels(); toast('Item deleted');
-}
 
 // ════════════════════════════════
 // ALACARTE MODAL
@@ -1588,10 +1544,7 @@ function openEditEntry(type, idx) {
       var on = currentPkgs.some(function(p){return p===lv.name.toLowerCase()||p.indexOf(lv.name.toLowerCase())>=0;});
       html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount();var sps=getCurrentSpSponsorships();updateSpPlayerSection(sps);rebuildBenefitsFromPackage(sps);">'+escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
     });
-    sortBy(STATE.alacarte).forEach(function(ac){
-      var on = currentPkgs.some(function(p){return p===ac.name.toLowerCase()||p.indexOf(ac.name.toLowerCase())>=0;});
-      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(ac.name)+'" data-sp-price="'+ac.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount();var sps=getCurrentSpSponsorships();updateSpPlayerSection(sps);rebuildBenefitsFromPackage(sps);">'+escH(ac.name)+' — '+fmtMoney(ac.price)+'</div>';
-    });
+    
     picker.innerHTML = html;
   }
 
@@ -2215,13 +2168,9 @@ document.getElementById('me-reg-amount').addEventListener('input', function(){ t
 function buildSpLevelToggles() {
   var container = document.getElementById('me-sp-levels');
   var html = '';
-  sortBy(STATE.levels).forEach(function(lv){
+  STATE.levels.slice().sort(function(a,b){return b.price-a.price;}).forEach(function(lv){
     html += '<div class="benefit-toggle" onclick="toggleSpLevel(this,'+lv.price+')" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'">'+
       escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
-  });
-  sortBy(STATE.alacarte).forEach(function(ac){
-    html += '<div class="benefit-toggle" onclick="toggleSpLevel(this,'+ac.price+')" data-sp-name="'+escH(ac.name)+'" data-sp-price="'+ac.price+'">'+
-      escH(ac.name)+' — '+fmtMoney(ac.price)+'</div>';
   });
   container.innerHTML = html;
 }
