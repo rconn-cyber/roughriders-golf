@@ -254,10 +254,7 @@ tr:hover td { background: #f8faf8; }
         <span class="nav-icon">🏆</span> Sponsor Levels
         <span class="nav-count" id="cnt-levels">0</span>
       </div>
-      <div class="nav-item" id="nav-alacarte" onclick="showPanel('alacarte')">
-        <span class="nav-icon">🃏</span> À La Carte
-        <span class="nav-count" id="cnt-ac">0</span>
-      </div>
+
       <div class="nav-item" id="nav-pool" onclick="showPanel('pool')">
         <span class="nav-icon">📋</span> Benefits Pool
         <span class="nav-count" id="cnt-pool">0</span>
@@ -337,23 +334,14 @@ tr:hover td { background: #f8faf8; }
         <div class="page-hdr">
           <div class="page-hdr-l">
             <h1>Sponsor Levels</h1>
-            <p>Changes save automatically and go live on register.html instantly.</p>
+            <p>All tiers and à la carte items — sorted by price. Changes save automatically and go live instantly.</p>
           </div>
-          <button class="btn btn-primary" onclick="openLevelModal(null)">+ New Level</button>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline" onclick="openAcModal(null)">+ À La Carte Item</button>
+            <button class="btn btn-primary" onclick="openLevelModal(null)">+ Sponsor Level</button>
+          </div>
         </div>
         <div class="levels-grid" id="levels-grid"></div>
-      </div>
-
-      <!-- À LA CARTE -->
-      <div class="panel" id="panel-alacarte">
-        <div class="page-hdr">
-          <div class="page-hdr-l">
-            <h1>À La Carte Items</h1>
-            <p>Changes save automatically and go live on register.html instantly.</p>
-          </div>
-          <button class="btn btn-primary" onclick="openAcModal(null)">+ New Item</button>
-        </div>
-        <div id="ac-panel-body"></div>
       </div>
 
       <!-- BENEFITS POOL -->
@@ -788,25 +776,36 @@ tr:hover td { background: #f8faf8; }
         <div class="form-group">
           <label class="form-label">Category</label>
           <select class="form-input" id="ac-cat">
-            <option>Food & Beverage</option>
+            <option>Food &amp; Beverage</option>
             <option>Contests</option>
             <option>Branding</option>
             <option>On-Course</option>
-            <option>Gifts & Swag</option>
+            <option>Gifts &amp; Swag</option>
             <option>Other</option>
           </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Color Theme</label>
+        <div class="theme-picker" id="ac-themes">
+          <div class="theme-swatch" data-theme="forest" title="Forest" style="background:linear-gradient(135deg,#0f2318,#1e4a2c)" onclick="pickAcTheme(this)"></div>
+          <div class="theme-swatch" data-theme="gold"   title="Gold"   style="background:linear-gradient(135deg,#3d2e0a,#6b4f16)" onclick="pickAcTheme(this)"></div>
+          <div class="theme-swatch" data-theme="silver" title="Silver" style="background:linear-gradient(135deg,#2a2e30,#4a5255)" onclick="pickAcTheme(this)"></div>
+          <div class="theme-swatch" data-theme="bronze" title="Bronze" style="background:linear-gradient(135deg,#3d1e0a,#6b3316)" onclick="pickAcTheme(this)"></div>
+          <div class="theme-swatch" data-theme="green"  title="Green"  style="background:linear-gradient(135deg,#0d3320,#1a5c35)" onclick="pickAcTheme(this)"></div>
+          <div class="theme-swatch" data-theme="navy"   title="Navy"   style="background:linear-gradient(135deg,#0d1f3c,#1a3464)" onclick="pickAcTheme(this)"></div>
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">Benefits / Bullets <span>— shown on registration card &amp; check-in sheets</span></label>
         <div id="ac-bullets-list"></div>
         <div style="display:flex;gap:8px;margin-top:6px;">
-          <input class="form-input" id="ac-new-bullet" type="text" placeholder="Add bullet point…" maxlength="120"
+          <input class="form-input" id="ac-new-bullet" type="text" placeholder="Add benefit…" maxlength="120"
             style="font-size:13px;padding:8px 11px;"
             onkeydown="if(event.key==='Enter'){addBullet();event.preventDefault();}">
           <button class="btn btn-outline btn-sm" onclick="addBullet()">+ Add</button>
         </div>
-        <div class="form-hint">These are the benefits — they appear as bullet points on the sponsorship card in register.html and on check-in sheets.</div>
+        <div class="form-hint">These appear as bullets on the sponsorship card and check-in sheets.</div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1028,8 +1027,8 @@ function toast(msg){
 // ════════════════════════════════
 function updateCounts(){
   var el=function(id){return document.getElementById(id);};
-  if(el('cnt-levels')) el('cnt-levels').textContent=STATE.levels.length;
-  if(el('cnt-ac'))     el('cnt-ac').textContent=STATE.alacarte.length;
+  var total = STATE.levels.length + STATE.alacarte.length;
+  if(el('cnt-levels')) el('cnt-levels').textContent=total;
   if(el('cnt-pool'))   el('cnt-pool').textContent=STATE.benefits.length;
 }
 
@@ -1163,23 +1162,64 @@ function updateSponsorStats(sponsors){
 // ════════════════════════════════
 // RENDER: SPONSOR LEVELS
 // ════════════════════════════════
+function allLevelsSorted(){
+  // Merge STATE.levels and STATE.alacarte into one unified list, sorted by price desc
+  var all = [];
+  STATE.levels.forEach(function(lv){
+    all.push(Object.assign({}, lv, {_source:'level'}));
+  });
+  STATE.alacarte.forEach(function(ac){
+    // Convert alacarte to level shape: bullets become benefit tags
+    all.push({
+      id: ac.id, name: ac.name, price: ac.price,
+      theme: ac.theme || (function(cat){
+        var m={'Food & Beverage':'bronze','Contests':'navy','Branding':'silver','On-Course':'green','Gifts & Swag':'gold'};
+        return m[cat] || 'green';
+      })(ac.cat || ''),
+      badge: ac.cat || '',
+      featured: false,
+      benefits: [], // bullets stored separately
+      bullets: ac.bullets || [],
+      order: ac.order || 999,
+      _source: 'alacarte'
+    });
+  });
+  // Sort by price descending
+  return all.sort(function(a,b){ return b.price - a.price; });
+}
+
 function renderLevels(){
   var grid = document.getElementById('levels-grid');
   if (!grid) return;
-  var html = sortBy(STATE.levels).map(function(lv){
+  var all = allLevelsSorted();
+  var html = all.map(function(lv){
     var thm = THEMES[lv.theme]||THEMES.forest;
-    var tags = lv.benefits.map(function(bid){ var t=benText(bid); return t?'<span class="lc-tag">'+escH(t)+'</span>':''; }).join('');
+    var tags;
+    if (lv._source === 'alacarte') {
+      tags = (lv.bullets||[]).map(function(b){ return '<span class="lc-tag">'+escH(b)+'</span>'; }).join('');
+    } else {
+      tags = (lv.benefits||[]).map(function(bid){ var t=benText(bid); return t?'<span class="lc-tag">'+escH(t)+'</span>':''; }).join('');
+    }
+    var editFn = lv._source === 'alacarte'
+      ? 'openAcModal(\''+lv.id+'\')'
+      : 'openLevelModal(\''+lv.id+'\')';
+    var delFn = lv._source === 'alacarte'
+      ? 'deleteAcItem(\''+lv.id+'\')'
+      : 'deleteLevel(\''+lv.id+'\')';
+    var catBadge = (lv._source === 'alacarte' && lv.badge)
+      ? '<div class="lc-badge-lbl" style="font-size:8px;opacity:.6;">'+escH(lv.badge)+'</div>'
+      : (lv.badge ? '<div class="lc-badge-lbl">'+escH(lv.badge)+'</div>' : '');
     return '<div class="level-card">'+
       '<div class="lc-head" style="background:'+thm+'">'+
-        '<div>'+(lv.badge?'<div class="lc-badge-lbl">'+escH(lv.badge)+'</div>':'')+
+        '<div>'+catBadge+
           '<div class="lc-name">'+escH(lv.name)+'</div></div>'+
         '<div class="lc-price">'+fmtMoney(lv.price)+'</div>'+
       '</div>'+
       '<div class="lc-body">'+
         '<div class="lc-tags">'+(tags||'<span class="lc-none">No benefits — click Edit</span>')+'</div>'+
         '<div class="lc-actions">'+
-          '<button class="btn btn-outline btn-sm" onclick="openLevelModal(\''+lv.id+'\')">✏ Edit</button>'+
-          '<button class="btn btn-danger btn-sm" onclick="deleteLevel(\''+lv.id+'\')">✕ Delete</button>'+
+          '<button class="btn btn-outline btn-sm" onclick="'+editFn+'">✏ Edit</button>'+
+          '<button class="btn btn-danger btn-sm" onclick="'+delFn+'">✕ Delete</button>'+
         '</div>'+
       '</div>'+
     '</div>';
@@ -1329,18 +1369,30 @@ function renderAlaCarte(){
 function deleteAcItem(id){
   if (!confirm('Delete this item?')) return;
   STATE.alacarte = STATE.alacarte.filter(function(x){return x.id!==id;});
-  scheduleSave(); renderAlaCarte(); toast('Item deleted');
+  scheduleSave(); renderLevels(); toast('Item deleted');
 }
 
 // ════════════════════════════════
 // ALACARTE MODAL
 // ════════════════════════════════
-var _editAcId = null, _mBullets = [];
+var _editAcId = null, _mBullets = [], _mAcTheme = 'green';
+
+function pickAcTheme(el) {
+  _mAcTheme = el.dataset.theme;
+  document.querySelectorAll('#ac-themes .theme-swatch').forEach(function(s){s.classList.remove('active');});
+  el.classList.add('active');
+}
 
 function openAcModal(id){
   _editAcId = id;
   var ac = id ? STATE.alacarte.find(function(x){return x.id===id;}) : null;
   _mBullets = ac ? ac.bullets.slice() : [];
+  _mAcTheme = ac ? (ac.theme || 'green') : 'green';
+
+  // Set theme swatches
+  document.querySelectorAll('#ac-themes .theme-swatch').forEach(function(sw){
+    sw.classList.toggle('active', sw.dataset.theme === _mAcTheme);
+  });
 
   document.getElementById('ac-modal-title').textContent = ac ? 'Edit À La Carte Item' : 'New À La Carte Item';
   document.getElementById('ac-name').value  = ac ? ac.name  : '';
@@ -1401,12 +1453,12 @@ function saveAcItem(){
   if (dup) { document.getElementById('ac-id').focus(); toast('That ID is already in use'); return; }
   if (_editAcId) {
     var ac = STATE.alacarte.find(function(x){return x.id===_editAcId;});
-    if (ac){ ac.id=id;ac.name=name;ac.price=price;ac.cat=cat;ac.bullets=_mBullets.slice(); }
+    if (ac){ ac.id=id;ac.name=name;ac.price=price;ac.cat=cat;ac.theme=_mAcTheme;ac.bullets=_mBullets.slice(); }
   } else {
-    STATE.alacarte.push({id:id,name:name,price:price,cat:cat,order:(STATE.alacarte.length+1)*10,bullets:_mBullets.slice()});
+    STATE.alacarte.push({id:id,name:name,price:price,cat:cat,theme:_mAcTheme,order:(STATE.alacarte.length+1)*10,bullets:_mBullets.slice()});
   }
   closeAcModal();
-  scheduleSave(); renderAlaCarte();
+  scheduleSave(); renderLevels();
   toast((_editAcId?'Item updated':'Item created')+' — saving to site…');
 }
 
@@ -2311,7 +2363,6 @@ async function initApp(){
   setSaveBadge('saving', 'Loading…');
   await loadConfig();
   renderLevels();
-  renderAlaCarte();
   renderPool();
   updateCounts();
   setSaveBadge('ok');
