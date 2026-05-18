@@ -1120,18 +1120,28 @@ async function loadOrders(){
   // Load registrations
   try {
     var rRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', { headers: authHdr });
-    var regs = rRes.ok ? await rRes.json() : [];
-    renderRegistrations(Array.isArray(regs) ? regs : (regs.items || []));
+    if (!rRes.ok) {
+      var rErrText = await rRes.text();
+      document.getElementById('reg-tbody').innerHTML = emptyMsg(8, '⚠️', 'Could not load registrations (HTTP ' + rRes.status + ': ' + rErrText.slice(0,80) + ')');
+    } else {
+      var regs = await rRes.json();
+      renderRegistrations(Array.isArray(regs) ? regs : (regs.items || []));
+    }
   } catch(e) {
-    document.getElementById('reg-tbody').innerHTML = emptyMsg(7, '⚠️', 'Could not load registrations');
+    document.getElementById('reg-tbody').innerHTML = emptyMsg(8, '⚠️', 'Could not load registrations: ' + e.message);
   }
   // Load sponsors
   try {
     var sRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=sponsors', { headers: authHdr });
-    var sps = sRes.ok ? await sRes.json() : [];
-    renderSponsors(Array.isArray(sps) ? sps : (sps.items || []));
+    if (!sRes.ok) {
+      var errText = await sRes.text();
+      document.getElementById('sponsor-tbody').innerHTML = emptyMsg(8, '⚠️', 'Could not load sponsors (HTTP ' + sRes.status + ': ' + errText.slice(0,80) + ')');
+    } else {
+      var sps = await sRes.json();
+      renderSponsors(Array.isArray(sps) ? sps : (sps.items || []));
+    }
   } catch(e) {
-    document.getElementById('sponsor-tbody').innerHTML = emptyMsg(7, '⚠️', 'Could not load sponsors');
+    document.getElementById('sponsor-tbody').innerHTML = emptyMsg(8, '⚠️', 'Could not load sponsors: ' + e.message);
   }
 }
 
