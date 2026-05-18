@@ -668,6 +668,30 @@ tr:hover td { background: #f8faf8; }
             <input class="form-input" id="me-sp-website" type="url" placeholder="https://example.com">
           </div>
         </div>
+        <!-- Logo upload -->
+        <div class="form-group" style="margin-top:4px;">
+          <label class="form-label">Logo <span>(optional)</span></label>
+          <div id="me-logo-preview" style="display:none;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:9px 12px;background:#f8faf6;border:1px solid var(--border);border-radius:6px;">
+              <img id="me-logo-img" src="" alt="Logo" style="max-height:44px;max-width:120px;object-fit:contain;border-radius:3px;">
+              <div style="flex:1;min-width:0;">
+                <div id="me-logo-filename" style="font-size:12px;font-weight:600;color:var(--tm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+              </div>
+              <button class="btn btn-danger btn-sm" onclick="removeManualLogo()">✕ Remove</button>
+            </div>
+          </div>
+          <div id="me-logo-drop"
+            style="border:2px dashed var(--border);border-radius:6px;padding:16px;text-align:center;cursor:pointer;transition:all .15s;"
+            onclick="document.getElementById('me-logo-file').click()"
+            ondragover="event.preventDefault();this.style.borderColor='var(--gl)';this.style.background='#f4faf6';"
+            ondragleave="this.style.borderColor='';this.style.background='';"
+            ondrop="event.preventDefault();this.style.borderColor='';this.style.background='';handleManualLogoFile(event.dataTransfer.files[0]);">
+            <div style="font-size:18px;margin-bottom:4px;opacity:.4;">🖼</div>
+            <div style="font-size:12px;font-weight:600;color:var(--tm);">Click to upload or drag &amp; drop</div>
+            <div style="font-size:11px;color:var(--tl);margin-top:2px;">PNG, JPG, SVG — max 2MB</div>
+          </div>
+          <input type="file" id="me-logo-file" accept="image/*" style="display:none;" onchange="handleManualLogoFile(this.files[0])">
+        </div>
       </div>
 
     </div>
@@ -2155,6 +2179,42 @@ async function deleteEntry(resource, id, idx) {
 // ════════════════════════════════
 var _manualTab = 'registration';
 
+
+// ── Manual entry logo ──
+var _meLogoData = null;
+
+function handleManualLogoFile(file) {
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { toast('Not an image file'); return; }
+  if (file.size > 2 * 1024 * 1024) { toast('File too large — max 2MB'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    _meLogoData = e.target.result;
+    document.getElementById('me-logo-img').src = _meLogoData;
+    document.getElementById('me-logo-filename').textContent = file.name;
+    document.getElementById('me-logo-preview').style.display = 'block';
+    document.getElementById('me-logo-drop').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeManualLogo() {
+  _meLogoData = null;
+  document.getElementById('me-logo-preview').style.display = 'none';
+  document.getElementById('me-logo-drop').style.display = 'block';
+  document.getElementById('me-logo-file').value = '';
+}
+
+function resetManualLogo() {
+  _meLogoData = null;
+  var prev = document.getElementById('me-logo-preview');
+  var drop = document.getElementById('me-logo-drop');
+  var inp  = document.getElementById('me-logo-file');
+  if (prev) prev.style.display = 'none';
+  if (drop) drop.style.display = 'block';
+  if (inp)  inp.value = '';
+}
+
 function openManualEntry(type) {
   _manualTab = type || 'registration';
   // Reset form
@@ -2164,6 +2224,7 @@ function openManualEntry(type) {
   });
   document.getElementById('me-payment-type').value = 'comped';
   document.getElementById('me-reg-type').value = 'team';
+  resetManualLogo();
   document.querySelectorAll('#me-addons .benefit-toggle').forEach(function(t){t.classList.remove('on');});
   document.getElementById('me-payment-note').style.display = 'none';
   // Build sponsor level toggles from current STATE
@@ -2359,6 +2420,8 @@ async function saveManualSponsor(paymentType, notes) {
     email:        document.getElementById('me-sp-email').value.trim(),
     company:      document.getElementById('me-sp-company').value.trim(),
     website:      document.getElementById('me-sp-website').value.trim(),
+    logoData:     _meLogoData || null,
+    logoFileName: (_meLogoData && document.getElementById('me-logo-file').files[0]) ? document.getElementById('me-logo-file').files[0].name : null,
     sponsorships: sponsorships,
     package:      sponsorships.map(function(s){return s.name;}).join(', '),
     total:        amount,
