@@ -1045,12 +1045,14 @@ function buildPublicSponsors() {
       return bAmt - aAmt;
     })
     .map(function(s){
+      // Keep logoData only if reasonably sized (under 200KB base64)
+      var logo = s.logoData && s.logoData.length < 200000 ? s.logoData : null;
       return {
-        company:   s.company  || null,
-        firstName: s.firstName|| null,
-        lastName:  s.lastName || null,
-        website:   s.website  || null,
-        logoData:  s.logoData || null,
+        company:   s.company   || null,
+        firstName: s.firstName || null,
+        lastName:  s.lastName  || null,
+        website:   s.website   || null,
+        logoData:  logo,
       };
     });
 }
@@ -2122,11 +2124,12 @@ async function saveEditEntry() {
     var fetchRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, { headers: authHdr });
     var all = fetchRes.ok ? await fetchRes.json() : [];
     if (!Array.isArray(all)) all = all.items || [];
+    all = all.filter(function(r){ return r && typeof r === 'object'; }); // strip nulls
 
     // Find by id, fall back to index
     var found = false;
     for (var i = 0; i < all.length; i++) {
-      if (all[i].id && updated.id && all[i].id === updated.id) {
+      if (all[i] && all[i].id && updated.id && all[i].id === updated.id) {
         all[i] = updated; found = true; break;
       }
     }
@@ -2179,6 +2182,7 @@ async function deleteEntry(resource, id, idx) {
       var fetchRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, { headers: authHdr });
       var all = fetchRes.ok ? await fetchRes.json() : [];
       if (!Array.isArray(all)) all = all.items || [];
+      all = all.filter(function(r){ return r && typeof r === 'object'; }); // strip nulls
       var loadedArr = resource === 'registrations' ? _loadedRegs : _loadedSponsors;
       var origRecord = loadedArr[idx];
       all = all.filter(function(r){
