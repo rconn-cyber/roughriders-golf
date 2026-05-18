@@ -804,6 +804,7 @@ var FALLBACK_LEVELS = [
   {id:'long-drive-sp',name:'Longest Drive', price:400,  theme:'navy',   badge:'Contest',     featured:false, benefits:['Branded tee sign at contest hole','Name announced when winner presented','Logo on tournament materials & website']},
   {id:'close-pin-sp',name:'Closest to Pin', price:400,  theme:'navy',   badge:'Contest',     featured:false, benefits:['Branded tee sign at contest hole','Name announced when winner presented','Logo on tournament materials & website']},
   {id:'scorecard',name:'Scorecard',         price:350,  theme:'silver', badge:'Branding',    featured:false, benefits:['Logo printed on every player’s scorecard','Handled repeatedly throughout the round','Logo on tournament materials & website']},
+  {id:'hole',     name:'Hole Sponsor',        price:250,  theme:'green',  badge:'On-Course',   featured:true,  benefits:['Custom tee sign','Name & logo on-course','Sponsor board','Website listing']},
 ];
 
 var PLAYER_PRICE = 165;
@@ -1857,8 +1858,20 @@ function renderSponsorConfig(config) {
   });
   all.sort(function(a,b){ return b.price - a.price; });
 
-  if (all.length) {
-    tiersEl.innerHTML = all.map(buildTierHTML).join('');
+  // Filter out hidden levels (set in admin)
+  var visible = all.filter(function(lv){ return !lv.hidden; });
+
+  if (visible.length) {
+    tiersEl.innerHTML = visible.map(function(lv){
+      return lv.id === 'hole' ? '' : buildTierHTML(lv);
+    }).join('');
+  }
+
+  // Handle hole sponsor separately (featured card below grid)
+  var holeLv = all.find(function(l){ return l.id === 'hole'; });
+  var holeCard = document.querySelector('.featured-hole');
+  if (holeCard) {
+    holeCard.style.display = (holeLv && holeLv.hidden) ? 'none' : '';
   }
 
   // Re-attach click listeners
@@ -1885,6 +1898,27 @@ function renderSponsorConfig(config) {
   all.forEach(function(lv) {
     BENEFITS_DATA[lv.id] = { perks: lv.benefits || [] };
   });
+
+  // Update featured hole sponsor card from live config
+  if (holeLv) updateFeaturedHoleCard(holeLv);
+}
+
+function updateFeaturedHoleCard(lv) {
+  var card = document.querySelector('.featured-hole');
+  if (!card) return;
+  // Update price
+  var priceEl = card.querySelector('.hole-featured-price');
+  if (priceEl) priceEl.innerHTML = '$' + Number(lv.price).toLocaleString('en-US') +
+    '<span style="font-size:14px;font-weight:500;opacity:.7;margin-left:4px;">/ hole</span>';
+  // Update data-price for checkout
+  card.dataset.price = lv.price;
+  // Update perks
+  var perksEl = card.querySelector('.hole-perks');
+  if (perksEl && lv.benefits && lv.benefits.length) {
+    perksEl.innerHTML = lv.benefits.map(function(b) {
+      return '<span class="perk-tag">' + b.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</span>';
+    }).join('');
+  }
 }
 
 async function loadSponsorConfig() {
