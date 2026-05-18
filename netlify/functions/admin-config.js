@@ -1,93 +1,85 @@
 // netlify/functions/admin-config.js
-// Reads and writes sponsor level + à la carte config to Netlify Blobs
-// GET  /.netlify/functions/admin-config  → returns current config JSON
-// POST /.netlify/functions/admin-config  → saves new config JSON
-//
-// Deploy to: netlify/functions/admin-config.js
-// Requires:  @netlify/blobs (auto-available in Netlify Functions runtime)
+// GET  — public, no auth — returns sponsor config for register.html
+// POST — requires x-admin-key header — saves sponsor config from admin
 
-import { getStore } from '@netlify/blobs';
+const { getStore } = require('@netlify/blobs');
 
-const ADMIN_KEY = process.env.ADMIN_KEY;
+const ADMIN_KEY  = process.env.ADMIN_KEY;
 const BLOB_STORE = 'golf-config';
 const BLOB_KEY   = 'sponsor-config';
 
-export default async function handler(req, context) {
-  // ── Auth ──
-  const key = req.headers.get('x-admin-key');
-  if (key !== ADMIN_KEY) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: corsHeaders('application/json'),
-    });
+const CORS = {
+  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, x-admin-key',
+  'Cache-Control': 'no-store',
+};
+
+exports.handler = async function(event, context) {
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: CORS, body: '' };
   }
 
   const store = getStore(BLOB_STORE);
 
-  // ── GET: load config ──
-  if (req.method === 'GET') {
+  // ── GET: public — no auth required ──
+  if (event.httpMethod === 'GET') {
     try {
       const raw = await store.get(BLOB_KEY, { type: 'text' });
       if (!raw) {
-        // First run — return empty structure
-        return new Response(JSON.stringify({ benefits: [], levels: [], alacarte: [] }), {
-          status: 200,
-          headers: corsHeaders('application/json'),
-        });
+        return {
+          statusCode: 200,
+          headers: { ...CORS, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ benefits: [], levels: [], alacarte: [] }),
+        };
       }
-      return new Response(raw, {
-        status: 200,
-        headers: corsHeaders('application/json'),
-      });
+      return {
+        statusCode: 200,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: raw,
+      };
     } catch (err) {
       console.error('admin-config GET error:', err);
-      return new Response(JSON.stringify({ error: err.message }), {
-        status: 500,
-        headers: corsHeaders('application/json'),
-      });
+      return {
+        statusCode: 500,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: err.message }),
+      };
     }
   }
 
-  // ── POST: save config ──
-  if (req.method === 'POST') {
+  // ── POST: requires admin key ──
+  if (event.httpMethod === 'POST') {
+    const key = (event.headers && event.headers['x-admin-key']) || '';
+    if (!ADMIN_KEY || key !== ADMIN_KEY) {
+      return {
+        statusCode: 401,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Unauthorized' }),
+      };
+    }
     try {
-      const body = await req.text();
-      // Validate it's parseable JSON before storing
-      JSON.parse(body);
+      const body = event.body || '{}';
+      JSON.parse(body); // validate before storing
       await store.set(BLOB_KEY, body);
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: corsHeaders('application/json'),
-      });
+      return {
+        statusCode: 200,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ success: true }),
+      };
     } catch (err) {
       console.error('admin-config POST error:', err);
-      return new Response(JSON.stringify({ error: err.message }), {
-        status: 500,
-        headers: corsHeaders('application/json'),
-      });
+      return {
+        statusCode: 500,
+        headers: { ...CORS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: err.message }),
+      };
     }
   }
 
-  // ── OPTIONS: CORS preflight ──
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: corsHeaders() });
-  }
-
-  return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-    status: 405,
-    headers: corsHeaders('application/json'),
-  });
-}
-
-function corsHeaders(contentType) {
-  const h = {
-    'Access-Control-Allow-Origin':  '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, x-admin-key',
-    'Cache-Control': 'no-store',
+  return {
+    statusCode: 405,
+    headers: { ...CORS, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ error: 'Method not allowed' }),
   };
-  if (contentType) h['Content-Type'] = contentType;
-  return h;
-}
-
-export const config = { path: '/.netlify/functions/admin-config' };
+};
