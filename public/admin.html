@@ -1062,12 +1062,11 @@ async function doSave(){
     var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-config', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
-      body: JSON.stringify({
+      body: JSON.stringify(Object.assign({
         benefits: STATE.benefits,
         levels: STATE.levels,
         alacarte: STATE.alacarte,
-        publicSponsors: buildPublicSponsors()
-      })
+      }, _loadedSponsors.length > 0 ? { publicSponsors: buildPublicSponsors() } : {}))
     });
     if (!res.ok) throw new Error('HTTP '+res.status);
     setSaveBadge('ok');
@@ -1191,6 +1190,8 @@ async function loadOrders(){
     } else {
       var sps = await sRes.json();
       renderSponsors(Array.isArray(sps) ? sps : (sps.items || []));
+      // Push updated publicSponsors to admin-config so register.html logo strip stays current
+      scheduleSave();
     }
   } catch(e) {
     document.getElementById('sponsor-tbody').innerHTML = emptyMsg(8, '⚠️', 'Could not load sponsors: ' + e.message);
@@ -2153,7 +2154,7 @@ async function saveEditEntry() {
     if (!putRes.ok) throw new Error('HTTP ' + putRes.status);
 
     closeEditModal();
-    loadOrders();
+    loadOrders(); // loadOrders will scheduleSave which pushes publicSponsors
     toast('Entry updated ✓');
   } catch(e) {
     toast('Save failed: ' + e.message);
