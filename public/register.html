@@ -444,6 +444,59 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 .sp-player-row input:focus { border-color:var(--green-light,#2d7a4a); }
 .sp-player-row .sp-del { background:none;border:none;cursor:pointer;color:var(--red,#b02020);font-size:16px;padding:0 4px;opacity:.6;flex-shrink:0; }
 .sp-player-row .sp-del:hover { opacity:1; }
+
+/* ── Add-ons section ── */
+.addons-section-header {
+  display: flex; align-items: baseline; gap: 12px;
+  margin: 32px 0 14px; padding-bottom: 10px;
+  border-bottom: 2px solid var(--green-dark, #0f2318);
+}
+.addons-section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700; color: var(--green-dark, #0f2318);
+}
+.addons-section-sub {
+  font-size: 12px; color: var(--text-light, #666); font-style: italic;
+}
+.addons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 32px;
+}
+/* Compact add-on card */
+.addon-tier {
+  background: var(--white, #fff);
+  border: 1.5px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+  position: relative;
+  user-select: none;
+}
+.addon-tier:hover { border-color: rgba(0,0,0,.2); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.addon-tier.selected { border-color: var(--gold, #b8940e); box-shadow: 0 0 0 3px rgba(184,148,14,.18); }
+.addon-tier .check-badge {
+  position: absolute; top: 8px; right: 8px;
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,.18); background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.addon-tier.selected .check-badge { background: var(--gold,#b8940e); border-color: var(--gold,#b8940e); }
+.addon-tier-header {
+  padding: 10px 12px 8px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.addon-tier-label { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: #fff; line-height: 1.2; padding-right: 22px; }
+.addon-tier-price { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: rgba(255,255,255,.92); }
+.addon-tier-badge { font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 1px; }
+.addon-tier-body { padding: 8px 12px 10px; }
+.addon-tier-perks { display: flex; flex-direction: column; gap: 3px; }
+.addon-tier-perk { font-size: 10.5px; color: var(--text-mid,#555); display: flex; align-items: flex-start; gap: 5px; line-height: 1.3; }
+.addon-tier-perk::before { content: '·'; color: var(--green-light,#2d7a4a); font-weight: 700; flex-shrink: 0; margin-top: 0; }
+@media (max-width: 480px) { .addons-grid { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
 <body>
@@ -680,11 +733,22 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 <!-- ══════════ PAGE 2: SPONSORSHIP ══════════ -->
 <div class="page" id="page-1">
   <p class="section-heading">Sponsorship Opportunities</p>
-  <p class="section-sub">Click any card to select. All levels sorted by investment. Sponsorship is optional — skip to pay registration only.</p>
+  <p class="section-sub">Click any card to select. Sponsorship is optional — skip to pay registration only.</p>
 
-  <!-- All sponsor levels — populated dynamically from admin-config -->
+  <!-- Sponsor tiers ($1,000+) -->
   <div class="tiers" id="tiers-container">
     <!-- Populated by renderSponsorConfig() on load -->
+  </div>
+
+  <!-- Add-ons (under $1,000) -->
+  <div id="addons-section" style="display:none;">
+    <div class="addons-section-header">
+      <span class="addons-section-title">Add-Ons</span>
+      <span class="addons-section-sub">Individual sponsorship opportunities</span>
+    </div>
+    <div class="addons-grid" id="addons-container">
+      <!-- Populated by renderSponsorConfig() on load -->
+    </div>
   </div>
 
   <!-- Hole Sponsor — featured standalone at bottom -->
@@ -2055,6 +2119,26 @@ function buildAlaCarteHTML(ac) {
   '</div>';
 }
 
+
+function buildAddonTierHTML(lv) {
+  var headerColor = THEME_COLOR_MAP[lv.theme] || '#1e4a2c';
+  var price = Number(lv.price).toLocaleString('en-US');
+  var badgeHtml = lv.badge ? '<div class="addon-tier-badge">' + escHtmlConfig(lv.badge) + '</div>' : '';
+  var perks = (lv.benefits || []).slice(0, 3).map(function(b) {
+    return '<div class="addon-tier-perk">' + escHtmlConfig(b) + '</div>';
+  }).join('');
+  var checkSvg = '<svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4l2.5 2.5L9 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  return '<div class="addon-tier selectable" data-id="' + escHtmlConfig(lv.id) + '" data-name="' + escHtmlConfig(lv.name) + '" data-price="' + lv.price + '">' +
+    '<div class="check-badge">' + checkSvg + '</div>' +
+    '<div class="addon-tier-header" style="background:' + headerColor + '">' +
+      badgeHtml +
+      '<div class="addon-tier-label">' + escHtmlConfig(lv.name) + '</div>' +
+      '<div class="addon-tier-price"><sup style="font-size:11px;">$</sup>' + price + '</div>' +
+    '</div>' +
+    '<div class="addon-tier-body"><div class="addon-tier-perks">' + perks + '</div></div>' +
+  '</div>';
+}
+
 function renderSponsorConfig(config) {
   var tiersEl = document.getElementById('tiers-container');
   if (!tiersEl) return;
@@ -2073,10 +2157,23 @@ function renderSponsorConfig(config) {
   // Filter out hidden levels (set in admin)
   var visible = all.filter(function(lv){ return !lv.hidden; });
 
-  if (visible.length) {
-    tiersEl.innerHTML = visible.map(function(lv){
-      return lv.id === 'hole' ? '' : buildTierHTML(lv);
-    }).join('');
+  // Split: tiers ($1000+) vs add-ons (under $1000), exclude hole
+  var tiers   = visible.filter(function(lv){ return lv.id !== 'hole' && lv.price >= 1000; });
+  var addons  = visible.filter(function(lv){ return lv.id !== 'hole' && lv.price < 1000; });
+
+  if (tiers.length) {
+    tiersEl.innerHTML = tiers.map(buildTierHTML).join('');
+  }
+
+  var addonsContainer = document.getElementById('addons-container');
+  var addonsSection   = document.getElementById('addons-section');
+  if (addonsContainer) {
+    if (addons.length) {
+      addonsContainer.innerHTML = addons.map(buildAddonTierHTML).join('');
+      if (addonsSection) addonsSection.style.display = '';
+    } else {
+      if (addonsSection) addonsSection.style.display = 'none';
+    }
   }
 
   // Handle hole sponsor separately (featured card below grid)
