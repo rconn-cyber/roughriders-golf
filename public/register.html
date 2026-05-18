@@ -424,6 +424,16 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 .tier.slate-tier .tier-price,.tier.charcoal-tier .tier-price,.tier.steel-tier .tier-price,
 .tier.crimson-tier .tier-price,.tier.burgundy-tier .tier-price,.tier.purple-tier .tier-price,
 .tier.teal-tier .tier-price,.tier.rust-tier .tier-price,.tier.indigo-tier .tier-price { color: #fff; }
+
+/* Sponsor team/player rows */
+.sp-team-label { font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green-dark,#0f2318);padding:8px 0 4px;border-top:1px dashed rgba(0,0,0,.1);margin-top:4px; }
+.sp-team-label:first-child { border-top:none;margin-top:0;padding-top:0; }
+.sp-player-row { display:flex;align-items:center;gap:8px;padding:4px 0; }
+.sp-player-num { width:22px;height:22px;border-radius:50%;background:#0f2318;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.sp-player-row input { flex:1;min-width:80px;padding:7px 10px;border:1.5px solid rgba(0,0,0,.14);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none; }
+.sp-player-row input:focus { border-color:var(--green-light,#2d7a4a); }
+.sp-player-row .sp-del { background:none;border:none;cursor:pointer;color:var(--red,#b02020);font-size:16px;padding:0 4px;opacity:.6;flex-shrink:0; }
+.sp-player-row .sp-del:hover { opacity:1; }
 </style>
 </head>
 <body>
@@ -754,6 +764,28 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
             <input type="file" id="sp-logo-file" accept="image/*" style="display:none;" onchange="handleSpLogoUpload(this)">
           </label>
           <input type="hidden" id="sp-logo-data">
+        </div>
+      </div>
+
+      <!-- Team / Player names (shown when selected package includes golfers) -->
+      <div class="reg-section" id="sp-team-section" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div class="reg-section-title" style="margin-bottom:2px;">Golfer Names</div>
+            <div style="font-size:12px;color:var(--text-light);">Your package includes golfer slots — enter names below, or skip and provide them later.</div>
+          </div>
+          <button type="button" onclick="addSpTeamBlock()" id="sp-add-team-btn"
+            style="padding:7px 14px;background:#fff;border:1.5px solid rgba(0,0,0,0.18);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;display:none;">
+            + Add Team
+          </button>
+        </div>
+        <div id="sp-players-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button type="button" onclick="addSpPlayerRow()"
+            style="padding:6px 13px;background:#fff;border:1.5px solid rgba(0,0,0,0.15);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;">
+            + Add Player
+          </button>
+          <span style="font-size:11px;color:var(--text-light);">Names can be provided later — we'll follow up before the event.</span>
         </div>
       </div>
 
@@ -1437,6 +1469,7 @@ function updateSponsorTotal() {
     html += '<div style="display:flex;justify-content:space-between;padding:8px 0 0;font-weight:700;font-size:14px;"><span>Total</span><span style="color:#b8940e;font-family:\'Playfair Display\',serif;font-size:18px;">'+fmt(total)+'</span></div>';
     summary.innerHTML = html;
     prefillSponsorContact();
+    updateSpTeamSection();
   }
 
   var td = document.getElementById('sp-total-display');
@@ -1445,6 +1478,114 @@ function updateSponsorTotal() {
   // Keep page-1 total bar in sync
   updateRegTotal();
   updatePayButton();
+}
+
+
+// ════════════════════════════════
+// SPONSOR TEAM / PLAYER NAMES
+// ════════════════════════════════
+var _spFormPlayers = []; // [{fn, ln, email}]
+var _spIncludedSlots = 0;
+
+function getIncludedGolferSlots() {
+  // Count golfer slots from selected sponsorships by scanning benefit text
+  var total = 0;
+  Object.keys(sponsorSelections).forEach(function(id) {
+    if (id === 'hole') return;
+    // Look up the level in BENEFITS_DATA
+    var data = BENEFITS_DATA[id];
+    if (!data || !data.perks) return;
+    data.perks.forEach(function(perk) {
+      // Match "N teams — N golfers", "N team — N golfers", "N golfers"
+      var m = perk.match(/(\d+)\s+team[s]?\s*[—\-]\s*(\d+)\s+golfer[s]?/i);
+      if (m) { var n = parseInt(m[2]); if (n > total) total = n; return; }
+      m = perk.match(/(\d+)\s+golfer[s]?/i);
+      if (m) { var n2 = parseInt(m[1]); if (n2 > total) total = n2; }
+    });
+  });
+  return total;
+}
+
+function updateSpTeamSection() {
+  var slots = getIncludedGolferSlots();
+  _spIncludedSlots = slots;
+  var sec = document.getElementById('sp-team-section');
+  var addTeamBtn = document.getElementById('sp-add-team-btn');
+  if (!sec) return;
+
+  if (slots === 0) {
+    sec.style.display = 'none';
+    return;
+  }
+
+  sec.style.display = 'block';
+
+  // Show "+ Add Team" button if 4+ slots (multi-team packages)
+  if (addTeamBtn) addTeamBtn.style.display = slots >= 4 ? '' : 'none';
+
+  // Expand player list to match included slots if currently under
+  while (_spFormPlayers.length < slots) {
+    _spFormPlayers.push({ fn:'', ln:'', email:'' });
+  }
+
+  renderSpPlayersList(slots);
+}
+
+function renderSpPlayersList(includedCount) {
+  var list = document.getElementById('sp-players-list');
+  if (!list) return;
+  var html = '';
+  for (var i = 0; i < _spFormPlayers.length; i++) {
+    var p = _spFormPlayers[i];
+    var teamNum = Math.floor(i / 4) + 1;
+    var posInTeam = i % 4;
+    // Team divider label (only for multi-team packages)
+    if (includedCount > 4) {
+      if (i === 0) html += '<div class="sp-team-label">Team 1</div>';
+      else if (posInTeam === 0) html += '<div class="sp-team-label">Team ' + teamNum + '</div>';
+    }
+    var isExtra = includedCount > 0 && i >= includedCount;
+    var numStyle = isExtra ? 'background:#b8940e' : '';
+    html += '<div class="sp-player-row" id="sp-pr-' + i + '">' +
+      '<div class="sp-player-num" style="' + numStyle + '">' + (i+1) + '</div>' +
+      '<input type="text" placeholder="First name" value="' + escSp(p.fn) + '" oninput="_spFormPlayers[' + i + '].fn=this.value">' +
+      '<input type="text" placeholder="Last name"  value="' + escSp(p.ln) + '" oninput="_spFormPlayers[' + i + '].ln=this.value">' +
+      '<input type="email" placeholder="Email (optional)" value="' + escSp(p.email) + '" oninput="_spFormPlayers[' + i + '].email=this.value" style="min-width:130px;">' +
+      '<button class="sp-del" type="button" onclick="removeSpPlayerRow(' + i + ')" title="Remove">×</button>' +
+    '</div>';
+  }
+  list.innerHTML = html;
+}
+
+function escSp(s) { return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function addSpPlayerRow() {
+  _spFormPlayers.push({ fn:'', ln:'', email:'' });
+  renderSpPlayersList(_spIncludedSlots);
+  setTimeout(function(){
+    var rows = document.querySelectorAll('#sp-players-list .sp-player-row');
+    var last = rows[rows.length-1];
+    if (last) { var inp = last.querySelector('input'); if(inp) inp.focus(); }
+  }, 30);
+}
+
+function addSpTeamBlock() {
+  for (var i = 0; i < 4; i++) _spFormPlayers.push({ fn:'', ln:'', email:'' });
+  renderSpPlayersList(_spIncludedSlots);
+  setTimeout(function(){
+    var rows = document.querySelectorAll('#sp-players-list .sp-player-row');
+    var first = rows[rows.length - 4];
+    if (first) { var inp = first.querySelector('input'); if(inp) inp.focus(); }
+  }, 30);
+}
+
+function removeSpPlayerRow(idx) {
+  _spFormPlayers.splice(idx, 1);
+  renderSpPlayersList(_spIncludedSlots);
+}
+
+function getSpPlayers() {
+  return _spFormPlayers.filter(function(p){ return p.fn || p.ln || p.email; });
 }
 
 function handleSpLogoUpload(input) {
@@ -1542,13 +1683,16 @@ async function handleSponsorPay() {
     email:     document.getElementById('sp-em').value.trim(),
     phone:     document.getElementById('sp-ph').value.trim(),
     company:   document.getElementById('sp-co').value.trim(),
+    website:   document.getElementById('sp-web').value.trim(),
+    address:   document.getElementById('sp-addr').value.trim(),
     logoData:  getSpLogoData(),
   }];
+  var teamPlayers = getSpPlayers();
 
   try {
     var res = await fetch(NETLIFY_BASE+'/.netlify/functions/create-checkout',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({golfers, sponsorships}),
+      body: JSON.stringify({golfers, sponsorships, teamPlayers: teamPlayers}),
     });
     var data = await res.json();
     if(!res.ok||!data.url) throw new Error(data.error||'Could not create checkout');
