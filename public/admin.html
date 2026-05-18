@@ -1206,8 +1206,22 @@ function renderSponsors(sponsors){
   }
   tbody.innerHTML = sponsors.map(function(s, idx){
     var name = s.company || ((s.firstName||'') + ' ' + (s.lastName||'')).trim() || '—';
-    var pkg = (s.sponsorships||[]).map(function(x){return x.name||x;}).join(', ') || s.package || '—';
-    var amt = s.amount ? fmtMoney(s.amount/100) : (s.total ? fmtMoney(s.total) : '—');
+    // Handle both old schema (tier) and new schema (sponsorships/package)
+    var pkg = '—';
+    if (s.sponsorships && s.sponsorships.length) {
+      pkg = s.sponsorships.map(function(x){return x.name||x;}).join(', ');
+    } else if (s.package) {
+      pkg = s.package;
+    } else if (s.tier) {
+      pkg = s.tier + (s.hole ? ' · Holes: ' + s.hole : '');
+    }
+    // Handle both old schema (amount in dollars) and new schema (amount in cents or total in dollars)
+    var amt = '—';
+    if (s.total) { amt = fmtMoney(s.total); }
+    else if (s.amount) {
+      // Old schema stores dollars directly, new schema stores cents (>10000 threshold)
+      amt = s.amount > 10000 ? fmtMoney(s.amount/100) : fmtMoney(s.amount);
+    }
     var status = s.status || s.paymentStatus || 'paid';
     var logoCell = s.logoData
       ? '<img src="'+s.logoData+'" style="max-height:32px;max-width:80px;object-fit:contain;vertical-align:middle;border-radius:2px;" title="Logo on file">'
@@ -1237,7 +1251,9 @@ function updateSponsorStats(sponsors){
   sponsors.forEach(function(s){
     var st = s.status||s.paymentStatus||'paid';
     if(st==='paid') paid++; else if(st==='invoice'||st==='invoiced') inv++;
-    rev += s.amount ? s.amount/100 : (s.total||0);
+    // Handle both old (dollars) and new (cents) amount schemas
+    if (s.total) rev += s.total;
+    else if (s.amount) rev += s.amount > 10000 ? s.amount/100 : s.amount;
   });
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   set('stat-sp-count',sponsors.length||'0');
@@ -1597,7 +1613,7 @@ function openEditEntry(type, idx) {
     document.getElementById('em-sp-email').value   = r.email     || '';
     document.getElementById('em-sp-company').value = r.company   || '';
     document.getElementById('em-sp-website').value = r.website   || '';
-    document.getElementById('em-sp-amount').value  = r.total || (r.amount ? r.amount/100 : '');
+    document.getElementById('em-sp-amount').value  = r.total || (r.amount ? (r.amount > 10000 ? r.amount/100 : r.amount) : '');
     delete document.getElementById('em-sp-amount').dataset.dirty;
     // Build sponsor package picker from STATE and pre-select current ones
     var currentPkgs = (r.sponsorships||[]).map(function(x){return (x.name||x).toLowerCase().trim();});
