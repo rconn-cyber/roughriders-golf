@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -710,6 +710,28 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 // CONFIG
 // ════════════════════════════════
 var NETLIFY_BASE = 'https://rr-golf.netlify.app';
+
+// Hardcoded fallback levels — used if admin-config is unavailable
+var FALLBACK_LEVELS = [
+  {id:'title',  name:'Title Sponsor',       price:7500, theme:'forest', badge:'Top Tier',    featured:true,  benefits:['3 teams — 12 golfers','12 super tickets','5 hole sponsor signs','Logo on sponsor banner','Website listing']},
+  {id:'gold',   name:'Gold Sponsor',        price:5000, theme:'gold',   badge:'',            featured:false, benefits:['2 teams — 8 golfers','8 super tickets','3 hole sponsor signs','Logo on materials & banner']},
+  {id:'silver', name:'Silver Sponsor',      price:2500, theme:'silver', badge:'',            featured:false, benefits:['1 team — 4 golfers','4 super tickets','2 hole sponsor signs','Logo on tournament materials']},
+  {id:'vip-tent',name:'VIP Tent',           price:1500, theme:'green',  badge:'On-Course',   featured:false, benefits:['Branded signage & banner at VIP area','Premium visibility — high-traffic spot','Recognition at awards','Logo on tournament materials & website']},
+  {id:'bev-cart',name:'Beverage Cart',      price:1500, theme:'bronze', badge:'Food & Bev',  featured:false, benefits:['Logo on cart signage seen by all golfers','Brand mention at player check-in','Logo on tournament materials & website']},
+  {id:'bronze', name:'Bronze Sponsor',      price:1000, theme:'bronze', badge:'',            featured:false, benefits:['1 team — 4 golfers','1 hole sponsor sign','Logo on tournament materials']},
+  {id:'lunch',  name:'Lunch / Dinner',      price:1250, theme:'bronze', badge:'Food & Bev',  featured:false, benefits:['Prominent branded signage at meal service','Verbal recognition & thank-you during awards','Logo on tournament materials & website']},
+  {id:'breakfast',name:'Breakfast',         price:750,  theme:'bronze', badge:'Food & Bev',  featured:false, benefits:['Branded table signage at breakfast station','Verbal recognition during morning announcements','Logo on tournament materials & website']},
+  {id:'cooler', name:'Cooler Bag',          price:600,  theme:'gold',   badge:'Gifts & Swag',featured:false, benefits:['Logo imprinted on every player’s cooler bag','Bags go home with golfers','Logo on tournament materials & website']},
+  {id:'putting',name:'Putting Contest',     price:500,  theme:'navy',   badge:'Contest',     featured:false, benefits:['Branded signage at putting green','High-traffic area — visible to all','Logo on tournament materials & website']},
+  {id:'cigar',  name:'Cigar Sponsor',       price:500,  theme:'green',  badge:'On-Course',   featured:false, benefits:['Branded signage at cigar station','Optional product sampling on-site','Logo on tournament materials & website']},
+  {id:'tee-gift',name:'Tee Gift',           price:500,  theme:'gold',   badge:'Gifts & Swag',featured:false, benefits:['Brand on item in every player’s gift bag','Tangible takeaway beyond event day','Logo on tournament materials & website']},
+  {id:'golf-ball',name:'Golf Ball Sponsor', price:500,  theme:'green',  badge:'Branding',    featured:false, benefits:['Logo on branded balls given to all players','In-hand brand exposure every shot','Logo on tournament materials & website']},
+  {id:'range',  name:'Driving Range',       price:500,  theme:'green',  badge:'On-Course',   featured:false, benefits:['Branded signage at warm-up range','First brand seen before teeing off','Logo on tournament materials & website']},
+  {id:'long-drive-sp',name:'Longest Drive', price:400,  theme:'navy',   badge:'Contest',     featured:false, benefits:['Branded tee sign at contest hole','Name announced when winner presented','Logo on tournament materials & website']},
+  {id:'close-pin-sp',name:'Closest to Pin', price:400,  theme:'navy',   badge:'Contest',     featured:false, benefits:['Branded tee sign at contest hole','Name announced when winner presented','Logo on tournament materials & website']},
+  {id:'scorecard',name:'Scorecard',         price:350,  theme:'silver', badge:'Branding',    featured:false, benefits:['Logo printed on every player’s scorecard','Handled repeatedly throughout the round','Logo on tournament materials & website']},
+];
+
 var PLAYER_PRICE = 165;
 var TEAM_PRICE = 650;
 var MAX_PLAYERS  = 4;
@@ -1647,7 +1669,9 @@ document.addEventListener('DOMContentLoaded', function() {
     goPage(2);
   }
 
-  // Load sponsor config (levels + à la carte) from admin
+  // Render fallback levels immediately — guarantees levels show even if fetch fails
+  renderSponsorConfig({ levels: FALLBACK_LEVELS });
+  // Load live config from admin-config (overrides fallback if data exists)
   loadSponsorConfig();
 
   // Load sponsor logos from admin data
@@ -1796,14 +1820,39 @@ async function loadSponsorConfig() {
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     var config = await res.json();
-    if (config && (config.levels || config.alacarte)) {
-      renderSponsorConfig(config);
+
+    // Build a benefit ID→text lookup from the pool
+    var benefitMap = {};
+    (config.benefits || []).forEach(function(b) {
+      benefitMap[b.id] = b.text;
+    });
+
+    // Resolve benefit IDs to text strings on each level
+    var levels = (config.levels || []).slice().map(function(lv) {
+      var resolved = (lv.benefits || []).map(function(b) {
+        // b is either already a text string or a benefit ID like 'b1'
+        return benefitMap[b] || (typeof b === 'string' && !b.match(/^b\d+$/) ? b : null);
+      }).filter(Boolean);
+      return Object.assign({}, lv, { benefits: resolved });
+    });
+
+    // Merge any legacy alacarte items
+    (config.alacarte || []).forEach(function(ac) {
+      if (!levels.find(function(l){return l.id===ac.id;})) {
+        levels.push({ id:ac.id, name:ac.name, price:ac.price,
+          theme:ac.theme||'green', badge:ac.cat||'', featured:false,
+          benefits:ac.bullets||[] });
+      }
+    });
+
+    if (levels.length > 0) {
+      renderSponsorConfig({ levels: levels });
+    } else {
+      renderSponsorConfig({ levels: FALLBACK_LEVELS });
     }
   } catch(e) {
-    // Silently fall back — hardcoded HTML in DOM is already correct
-    console.log('admin-config unavailable, using defaults:', e.message);
-    // Still wire up click listeners on the hardcoded selectable elements
-    // (DOMContentLoaded handles this already via the existing listener block)
+    console.log('admin-config unavailable, using fallback defaults:', e.message);
+    renderSponsorConfig({ levels: FALLBACK_LEVELS });
   }
 }
 
