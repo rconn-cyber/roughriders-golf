@@ -555,6 +555,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
   <button class="step-tab active" onclick="goPage(0)" style="font-size:16px;font-weight:700;padding:16px 12px;">Register to Golf</button>
   <button class="step-tab"        onclick="goPage(1)" style="font-size:16px;font-weight:700;padding:16px 12px;">Become a Sponsor</button>
   <button class="step-tab"        id="confirm-tab" onclick="return false;" style="opacity:0.4;cursor:not-allowed;font-size:14px;padding:16px 12px;">Confirmation</button>
+  <button class="step-tab"        onclick="goPage(3)" style="font-size:14px;font-weight:600;padding:16px 12px;">About the Rough Riders</button>
 </nav>
 
 <main>
@@ -863,6 +864,14 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         </div>
       </div>
 
+      <!-- Notes -->
+      <div class="reg-section">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-mid);margin-bottom:8px;">Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-light)">(optional — special requests, dietary needs, etc.)</span></div>
+        <textarea id="sp-notes" rows="3" placeholder="Any special requests, questions, or information we should know..."
+          style="width:100%;padding:10px 12px;border:1.5px solid rgba(0,0,0,0.14);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-dark);resize:vertical;outline:none;transition:border-color .15s;"
+          onfocus="this.style.borderColor='var(--green-light,#2d7a4a)'" onblur="this.style.borderColor='rgba(0,0,0,0.14)'"></textarea>
+      </div>
+
       <!-- Team / Player names (shown when selected package includes golfers) -->
       <div class="reg-section" id="sp-team-section" style="display:none;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
@@ -926,6 +935,71 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
     <p>Your registration is confirmed. Check your email for a receipt from Stripe. We'll be in touch with all event details — see you on the green!</p>
   </div>
 </div>
+
+<!-- PAGE 3: ABOUT THE ROUGH RIDERS -->
+<div class="page" id="page-3" style="max-width:760px;margin:0 auto;padding:0 0 48px;">
+
+  <div style="text-align:center;padding:32px 0 24px;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text-light);margin-bottom:10px;">1st U.S. Volunteer Cavalry Regiment</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:34px;font-weight:900;color:#0f2318;margin-bottom:8px;">Who We Are</h2>
+    <div style="width:48px;height:3px;background:#b8940e;margin:0 auto;"></div>
+  </div>
+
+  <div style="font-size:15px;line-height:1.8;color:#333;margin-bottom:32px;padding:0 4px;">
+    <p style="margin-bottom:16px;">The <strong>1st U.S. Volunteer Cavalry Regiment &ndash; Rough Riders, Inc.</strong> is a Tampa-based nonprofit fraternal organization rooted in the proud legacy of Theodore Roosevelt's Rough Riders, the legendary volunteer cavalry regiment that rode to glory in the Spanish-American War of 1898.</p>
+    <p>Headquartered in Ybor City at <strong>601 N. 19th Street</strong> &mdash; just blocks from where many of the original Rough Riders mustered before shipping out to Cuba &mdash; our regiment is the keeper of one of Tampa's most remarkable collections of historical artifacts, memorabilia, and stories tied directly to that pivotal moment in American history.</p>
+  </div>
+
+  <!-- Photo grid -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:32px;">
+    <div style="border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:#dde8dd;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Theodore_Roosevelt_as_Lieutenant_Colonel_of_the_Rough_Riders%2C_1898_crop.jpg/400px-Theodore_Roosevelt_as_Lieutenant_Colonel_of_the_Rough_Riders%2C_1898_crop.jpg"
+        alt="Theodore Roosevelt, Lieutenant Colonel of the Rough Riders, 1898"
+        style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background='#c8d8c8'">
+    </div>
+    <div style="border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:#dde8dd;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Roosevelt_Rough_Riders.jpg/400px-Roosevelt_Rough_Riders.jpg"
+        alt="Roosevelt's Rough Riders"
+        style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background='#c8d8c8'">
+    </div>
+    <div style="border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:#dde8dd;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Rough_Riders_san_juan_hill.jpg/400px-Rough_Riders_san_juan_hill.jpg"
+        alt="Rough Riders at San Juan Hill"
+        style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background='#c8d8c8'">
+    </div>
+    <div style="border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:#dde8dd;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Charge_of_the_Rough_Riders_at_San_Juan_Hill.jpg/400px-Charge_of_the_Rough_Riders_at_San_Juan_Hill.jpg"
+        alt="Charge of the Rough Riders at San Juan Hill"
+        style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background='#c8d8c8'">
+    </div>
+  </div>
+
+  <!-- Visit Our Museum -->
+  <div style="background:#0f2318;border-radius:10px;padding:28px 28px 24px;margin-bottom:28px;color:#fff;">
+    <h3 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#fff;margin-bottom:14px;">&#9876; Visit Our Museum</h3>
+    <p style="font-size:14px;line-height:1.8;color:rgba(255,255,255,.82);margin-bottom:14px;">Our headquarters is home to an extraordinary collection of Rough Rider history that you won't find anywhere else in the world. From original uniforms, weapons, and personal effects carried by the men who charged up San Juan Hill, to photographs, documents, and relics that bring the summer of 1898 vividly to life, the museum offers a rare window into a defining chapter of both Tampa and American history.</p>
+    <p style="font-size:14px;line-height:1.8;color:rgba(255,255,255,.82);margin-bottom:22px;">Located in the heart of historic Ybor City &mdash; the very neighborhood that served as the regiment's staging ground &mdash; a visit to our museum is a journey back to the moment Tampa stood at the center of a nation going to war.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+      <a href="https://tamparoughriders.org" target="_blank"
+        style="display:inline-block;padding:10px 20px;background:#b8940e;color:#fff;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:.04em;">
+        &#127760; Visit Our Website
+      </a>
+      <a href="https://maps.google.com/?q=601+N+19th+St+Tampa+FL+33605" target="_blank"
+        style="display:inline-block;padding:10px 20px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:5px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:.04em;">
+        &#128205; 601 N. 19th St, Tampa FL
+      </a>
+    </div>
+  </div>
+
+  <div style="text-align:center;">
+    <button onclick="goPage(0)"
+      style="padding:12px 28px;background:#0f2318;color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.04em;">
+      &#8592; Back to Registration
+    </button>
+  </div>
+
+</div>
+
 
 </main>
 
@@ -1805,6 +1879,7 @@ async function handleSponsorPay() {
     company:   document.getElementById('sp-co').value.trim(),
     website:   document.getElementById('sp-web').value.trim(),
     address:   document.getElementById('sp-addr').value.trim(),
+    notes:     document.getElementById('sp-notes') ? document.getElementById('sp-notes').value.trim() : '',
     logoData:  getSpLogoData(),
   }];
   var teamPlayers = getSpPlayers();
