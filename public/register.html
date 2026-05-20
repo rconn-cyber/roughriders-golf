@@ -502,6 +502,18 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
 .addon-tier-header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; margin-bottom: 4px; }
 .addon-tier-icon-wrap { flex-shrink: 0; }
+.tier-icon-below, .alacarte-icon-below {
+  text-align: center;
+  padding: 8px 0 2px;
+  font-size: 28px;
+  line-height: 1;
+}
+.addon-tier-icon-below {
+  text-align: center;
+  padding: 8px 0 2px;
+  font-size: 28px;
+  line-height: 1;
+}
 .addon-tier-icon { font-size: 26px; line-height: 1; display: block; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3)); }
 .addon-tier-badge { font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 1px; }
 .addon-tier-body { padding: 8px 12px 10px; }
@@ -2287,6 +2299,7 @@ function buildTierHTML(lv) {
   var perks = (lv.benefits || []).map(function(b) {
     return '<div class="perk"><span class="perk-dot"></span><span>' + escHtmlConfig(b) + '</span></div>';
   }).join('');
+  var iconHtml = lv.icon ? '<div class="tier-icon-below">' + lv.icon + '</div>' : '';
   return '<div class="tier ' + cls + ' selectable" data-id="' + escHtmlConfig(lv.id) + '" data-name="' + escHtmlConfig(lv.name) + '" data-price="' + lv.price + '">' +
     '<div class="check-badge">' + CHECK_SVG_WHITE + '</div>' +
     '<div class="tier-header"' + headerStyle + '>' +
@@ -2294,6 +2307,7 @@ function buildTierHTML(lv) {
       '<div class="tier-price"><sup>$</sup>' + price + '</div>' +
       badgeHtml +
     '</div>' +
+    iconHtml +
     '<div class="tier-body">' + perks + '</div>' +
   '</div>';
 }
@@ -2305,12 +2319,14 @@ function buildAlaCarteHTML(ac) {
     return '<li>' + escHtmlConfig(b) + '</li>';
   }).join('');
   var badgeHtml = ac.badge ? '<div class="alacarte-badge">' + escHtmlConfig(ac.badge) + '</div>' : '';
+  var iconHtml = ac.icon ? '<div class="alacarte-icon-below">' + ac.icon + '</div>' : '';
   return '<div class="alacarte-card selectable" data-id="' + escHtmlConfig(ac.id) + '" data-name="' + escHtmlConfig(ac.name) + '" data-price="' + ac.price + '">' +
     '<div class="check-badge">' + CHECK_SVG_WHITE + '</div>' +
     '<div class="alacarte-header-strip" style="background:' + bgColor + '">' +
       '<div>' + badgeHtml + '<div class="alacarte-name">' + escHtmlConfig(ac.name) + '</div></div>' +
       '<div class="alacarte-price"><sup>$</sup>' + price + '</div>' +
     '</div>' +
+    iconHtml +
     '<div class="alacarte-body"><ul class="alacarte-benefits">' + bullets + '</ul></div>' +
   '</div>';
 }
@@ -2330,10 +2346,10 @@ function buildAddonTierHTML(lv) {
     '<div class="addon-tier-header" style="background:' + headerColor + '">' +
       '<div class="addon-tier-header-top">' +
         '<div>' + badgeHtml + '<div class="addon-tier-label">' + escHtmlConfig(lv.name) + '</div></div>' +
-        (iconHtml ? '<div class="addon-tier-icon-wrap">' + iconHtml + '</div>' : '') +
       '</div>' +
       '<div class="addon-tier-price"><sup style="font-size:11px;">$</sup>' + price + '</div>' +
     '</div>' +
+    (iconHtml ? '<div class="addon-tier-icon-below">' + iconHtml + '</div>' : '') +
     '<div class="addon-tier-body"><div class="addon-tier-perks">' + perks + '</div></div>' +
   '</div>';
 }
