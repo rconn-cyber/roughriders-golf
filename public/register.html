@@ -585,7 +585,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 <nav class="steps-nav" id="steps-nav">
   <button class="step-tab active" onclick="goPage(0)" style="font-size:16px;font-weight:700;padding:16px 12px;">Register to Golf</button>
   <button class="step-tab"        onclick="goPage(1)" style="font-size:16px;font-weight:700;padding:16px 12px;">Become a Sponsor</button>
-  <button class="step-tab"        id="confirm-tab" onclick="return false;" style="opacity:0.4;cursor:not-allowed;font-size:14px;padding:16px 12px;">Confirmation</button>
+
   <button class="step-tab"        onclick="goPage(3)" style="font-size:14px;font-weight:600;padding:16px 12px;">About the Rough Riders</button>
 </nav>
 
@@ -959,7 +959,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 </div><!-- end page-1 -->
 
 <!-- ══════════ PAGE 3: SUCCESS ══════════ -->
-<div class="page" id="page-2">
+<div class="page" id="page-2" style="display:none!important">
   <div class="success-screen">
     <div class="success-icon">🏌️</div>
     <h2>You're on the course!</h2>
@@ -1100,6 +1100,18 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
 </div>
 
+
+
+<!-- ══════════ CONFIRMATION MODAL ══════════ -->
+<div id="confirm-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;max-width:480px;width:90%;padding:48px 36px 40px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.22);position:relative;">
+    <button onclick="document.getElementById('confirm-modal').style.display='none';" style="position:absolute;top:14px;right:18px;background:none;border:none;font-size:22px;cursor:pointer;color:#999;line-height:1;">&#x2715;</button>
+    <div id="confirm-modal-icon" style="font-size:64px;margin-bottom:16px;">🏌️</div>
+    <h2 id="confirm-modal-title" style="font-family:'Playfair Display',serif;font-size:30px;font-weight:900;color:#1a3320;margin-bottom:10px;">You're on the course!</h2>
+    <p id="confirm-modal-msg" style="font-size:15px;color:#555;line-height:1.7;margin-bottom:28px;">Your registration is confirmed. Check your email for a receipt from Stripe. We'll be in touch with all event details — see you on the green!</p>
+    <button onclick="document.getElementById('confirm-modal').style.display='none';" style="background:#1a3320;color:#c9a84c;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;padding:14px 36px;border:none;border-radius:8px;cursor:pointer;letter-spacing:0.04em;">Close</button>
+  </div>
+</div>
 
 </main>
 
@@ -1244,7 +1256,7 @@ function unlockConfirmation() {
   if (tab) {
     tab.style.opacity = '1';
     tab.style.cursor  = 'pointer';
-    tab.setAttribute('onclick', 'goPage(2)');
+    tab.setAttribute('onclick', 'showConfirmModal()');
   }
 }
 
@@ -2037,9 +2049,7 @@ async function handleSponsorInvoice() {
     var data = await res.json();
     if(!res.ok||!data.success) throw new Error(data.error||'Could not create invoice');
     unlockConfirmation();
-    goPage(2);
-    document.querySelector('.success-screen h2').textContent='Invoice on its way!';
-    document.querySelector('.success-screen p').textContent='A Stripe invoice has been sent to '+document.getElementById('sp-em').value.trim()+' with a secure Pay Now link. Net 30 payment terms. Questions? Email golf@tamparoughriders.org';
+    showConfirmModal('Invoice on its way!', 'A Stripe invoice has been sent to ' + document.getElementById('sp-em').value.trim()+' with a secure Pay Now link. Net 30 payment terms. Questions? Email golf@tamparoughriders.org');
   } catch(err) {
     errEl.textContent='Error: '+err.message+'. Please try again or contact us.';
     errEl.style.display='block';
@@ -2133,9 +2143,7 @@ async function submitInvoice() {
     if (!res.ok || !data.success) throw new Error(data.error || 'Could not create invoice');
     document.getElementById('invoice-modal').style.display = 'none';
     unlockConfirmation();
-    goPage(2);
-    document.querySelector('.success-screen h2').textContent = 'Invoice on its way!';
-    document.querySelector('.success-screen p').textContent = `A Stripe invoice has been sent to ${em} with a secure Pay Now link. Payment terms: net 30 days. Questions? Email r.conn@tamparoughriders.org`;
+    showConfirmModal('Invoice on its way!', `A Stripe invoice has been sent to ${em} with a secure Pay Now link. Payment terms: net 30 days. Questions? Email r.conn@tamparoughriders.org`);
   } catch(err) {
     errEl.textContent = `Error: ${err.message}. Please try again or contact us directly.`;
     errEl.style.display = 'block';
@@ -2204,7 +2212,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Check for Stripe success redirect
   if (window.location.search.includes('session_id')) {
     unlockConfirmation();
-    goPage(2);
+    showConfirmModal();
   }
 
   // Render fallback levels immediately — guarantees levels show even if fetch fails
@@ -2525,6 +2533,14 @@ function goPage(n) {
   if (bar) { if(n!==1) bar.classList.remove('visible'); else updateSponsorTotal(); }
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+function showConfirmModal(title, msg) {
+  if (title) document.getElementById('confirm-modal-title').textContent = title;
+  if (msg)   document.getElementById('confirm-modal-msg').textContent   = msg;
+  var m = document.getElementById('confirm-modal');
+  m.style.display = 'flex';
+}
+
 
 function updateTimestamp() {
   var el = document.getElementById('rr-timestamp');
