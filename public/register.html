@@ -623,10 +623,9 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 <div style="height:20px;"></div>
 
 <nav class="steps-nav" id="steps-nav">
-  <button class="step-tab active" onclick="goPage(0)" style="font-size:16px;font-weight:700;padding:16px 12px;">Register to Golf</button>
-  <button class="step-tab"        onclick="goPage(1)" style="font-size:16px;font-weight:700;padding:16px 12px;">Become a Sponsor</button>
-
-  <button class="step-tab"        onclick="goPage(3)" style="font-size:14px;font-weight:600;padding:16px 12px;">About the Rough Riders</button>
+  <button class="step-tab active" data-page="0" onclick="goPage(0)" style="font-size:16px;font-weight:700;padding:16px 12px;">Register to Golf</button>
+  <button class="step-tab"        data-page="1" onclick="goPage(1)" style="font-size:16px;font-weight:700;padding:16px 12px;">Become a Sponsor</button>
+  <button class="step-tab"        data-page="3" onclick="goPage(3)" style="font-size:14px;font-weight:600;padding:16px 12px;">About the Rough Riders</button>
 </nav>
 
 <main>
@@ -2551,10 +2550,16 @@ async function loadSponsorConfig() {
 var currentPage = 0;
 
 function goPage(n) {
-  var pages = document.querySelectorAll('.page');
-  var tabEls = document.querySelectorAll('.step-tab');
-  pages.forEach(function(p,i){ p.classList.toggle('active', i===n); });
-  tabEls.forEach(function(t,i){ t.classList.toggle('active', i===n); t.classList.toggle('done', i<n); });
+  // Activate page by id (page-N), not array index — avoids gaps from hidden pages
+  document.querySelectorAll('.page').forEach(function(p) {
+    p.classList.toggle('active', p.id === 'page-' + n);
+  });
+  // Sync tab highlight by data-page attribute
+  document.querySelectorAll('.step-tab').forEach(function(t) {
+    var tp = parseInt(t.dataset.page);
+    t.classList.toggle('active', tp === n);
+    t.classList.toggle('done', tp < n);
+  });
   currentPage = n;
   var bar = document.getElementById('total-bar');
   if (bar) { if(n!==1) bar.classList.remove('visible'); else updateSponsorTotal(); }
