@@ -130,6 +130,16 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 }
 
 /* ── ADD-ONS ── */
+
+.addon-group { margin-bottom: 28px; }
+.addon-group:last-child { margin-bottom: 0; }
+.addon-group-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-light);
+  padding: 0 2px 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
 .addons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .addon-item {
   display: flex; align-items: center; justify-content: space-between;
@@ -409,7 +419,17 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 }
 
 @media (max-width: 600px) {
-  .addons-grid { grid-template-columns: 1fr; }
+  
+.addon-group { margin-bottom: 28px; }
+.addon-group:last-child { margin-bottom: 0; }
+.addon-group-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-light);
+  padding: 0 2px 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
+.addons-grid { grid-template-columns: 1fr; }
   .field-row { grid-template-columns: 1fr; }
   .reg-section { padding: 20px; }
   .total-bar { padding: 14px 20px; }
@@ -473,6 +493,16 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 .addons-section-sub {
   font-size: 12px; color: var(--text-light, #666); font-style: italic;
 }
+
+.addon-group { margin-bottom: 28px; }
+.addon-group:last-child { margin-bottom: 0; }
+.addon-group-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-light);
+  padding: 0 2px 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
 .addons-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -527,7 +557,17 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 .addon-tier-perks { display: flex; flex-direction: column; gap: 3px; }
 .addon-tier-perk { font-size: 10.5px; color: var(--text-mid,#555); display: flex; align-items: flex-start; gap: 5px; line-height: 1.3; }
 .addon-tier-perk::before { content: '·'; color: var(--green-light,#2d7a4a); font-weight: 700; flex-shrink: 0; margin-top: 0; }
-@media (max-width: 480px) { .addons-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { 
+.addon-group { margin-bottom: 28px; }
+.addon-group:last-child { margin-bottom: 0; }
+.addon-group-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-light);
+  padding: 0 2px 10px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 12px;
+}
+.addons-grid { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
 <body>
@@ -800,39 +840,12 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
       <span class="addons-section-title">Add-Ons</span>
       <span class="addons-section-sub">Individual sponsorship opportunities</span>
     </div>
-    <div class="addons-grid" id="addons-container">
+    <div id="addons-container">
       <!-- Populated by renderSponsorConfig() on load -->
     </div>
   </div>
 
-  <!-- Hole Sponsor — featured standalone at bottom -->
-  <div class="hole-sponsor selectable featured-hole" data-id="hole" data-name="Hole Sponsor" data-price="250">
-    <div class="check-badge"><svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    <div class="hole-featured-inner">
-      <div class="hole-featured-left">
-        <div class="hole-featured-eyebrow">⛳ On-Course Visibility</div>
-        <div class="hole-featured-title">Hole Sponsor</div>
-        <div class="hole-featured-sub">Your branded tee sign on the course — seen by every golfer all day</div>
-        <div class="hole-perks" style="margin-top:10px;">
-          <span class="perk-tag">Custom tee sign</span>
-          <span class="perk-tag">Name &amp; logo on-course</span>
-          <span class="perk-tag">Sponsor board</span>
-          <span class="perk-tag">Website listing</span>
-        </div>
-      </div>
-      <div class="hole-featured-right">
-        <div class="hole-featured-price">$250<span style="font-size:14px;font-weight:500;opacity:.7;margin-left:4px;">/ hole</span></div>
-        <div class="hole-qty-row" style="margin-top:12px;justify-content:center;">
-          <span class="hole-qty-label">Holes:</span>
-          <div class="qty-controls">
-            <button class="qty-btn" id="hole-minus">−</button>
-            <div class="qty-display" id="hole-qty">1</div>
-            <button class="qty-btn" id="hole-plus">+</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Hole Sponsor — rendered by renderSponsorConfig() into addons-container -->
 
   <!-- ── SPONSOR CONTACT INFO + PAYMENT ── -->
   <div id="sponsor-contact-section" style="display:none;margin-top:32px;">
@@ -2387,9 +2400,9 @@ function renderSponsorConfig(config) {
   // Filter out hidden levels (set in admin)
   var visible = all.filter(function(lv){ return !lv.hidden; });
 
-  // Split: tiers ($1000+) vs add-ons (under $1000), exclude hole
-  var tiers   = visible.filter(function(lv){ return lv.id !== 'hole' && lv.price >= 1000; });
-  var addons  = visible.filter(function(lv){ return lv.id !== 'hole' && lv.price < 1000; });
+  // Split: tiers ($1000+) vs add-ons (under $1000); hole goes in addons like any other card
+  var tiers   = visible.filter(function(lv){ return lv.price >= 1000; });
+  var addons  = visible.filter(function(lv){ return lv.price < 1000; });
 
   if (tiers.length) {
     tiersEl.innerHTML = tiers.map(buildTierHTML).join('');
@@ -2399,19 +2412,41 @@ function renderSponsorConfig(config) {
   var addonsSection   = document.getElementById('addons-section');
   if (addonsContainer) {
     if (addons.length) {
-      addonsContainer.innerHTML = addons.map(buildAddonTierHTML).join('');
+      // Group addons by badge category, preserving order within each group
+      var GROUP_ORDER = ['Food & Bev', 'Contest', 'On-Course', 'Gifts & Swag', 'Branding', ''];
+      var groups = {};
+      GROUP_ORDER.forEach(function(g){ groups[g] = []; });
+      addons.forEach(function(lv) {
+        var key = (lv.badge || '').trim();
+        if (!groups.hasOwnProperty(key)) groups[key] = [];
+        groups[key].push(lv);
+      });
+      var GROUP_LABELS = {
+        'Food & Bev':   '🍽️  Food & Beverage',
+        'Contest':      '🏆  Contests',
+        'On-Course':    '⛳  On-Course',
+        'Gifts & Swag': '🎁  Gifts & Swag',
+        'Branding':     '🖨️  Branding',
+        '':             '➕  Other'
+      };
+      var html = '';
+      GROUP_ORDER.forEach(function(key) {
+        var items = groups[key];
+        if (!items || !items.length) return;
+        var label = GROUP_LABELS[key] || key;
+        html += '<div class="addon-group">' +
+          '<div class="addon-group-label">' + label + '</div>' +
+          '<div class="addons-grid">' + items.map(buildAddonTierHTML).join('') + '</div>' +
+          '</div>';
+      });
+      addonsContainer.innerHTML = html;
       if (addonsSection) addonsSection.style.display = '';
     } else {
       if (addonsSection) addonsSection.style.display = 'none';
     }
   }
 
-  // Handle hole sponsor separately (featured card below grid)
-  var holeLv = all.find(function(l){ return l.id === 'hole'; });
-  var holeCard = document.querySelector('.featured-hole');
-  if (holeCard) {
-    holeCard.style.display = (holeLv && holeLv.hidden) ? 'none' : '';
-  }
+  // Hole sponsor now rendered in addons grid like all other cards
 
   // Re-attach click listeners
   document.querySelectorAll('.selectable').forEach(function(el) {
@@ -2445,14 +2480,6 @@ function renderSponsorConfig(config) {
 function updateFeaturedHoleCard(lv) {
   var price = lv.price || 250;
   var priceStr = '$' + Number(price).toLocaleString('en-US');
-
-  // Update featured hole card (Step 2)
-  var card = document.querySelector('.featured-hole');
-  if (card) {
-    var priceEl = card.querySelector('.hole-featured-price');
-    if (priceEl) priceEl.innerHTML = priceStr +
-      '<span style="font-size:14px;font-weight:500;opacity:.7;margin-left:4px;">/ hole</span>';
-    card.dataset.price = price;
     var perksEl = card.querySelector('.hole-perks');
     if (perksEl && lv.benefits && lv.benefits.length) {
       perksEl.innerHTML = lv.benefits.map(function(b) {
