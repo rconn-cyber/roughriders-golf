@@ -524,8 +524,8 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
     <div style="font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-bottom:8px;">1st U.S. Volunteer Cavalry Regiment — Rough Riders</div>
     <h1 style="font-family:'Playfair Display',serif;font-size:clamp(26px,5vw,44px);font-weight:900;color:#ffffff;line-height:1.1;margin-bottom:10px;text-shadow:0 2px 12px rgba(0,0,0,0.5);">39th Annual Charity<br>Golf Tournament</h1>
     <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
-      <span style="background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.18);border-radius:20px;padding:6px 16px;font-size:13px;color:rgba(255,255,255,0.9);font-weight:500;">📅 Monday, September 14, 2026</span>
-      <span style="background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.18);border-radius:20px;padding:6px 16px;font-size:13px;color:rgba(255,255,255,0.9);font-weight:500;">📍 Hunter's Green Country Club · Tampa, FL</span>
+      <span style="background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.18);border-radius:20px;padding:6px 16px;font-size:13px;color:rgba(255,255,255,0.9);font-weight:500;">📅 <span id="hero-date">Monday, September 14, 2026</span></span>
+      <span style="background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.18);border-radius:20px;padding:6px 16px;font-size:13px;color:rgba(255,255,255,0.9);font-weight:500;">📍 <span id="hero-venue">Hunter's Green Country Club · Tampa, FL</span></span>
       <span style="background:rgba(184,148,14,0.75);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:6px 16px;font-size:13px;color:#fff;font-weight:700;">$165 per golfer</span>
     </div>
   </div>
@@ -1089,6 +1089,8 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 // CONFIG
 // ════════════════════════════════
 var NETLIFY_BASE = 'https://rr-golf.netlify.app';
+var EVENT_DATE     = 'Monday, September 14, 2026';
+var EVENT_VENUE    = 'Hunter\'s Green Country Club · Tampa, FL';
 
 // Hardcoded fallback levels — used if admin-config is unavailable
 var FALLBACK_LEVELS = [
@@ -2189,6 +2191,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // Render fallback levels immediately — guarantees levels show even if fetch fails
   renderSponsorConfig({ levels: FALLBACK_LEVELS });
   // Load live config from admin-config (overrides fallback if data exists)
+  
+  // Sync hero date/venue from config constants
+  (function(){
+    var d = document.getElementById('hero-date');
+    var v = document.getElementById('hero-venue');
+    if (d) d.textContent = EVENT_DATE;
+    if (v) v.textContent = EVENT_VENUE;
+  })();
   loadSponsorConfig();
 
   // Load sponsor logos from admin data
