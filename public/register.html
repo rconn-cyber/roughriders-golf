@@ -500,8 +500,9 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 .addon-tier-label { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: #fff; line-height: 1.2; padding-right: 22px; }
 .addon-tier-price { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: rgba(255,255,255,.92); }
 
-.addon-tier-header-top { display: flex; justify-content: space-between; align-items: flex-start; min-height: 18px; }
-.addon-tier-icon { font-size: 22px; line-height: 1; margin-bottom: 4px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
+.addon-tier-header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; margin-bottom: 4px; }
+.addon-tier-icon-wrap { flex-shrink: 0; }
+.addon-tier-icon { font-size: 26px; line-height: 1; display: block; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3)); }
 .addon-tier-badge { font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 1px; }
 .addon-tier-body { padding: 8px 12px 10px; }
 .addon-tier-perks { display: flex; flex-direction: column; gap: 3px; }
@@ -1091,24 +1092,24 @@ var NETLIFY_BASE = 'https://rr-golf.netlify.app';
 
 // Hardcoded fallback levels — used if admin-config is unavailable
 var FALLBACK_LEVELS = [
-  {id:'title',  name:'Title Sponsor',       price:7500, theme:'forest', badge:'Top Tier',    featured:true,  benefits:['3 teams — 12 golfers','12 super tickets','5 hole sponsor signs','Logo on sponsor banner','Website listing']},
-  {id:'gold',   name:'Gold Sponsor',        price:5000, theme:'gold',   badge:'',            featured:false, benefits:['2 teams — 8 golfers','8 super tickets','3 hole sponsor signs','Logo on materials & banner']},
-  {id:'silver', name:'Silver Sponsor',      price:2500, theme:'silver', badge:'',            featured:false, benefits:['1 team — 4 golfers','4 super tickets','2 hole sponsor signs','Logo on tournament materials']},
-  {id:'vip-tent',name:'VIP Tent',           price:1500, theme:'green',  badge:'On-Course',   featured:false, benefits:['Branded signage & banner at VIP area','Premium visibility — high-traffic spot','Recognition at awards','Logo on tournament materials & website']},
-  {id:'bev-cart',name:'Beverage Cart',      price:1500, theme:'bronze', badge:'Food & Bev',  featured:false, benefits:['Logo on cart signage seen by all golfers','Brand mention at player check-in','Logo on tournament materials & website']},
-  {id:'bronze', name:'Bronze Sponsor',      price:1000, theme:'bronze', badge:'',            featured:false, benefits:['1 team — 4 golfers','1 hole sponsor sign','Logo on tournament materials']},
-  {id:'lunch',  name:'Lunch / Dinner',      price:1250, theme:'bronze', badge:'Food & Bev',  featured:false, benefits:['Prominent branded signage at meal service','Verbal recognition & thank-you during awards','Logo on tournament materials & website']},
-  {id:'breakfast',name:'Breakfast',         price:750,  theme:'bronze', badge:'Food & Bev',  featured:false, benefits:['Branded table signage at breakfast station','Verbal recognition during morning announcements','Logo on tournament materials & website']},
-  {id:'cooler', name:'Cooler Bag',          price:600,  theme:'gold',   badge:'Gifts & Swag',featured:false, benefits:['Logo imprinted on every player’s cooler bag','Bags go home with golfers','Logo on tournament materials & website']},
-  {id:'putting',name:'Putting Contest',     price:500,  theme:'navy',   badge:'Contest',     featured:false, benefits:['Branded signage at putting green','High-traffic area — visible to all','Logo on tournament materials & website']},
-  {id:'cigar',  name:'Cigar Sponsor',       price:500,  theme:'green',  badge:'On-Course',   featured:false, benefits:['Branded signage at cigar station','Optional product sampling on-site','Logo on tournament materials & website']},
-  {id:'tee-gift',name:'Tee Gift',           price:500,  theme:'gold',   badge:'Gifts & Swag',featured:false, benefits:['Brand on item in every player’s gift bag','Tangible takeaway beyond event day','Logo on tournament materials & website']},
-  {id:'golf-ball',name:'Golf Ball Sponsor', price:500,  theme:'green',  badge:'Branding',    featured:false, benefits:['Logo on branded balls given to all players','In-hand brand exposure every shot','Logo on tournament materials & website']},
+  {id:'title',  name:'Title Sponsor',       price:7500, theme:'forest',icon:'🏆', badge:'Top Tier',    featured:true,  benefits:['3 teams — 12 golfers','12 super tickets','5 hole sponsor signs','Logo on sponsor banner','Website listing']},
+  {id:'gold',   name:'Gold Sponsor',        price:5000, theme:'gold',icon:'🥇',   badge:'',            featured:false, benefits:['2 teams — 8 golfers','8 super tickets','3 hole sponsor signs','Logo on materials & banner']},
+  {id:'silver', name:'Silver Sponsor',      price:2500, theme:'silver',icon:'🥈', badge:'',            featured:false, benefits:['1 team — 4 golfers','4 super tickets','2 hole sponsor signs','Logo on tournament materials']},
+  {id:'vip-tent',name:'VIP Tent',           price:1500, theme:'green',icon:'🌟',  badge:'On-Course',   featured:false, benefits:['Branded signage & banner at VIP area','Premium visibility — high-traffic spot','Recognition at awards','Logo on tournament materials & website']},
+  {id:'bev-cart',name:'Beverage Cart',      price:1500, theme:'bronze',icon:'🍺', badge:'Food & Bev',  featured:false, benefits:['Logo on cart signage seen by all golfers','Brand mention at player check-in','Logo on tournament materials & website']},
+  {id:'bronze', name:'Bronze Sponsor',      price:1000, theme:'bronze',icon:'🥉', badge:'',            featured:false, benefits:['1 team — 4 golfers','1 hole sponsor sign','Logo on tournament materials']},
+  {id:'lunch',  name:'Lunch / Dinner',      price:1250, theme:'bronze',icon:'🍽️', badge:'Food & Bev',  featured:false, benefits:['Prominent branded signage at meal service','Verbal recognition & thank-you during awards','Logo on tournament materials & website']},
+  {id:'breakfast',name:'Breakfast',         price:750,  theme:'bronze',icon:'☕', badge:'Food & Bev',  featured:false, benefits:['Branded table signage at breakfast station','Verbal recognition during morning announcements','Logo on tournament materials & website']},
+  {id:'cooler', name:'Cooler Bag',          price:600,  theme:'gold',icon:'🎁',   badge:'Gifts & Swag',featured:false, benefits:['Logo imprinted on every player’s cooler bag','Bags go home with golfers','Logo on tournament materials & website']},
+  {id:'putting',name:'Putting Contest',     price:500,  theme:'navy',icon:'⛳',   badge:'Contest',     featured:false, benefits:['Branded signage at putting green','High-traffic area — visible to all','Logo on tournament materials & website']},
+  {id:'cigar',  name:'Cigar Sponsor',       price:500,  theme:'green',icon:'🎖️',  badge:'On-Course',   featured:false, benefits:['Branded signage at cigar station','Optional product sampling on-site','Logo on tournament materials & website']},
+  {id:'tee-gift',name:'Tee Gift',           price:500,  theme:'gold',icon:'🎁',   badge:'Gifts & Swag',featured:false, benefits:['Brand on item in every player’s gift bag','Tangible takeaway beyond event day','Logo on tournament materials & website']},
+  {id:'golf-ball',name:'Golf Ball Sponsor', price:500,  theme:'green',icon:'⛳',  badge:'Branding',    featured:false, benefits:['Logo on branded balls given to all players','In-hand brand exposure every shot','Logo on tournament materials & website']},
   {id:'range',  name:'Driving Range',       price:500,  theme:'green',  badge:'On-Course',   featured:false, benefits:['Branded signage at warm-up range','First brand seen before teeing off','Logo on tournament materials & website']},
   {id:'long-drive-sp',name:'Longest Drive', price:400,  theme:'navy',   badge:'Contest',     featured:false, benefits:['Branded tee sign at contest hole','Name announced when winner presented','Logo on tournament materials & website']},
   {id:'close-pin-sp',name:'Closest to Pin', price:400,  theme:'navy',   badge:'Contest',     featured:false, benefits:['Branded tee sign at contest hole','Name announced when winner presented','Logo on tournament materials & website']},
-  {id:'scorecard',name:'Scorecard',         price:350,  theme:'silver', badge:'Branding',    featured:false, benefits:['Logo printed on every player’s scorecard','Handled repeatedly throughout the round','Logo on tournament materials & website']},
-  {id:'hole',     name:'Hole Sponsor',        price:250,  theme:'green',  badge:'On-Course',   featured:true,  benefits:['Custom tee sign','Name & logo on-course','Sponsor board','Website listing']},
+  {id:'scorecard',name:'Scorecard',         price:350,  theme:'silver',icon:'📋', badge:'Branding',    featured:false, benefits:['Logo printed on every player’s scorecard','Handled repeatedly throughout the round','Logo on tournament materials & website']},
+  {id:'hole',     name:'Hole Sponsor',        price:250,  theme:'green',icon:'⛳',  badge:'On-Course',   featured:true,  benefits:['Custom tee sign','Name & logo on-course','Sponsor board','Website listing']},
 ];
 
 var PLAYER_PRICE = 165;
@@ -2317,8 +2318,10 @@ function buildAddonTierHTML(lv) {
   return '<div class="addon-tier selectable" data-id="' + escHtmlConfig(lv.id) + '" data-name="' + escHtmlConfig(lv.name) + '" data-price="' + lv.price + '">' +
     '<div class="check-badge">' + checkSvg + '</div>' +
     '<div class="addon-tier-header" style="background:' + headerColor + '">' +
-      '<div class="addon-tier-header-top">' + badgeHtml + iconHtml + '</div>' +
-      '<div class="addon-tier-label">' + escHtmlConfig(lv.name) + '</div>' +
+      '<div class="addon-tier-header-top">' +
+        '<div>' + badgeHtml + '<div class="addon-tier-label">' + escHtmlConfig(lv.name) + '</div></div>' +
+        (iconHtml ? '<div class="addon-tier-icon-wrap">' + iconHtml + '</div>' : '') +
+      '</div>' +
       '<div class="addon-tier-price"><sup style="font-size:11px;">$</sup>' + price + '</div>' +
     '</div>' +
     '<div class="addon-tier-body"><div class="addon-tier-perks">' + perks + '</div></div>' +
