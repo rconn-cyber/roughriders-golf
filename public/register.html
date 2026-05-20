@@ -22,16 +22,23 @@ body { font-family: 'DM Sans', sans-serif; background: transparent; color: var(-
 /* ── STEP NAV ── */
 .steps-nav {
   display: flex; margin-bottom: 32px;
-  border-bottom: 2px solid rgba(0,0,0,0.12);
+  background: #1a3320;
+  border-radius: 10px;
+  border-bottom: none;
+  padding: 6px;
+  gap: 4px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
 }
 .step-tab {
   flex: 1; padding: 14px 8px; text-align: center;
-  font-size: 13px; font-weight: 600; color: var(--text-light);
-  background: none; border: none; border-bottom: 3px solid transparent;
-  cursor: pointer; transition: all 0.18s; margin-bottom: -2px;
+  font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6);
+  background: none; border: none; border-bottom: none;
+  border-radius: 7px;
+  cursor: pointer; transition: all 0.18s; margin-bottom: 0;
 }
-.step-tab.active { color: var(--green-dark); border-bottom-color: var(--gold); }
-.step-tab.done { color: var(--green-light); }
+.step-tab:hover:not([style*="not-allowed"]) { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); }
+.step-tab.active { background: var(--gold); color: #1a3320 !important; font-weight: 800; box-shadow: 0 2px 8px rgba(0,0,0,0.18); border-bottom: none; }
+.step-tab.done { color: rgba(255,255,255,0.75); }
 .step-num {
   display: inline-flex; align-items: center; justify-content: center;
   width: 22px; height: 22px; border-radius: 50%; font-size: 11px;
