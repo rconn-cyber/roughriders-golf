@@ -1145,15 +1145,15 @@ var FALLBACK_LEVELS = [
   {id:'bronze', name:'Bronze Sponsor',      price:1000, theme:'bronze',icon:'🥉', badge:'',            featured:false, benefits:['1 team — 4 golfers','1 hole sponsor sign','Logo on tournament materials']},
   {id:'lunch',  name:'Lunch / Dinner',      price:1250, theme:'bronze',icon:'🍽️', badge:'Food & Bev',  featured:false, benefits:['Prominent branded signage at meal service','Verbal recognition & thank-you during awards','Logo on tournament materials & website']},
   {id:'breakfast',name:'Breakfast',         price:750,  theme:'bronze',icon:'☕', badge:'Food & Bev',  featured:false, benefits:['Branded table signage at breakfast station','Verbal recognition during morning announcements','Logo on tournament materials & website']},
-  {id:'cooler', name:'Cooler Bag',          price:600,  theme:'gold',icon:'🎁',   badge:'Gifts & Swag',featured:false, benefits:['Logo imprinted on every player’s cooler bag','Bags go home with golfers','Logo on tournament materials & website']},
+  {id:'cooler', name:'Cooler Bag',          price:600,  theme:'gold',icon:'🎁',   badge:'Gifts & Swag',featured:false, benefits:['Logo imprinted on every player\'s cooler bag','Bags go home with golfers','Logo on tournament materials & website']},
   {id:'putting',name:'Putting Contest',     price:500,  theme:'navy',icon:'⛳',   badge:'Contest',     featured:false, benefits:['Branded signage at putting green','High-traffic area — visible to all','Logo on tournament materials & website']},
   {id:'cigar',  name:'Cigar Sponsor',       price:500,  theme:'green',icon:'🎖️',  badge:'On-Course',   featured:false, benefits:['Branded signage at cigar station','Optional product sampling on-site','Logo on tournament materials & website']},
-  {id:'tee-gift',name:'Tee Gift',           price:500,  theme:'gold',icon:'🎁',   badge:'Gifts & Swag',featured:false, benefits:['Brand on item in every player’s gift bag','Tangible takeaway beyond event day','Logo on tournament materials & website']},
+  {id:'tee-gift',name:'Tee Gift',           price:500,  theme:'gold',icon:'🎁',   badge:'Gifts & Swag',featured:false, benefits:['Brand on item in every player\'s gift bag','Tangible takeaway beyond event day','Logo on tournament materials & website']},
   {id:'golf-ball',name:'Golf Ball Sponsor', price:500,  theme:'green',icon:'⛳',  badge:'Branding',    featured:false, benefits:['Logo on branded balls given to all players','In-hand brand exposure every shot','Logo on tournament materials & website']},
   {id:'range',  name:'Driving Range',       price:500,  theme:'green',  badge:'On-Course',   featured:false, benefits:['Branded signage at warm-up range','First brand seen before teeing off','Logo on tournament materials & website']},
   {id:'long-drive-sp',name:'Longest Drive', price:400,  theme:'navy',   badge:'Contest',     featured:false, benefits:['Branded tee sign at contest hole','Name announced when winner presented','Logo on tournament materials & website']},
   {id:'close-pin-sp',name:'Closest to Pin', price:400,  theme:'navy',   badge:'Contest',     featured:false, benefits:['Branded tee sign at contest hole','Name announced when winner presented','Logo on tournament materials & website']},
-  {id:'scorecard',name:'Scorecard',         price:350,  theme:'silver',icon:'📋', badge:'Branding',    featured:false, benefits:['Logo printed on every player’s scorecard','Handled repeatedly throughout the round','Logo on tournament materials & website']},
+  {id:'scorecard',name:'Scorecard',         price:350,  theme:'silver',icon:'📋', badge:'Branding',    featured:false, benefits:['Logo printed on every player\'s scorecard','Handled repeatedly throughout the round','Logo on tournament materials & website']},
   {id:'hole',     name:'Hole Sponsor',        price:250,  theme:'green',icon:'⛳',  badge:'On-Course',   featured:true,  benefits:['Custom tee sign','Name & logo on-course','Sponsor board','Website listing']},
 ];
 
@@ -2472,34 +2472,8 @@ function renderSponsorConfig(config) {
     BENEFITS_DATA[lv.id] = { perks: lv.benefits || [] };
   });
 
-  // Update featured hole sponsor card from live config
-  if (holeLv) updateFeaturedHoleCard(holeLv);
 }
 
-function updateFeaturedHoleCard(lv) {
-  var price = lv.price || 250;
-  var priceStr = '$' + Number(price).toLocaleString('en-US');
-    var perksEl = card.querySelector('.hole-perks');
-    if (perksEl && lv.benefits && lv.benefits.length) {
-      perksEl.innerHTML = lv.benefits.map(function(b) {
-        return '<span class="perk-tag">' + escHtmlConfig(b) + '</span>';
-      }).join('');
-    }
-  }
-
-  // Update Step 1 add-on item price + description
-  var addonItem = document.getElementById('hole-addon-item');
-  if (addonItem) {
-    // Update onclick price
-    addonItem.setAttribute('onclick', "toggleAddonFlat(this, " + price + ", 'Hole Sponsor')");
-    var addonPriceEl = document.getElementById('hole-addon-price');
-    if (addonPriceEl) addonPriceEl.textContent = priceStr;
-    var addonDescEl = document.getElementById('hole-addon-desc');
-    if (addonDescEl && lv.benefits && lv.benefits.length) {
-      addonDescEl.textContent = lv.benefits.join(' · ');
-    }
-  }
-}
 
 async function loadSponsorConfig() {
   try {
