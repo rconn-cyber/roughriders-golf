@@ -499,6 +499,9 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 }
 .addon-tier-label { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: #fff; line-height: 1.2; padding-right: 22px; }
 .addon-tier-price { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 900; color: rgba(255,255,255,.92); }
+
+.addon-tier-header-top { display: flex; justify-content: space-between; align-items: flex-start; min-height: 18px; }
+.addon-tier-icon { font-size: 22px; line-height: 1; margin-bottom: 4px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); }
 .addon-tier-badge { font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 1px; }
 .addon-tier-body { padding: 8px 12px 10px; }
 .addon-tier-perks { display: flex; flex-direction: column; gap: 3px; }
@@ -2306,6 +2309,7 @@ function buildAddonTierHTML(lv) {
   var headerColor = THEME_COLOR_MAP[lv.theme] || '#1e4a2c';
   var price = Number(lv.price).toLocaleString('en-US');
   var badgeHtml = lv.badge ? '<div class="addon-tier-badge">' + escHtmlConfig(lv.badge) + '</div>' : '';
+  var iconHtml  = lv.icon  ? '<div class="addon-tier-icon">'  + lv.icon + '</div>' : '';
   var perks = (lv.benefits || []).slice(0, 3).map(function(b) {
     return '<div class="addon-tier-perk">' + escHtmlConfig(b) + '</div>';
   }).join('');
@@ -2313,7 +2317,7 @@ function buildAddonTierHTML(lv) {
   return '<div class="addon-tier selectable" data-id="' + escHtmlConfig(lv.id) + '" data-name="' + escHtmlConfig(lv.name) + '" data-price="' + lv.price + '">' +
     '<div class="check-badge">' + checkSvg + '</div>' +
     '<div class="addon-tier-header" style="background:' + headerColor + '">' +
-      badgeHtml +
+      '<div class="addon-tier-header-top">' + badgeHtml + iconHtml + '</div>' +
       '<div class="addon-tier-label">' + escHtmlConfig(lv.name) + '</div>' +
       '<div class="addon-tier-price"><sup style="font-size:11px;">$</sup>' + price + '</div>' +
     '</div>' +
