@@ -1408,7 +1408,7 @@ function renderLevels(){
       '<div class="lc-head" style="background:'+thm+'">'+
         '<div>'+badge+
           '<div class="lc-name">'+escH(lv.name)+'</div></div>'+
-        '<div class="lc-price">'+fmtMoney(lv.price)+'</div>'+
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'+(lv.icon?'<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));">'+lv.icon+'</div>':'')+'<div class="lc-price">'+fmtMoney(lv.price)+'</div></div>'+
       '</div>'+
       '<div class="lc-body">'+
         '<div class="lc-tags">'+(tags||'<span class="lc-none">No benefits — click Edit</span>')+'</div>'+
