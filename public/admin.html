@@ -1098,6 +1098,25 @@ function benText(id){ var b=STATE.benefits.find(function(x){return x.id===id;});
 // NETLIFY BLOBS SYNC — auto-save
 // ════════════════════════════════
 var saveTimer;
+
+// ════════════════════════════════
+// PUSH TO SITE (force full save)
+// ════════════════════════════════
+async function pushToSite() {
+  var btn = event.target;
+  btn.textContent = '⏳ Pushing…';
+  btn.disabled = true;
+  try {
+    await doSave();
+    btn.textContent = '✅ Done!';
+    setTimeout(function(){ btn.textContent = '↑ Push to Site'; btn.disabled = false; }, 2500);
+  } catch(e) {
+    btn.textContent = '❌ Failed';
+    btn.disabled = false;
+    toast('Push failed: ' + e.message);
+  }
+}
+
 function scheduleSave(){
   setSaveBadge('saving');
   clearTimeout(saveTimer);
