@@ -747,8 +747,18 @@ tr:hover td { background: #f8faf8; }
           <div class="form-hint">Unique · lowercase · no spaces</div>
         </div>
         <div class="form-group">
-          <label class="form-label">Badge <span>(optional)</span></label>
-          <input class="form-input" id="lm-badge" type="text" placeholder="e.g. Top Tier" maxlength="20">
+          <label class="form-label">Category <span>(optional)</span></label>
+          <select class="form-input" id="lm-badge" onchange="onBadgeSelect(this)">
+            <option value="">— None —</option>
+            <option value="Food & Bev">🍽️  Food &amp; Bev</option>
+            <option value="Contest">🏆  Contest</option>
+            <option value="On-Course">⛳  On-Course</option>
+            <option value="Gifts & Swag">🎁  Gifts &amp; Swag</option>
+            <option value="Branding">🖨️  Branding</option>
+            <option value="Top Tier">⭐  Top Tier</option>
+            <option value="_custom">✏️  Custom…</option>
+          </select>
+          <input class="form-input" id="lm-badge-custom" type="text" placeholder="Custom category label" maxlength="20" style="display:none;margin-top:6px;">
         </div>
       </div>
 
@@ -1466,7 +1476,19 @@ function openLevelModal(id){
   document.getElementById('lm-name').value  = lv ? lv.name  : '';
   document.getElementById('lm-price').value = lv ? lv.price : '';
   document.getElementById('lm-id').value    = lv ? lv.id    : '';
-  document.getElementById('lm-badge').value = lv ? (lv.badge||'') : '';
+  // Set badge dropdown
+  var badgeVal = lv ? (lv.badge||'') : '';
+  var badgeSel = document.getElementById('lm-badge');
+  var knownOpts = Array.from(badgeSel.options).map(function(o){return o.value;});
+  if (badgeVal && knownOpts.indexOf(badgeVal) === -1) {
+    badgeSel.value = '_custom';
+    document.getElementById('lm-badge-custom').value = badgeVal;
+    document.getElementById('lm-badge-custom').style.display = '';
+  } else {
+    badgeSel.value = badgeVal;
+    document.getElementById('lm-badge-custom').style.display = 'none';
+    document.getElementById('lm-badge-custom').value = '';
+  }
   delete document.getElementById('lm-id').dataset.dirty;
   var feat = document.getElementById('lm-featured');
   feat.className = 'toggle-switch' + (lv&&lv.featured?' on':'');
@@ -1562,11 +1584,20 @@ function closeLevelModal(){
   document.getElementById('lm-name').oninput = null;
 }
 
+
+function onBadgeSelect(sel) {
+  var custom = document.getElementById('lm-badge-custom');
+  custom.style.display = sel.value === '_custom' ? '' : 'none';
+  if (sel.value !== '_custom') custom.value = '';
+}
 function saveLevel(){
   var name  = document.getElementById('lm-name').value.trim();
   var price = parseInt(document.getElementById('lm-price').value, 10);
   var id    = document.getElementById('lm-id').value.trim() || slugify(name);
-  var badge = document.getElementById('lm-badge').value.trim();
+  var badgeSel2 = document.getElementById('lm-badge');
+  var badge = badgeSel2.value === '_custom'
+    ? document.getElementById('lm-badge-custom').value.trim()
+    : badgeSel2.value;
   var feat  = document.getElementById('lm-featured').classList.contains('on');
   var hidden = document.getElementById('lm-hidden').classList.contains('on');
   if (!name)  { document.getElementById('lm-name').focus();  toast('Name is required'); return; }
