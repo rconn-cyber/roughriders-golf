@@ -164,7 +164,7 @@ tr:hover td { background: #f8faf8; }
 .theme-picker { display: flex; flex-wrap: wrap; gap: 7px; }
 .theme-swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all .15s; }
 .theme-swatch:hover { transform: scale(1.1); }
-.theme-swatch.active { border-color: var(--gold); transform: scale(1.12); }
+.theme-swatch.active { border-color: #fff; outline: 3px solid var(--gold); transform: scale(1.15); box-shadow: 0 0 0 5px rgba(185,148,14,0.25); }
 .benefits-selector { display: flex; flex-wrap: wrap; gap: 6px; }
 .benefit-toggle { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 500; transition: all .12s; border: 1.5px solid var(--border); background: var(--w); color: var(--tm); user-select: none; }
 .benefit-toggle:hover { border-color: var(--gl); color: var(--gd); }
@@ -234,7 +234,6 @@ tr:hover td { background: #f8faf8; }
     </div>
     <div class="tb-right">
       <span class="save-badge" id="save-badge">✓ Saved</span>
-      <a href="/register.html" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#C9A84C;color:#0d1f3c;font-family:inherit;font-size:12px;font-weight:700;text-decoration:none;border-radius:5px;letter-spacing:0.5px;">&#8599; Registration Page</a>
       <button class="btn-logout" onclick="doLogout()">Log out</button>
     </div>
   </div>
