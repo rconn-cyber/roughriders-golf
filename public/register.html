@@ -2537,7 +2537,13 @@ function goPage(n) {
   currentPage = n;
   var bar = document.getElementById('total-bar');
   if (bar) { if(n!==1) bar.classList.remove('visible'); else updateSponsorTotal(); }
-  window.scrollTo({top:0,behavior:'smooth'});
+  var nav = document.getElementById('steps-nav');
+  if (nav) {
+    var navBottom = nav.getBoundingClientRect().bottom + window.pageYOffset;
+    window.scrollTo({top: navBottom - 8, behavior: 'smooth'});
+  } else {
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
 }
 
 function showConfirmModal(title, msg) {
