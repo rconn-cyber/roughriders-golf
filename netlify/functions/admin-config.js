@@ -1,12 +1,19 @@
 // netlify/functions/admin-config.js
-// GET  — public — returns sponsor config for register.html
-// POST — requires x-admin-key header matching ADMIN_PASSWORD env var
+// GET  — public
+//   ?key=sponsor-config  → returns sponsor config (levels, benefits, alacarte)
+//   ?key=event-content   → returns { html: "..." } for the home page highlights block
+// POST — requires x-admin-key header
+//   body must include { _key: "sponsor-config"|"event-content", ...data }
 
-// Uses same auth as admin-login.js (ADMIN_PASSWORD env var)
-// Uses same Blobs pattern as admin-data.js (REST API with NETLIFY_TOKEN)
-
-const ADMIN_KEY = process.env.ADMIN_PASSWORD; // same env var as admin-login
-const STORE_KEY = 'golf-admin/sponsor-config';
+const ADMIN_KEY  = process.env.ADMIN_PASSWORD;
+const BLOB_KEYS  = {
+  'sponsor-config': 'golf-admin/sponsor-config',
+  'event-content':  'golf-admin/event-content',
+};
+const DEFAULT_VALS = {
+  'sponsor-config': JSON.stringify({ benefits: [], levels: [], alacarte: [] }),
+  'event-content':  JSON.stringify({ html: '' }),
+};
 
 const CORS = {
   'Access-Control-Allow-Origin':  '*',
@@ -63,12 +70,16 @@ exports.handler = async function(event) {
 
   // ── GET: public ──
   if (event.httpMethod === 'GET') {
+    const qs  = event.queryStringParameters || {};
+    const key = qs.key || 'sponsor-config';
+    const blobKey = BLOB_KEYS[key];
+    if (!blobKey) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Unknown key' }) };
     try {
-      const raw = await blobGet(STORE_KEY);
+      const raw = await blobGet(blobKey);
       return {
         statusCode: 200,
         headers: CORS,
-        body: raw || JSON.stringify({ benefits: [], levels: [], alacarte: [] }),
+        body: raw || DEFAULT_VALS[key],
       };
     } catch (e) {
       console.error('GET error:', e);
@@ -80,13 +91,18 @@ exports.handler = async function(event) {
   if (event.httpMethod === 'POST') {
     const k = (event.headers || {})['x-admin-key'] || '';
     if (!ADMIN_KEY || k !== ADMIN_KEY) {
-      console.log('Auth failed — key provided:', k ? 'yes' : 'no', '— ADMIN_KEY set:', !!ADMIN_KEY);
       return { statusCode: 401, headers: CORS, body: JSON.stringify({ error: 'Unauthorized' }) };
     }
     try {
-      const body = event.body || '{}';
-      JSON.parse(body);
-      await blobSet(STORE_KEY, body);
+      const body   = event.body || '{}';
+      const parsed = JSON.parse(body);
+      // Determine which key to save
+      const keyName = parsed._key || 'sponsor-config';
+      const blobKey = BLOB_KEYS[keyName];
+      if (!blobKey) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Unknown _key' }) };
+      // Strip internal _key field before storing
+      delete parsed._key;
+      await blobSet(blobKey, JSON.stringify(parsed));
       return { statusCode: 200, headers: CORS, body: JSON.stringify({ success: true }) };
     } catch (e) {
       console.error('POST error:', e);
