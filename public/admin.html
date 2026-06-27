@@ -101,6 +101,14 @@ tr:hover td { background: #f8faf8; }
 .status-pending { background: #f3f0ff; color: #4a3080; }
 .status-cancelled { background: #fdf0ef; color: var(--red); }
 .empty-table { text-align: center; padding: 40px 20px; color: var(--tl); font-size: 13px; }
+.tt-btn { background:#fff;border:1px solid #ccc;border-radius:4px;padding:3px 9px;cursor:pointer;font-size:13px;line-height:1.5;transition:background .12s; }
+.tt-btn:hover { background:#e8f0e8;border-color:#6b9a6b; }
+.tt-btn.active { background:var(--gp);border-color:var(--gd);font-weight:700; }
+#tiptap-editor:focus { border-color:var(--gd);box-shadow:0 0 0 2px rgba(107,154,107,.2); }
+#tiptap-editor h2 { font-size:18px;font-weight:700;margin:8px 0 4px; }
+#tiptap-editor h3 { font-size:15px;font-weight:600;margin:6px 0 3px; }
+#tiptap-editor ul, #tiptap-editor ol { padding-left:22px;margin:4px 0; }
+#tiptap-editor p { margin:4px 0; }
 .empty-icon { font-size: 32px; margin-bottom: 10px; opacity: .35; }
 
 /* SPONSOR LEVELS */
@@ -278,6 +286,10 @@ tr:hover td { background: #f8faf8; }
         <span class="nav-icon">📋</span> Benefits Pool
         <span class="nav-count" id="cnt-pool">0</span>
       </div>
+      <div class="sb-label" style="margin-top:8px;">Content</div>
+      <div class="nav-item" id="nav-content" onclick="showPanel('content')">
+        <span class="nav-icon">&#x270F;&#xFE0F;</span> Home Page
+      </div>
       <div class="sb-label" style="margin-top:8px;">Print</div>
       <div class="nav-item" onclick="openCheckin()" style="color:var(--gold);">
         <span class="nav-icon">🖨</span> Check-In Sheets
@@ -377,6 +389,61 @@ tr:hover td { background: #f8faf8; }
                 onkeydown="if(event.key==='Enter')addBenefit()">
               <button class="btn btn-primary" onclick="addBenefit()">+ Add Benefit</button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTENT PANEL -->
+      <div class="panel" id="panel-content">
+        <div class="page-hdr">
+          <div class="page-hdr-l">
+            <h1>Home Page Content</h1>
+            <p>Edit the event highlights block at the top of the registration page.</p>
+          </div>
+          <div class="page-hdr-r">
+            <button class="btn btn-primary" id="content-save-btn" onclick="saveEventContent()">Save &amp; Publish</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2>Event Highlights Block</h2>
+            <span style="font-size:12px;color:var(--tl);">Shown between the header and registration steps on the home page</span>
+          </div>
+          <div class="card-body">
+            <div id="tiptap-toolbar" style="display:flex;flex-wrap:wrap;gap:4px;padding:8px;border:1px solid #ddd;border-bottom:none;border-radius:6px 6px 0 0;background:#f9f9f9;">
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('bold')"><b>B</b></button>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('italic')"><i>I</i></button>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('strike')"><s>S</s></button>
+              <span style="width:1px;background:#ddd;margin:2px 4px;display:inline-block;"></span>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('h2')">H2</button>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('h3')">H3</button>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('p')">P</button>
+              <span style="width:1px;background:#ddd;margin:2px 4px;display:inline-block;"></span>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('bulletList')">&#x2022; List</button>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('orderedList')">1. List</button>
+              <span style="width:1px;background:#ddd;margin:2px 4px;display:inline-block;"></span>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('alignLeft')">&#x2190;</button>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('alignCenter')">&#x2261;</button>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('alignRight')">&#x2192;</button>
+              <span style="width:1px;background:#ddd;margin:2px 4px;display:inline-block;"></span>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('undo')">&#x21A9;</button>
+              <button class="tt-btn" onmousedown="event.preventDefault();ttCmd('redo')">&#x21AA;</button>
+              <span style="width:1px;background:#ddd;margin:2px 4px;display:inline-block;"></span>
+              <button class="tt-btn" onclick="toggleHtmlView()" id="html-toggle-btn" style="font-size:11px;padding:2px 7px;">&lt;/&gt; HTML</button>
+            </div>
+            <div id="tiptap-editor" contenteditable="true" style="min-height:200px;border:1px solid #ddd;border-radius:0 0 6px 6px;padding:14px 16px;font-size:14px;line-height:1.7;outline:none;background:#fff;"></div>
+            <textarea id="tiptap-html" style="display:none;width:100%;min-height:200px;font-family:monospace;font-size:12px;border:1px solid #ddd;border-radius:0 0 6px 6px;padding:12px;box-sizing:border-box;" placeholder="Raw HTML..."></textarea>
+            <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="btn btn-secondary" onclick="previewContent()" style="font-size:12px;">&#x1F441; Preview</button>
+              <button class="btn btn-secondary" onclick="resetToDefault()" style="font-size:12px;color:#b00;">&#x21BA; Reset Default</button>
+              <span id="content-save-status" style="font-size:12px;margin-left:auto;"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="content-preview-card" style="display:none;margin-top:16px;">
+          <div class="card-header"><h2>Preview</h2></div>
+          <div class="card-body">
+            <div id="content-preview-box" style="text-align:center;padding:20px;border:2px dashed #ccc;border-radius:6px;background:#fafcfa;"></div>
           </div>
         </div>
       </div>
@@ -1238,6 +1305,7 @@ async function loadConfig(){
 // ════════════════════════════════
 function showPanel(name){
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  if (name === 'content') { loadEventContentOnce(); }
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   document.getElementById('panel-'+name).classList.add('active');
   document.getElementById('nav-'+name).classList.add('active');
@@ -2650,6 +2718,122 @@ async function initApp(){
   setSaveBadge('ok');
   setTimeout(function(){setSaveBadge('idle');},2000);
   loadOrders();
+}
+
+/* ====== CONTENT PANEL - TipTap-lite editor ====== */
+var _ttHtmlMode = false;
+var _contentLoaded = false;
+
+function getAdminKeyForContent() {
+  // admin.html uses a module-level ADMIN_KEY global
+  if (typeof ADMIN_KEY !== 'undefined' && ADMIN_KEY) return ADMIN_KEY;
+  return localStorage.getItem('golf-admin-key') || '';
+}
+
+function ttCmd(cmd) {
+  var ed = document.getElementById('tiptap-editor');
+  if (!ed) return;
+  ed.focus();
+  if      (cmd === 'bold')        document.execCommand('bold');
+  else if (cmd === 'italic')      document.execCommand('italic');
+  else if (cmd === 'strike')      document.execCommand('strikeThrough');
+  else if (cmd === 'h2')          document.execCommand('formatBlock', false, 'h2');
+  else if (cmd === 'h3')          document.execCommand('formatBlock', false, 'h3');
+  else if (cmd === 'p')           document.execCommand('formatBlock', false, 'p');
+  else if (cmd === 'bulletList')  document.execCommand('insertUnorderedList');
+  else if (cmd === 'orderedList') document.execCommand('insertOrderedList');
+  else if (cmd === 'alignLeft')   document.execCommand('justifyLeft');
+  else if (cmd === 'alignCenter') document.execCommand('justifyCenter');
+  else if (cmd === 'alignRight')  document.execCommand('justifyRight');
+  else if (cmd === 'undo')        document.execCommand('undo');
+  else if (cmd === 'redo')        document.execCommand('redo');
+}
+
+function toggleHtmlView() {
+  var ed  = document.getElementById('tiptap-editor');
+  var ta  = document.getElementById('tiptap-html');
+  var btn = document.getElementById('html-toggle-btn');
+  _ttHtmlMode = !_ttHtmlMode;
+  if (_ttHtmlMode) {
+    ta.value = ed.innerHTML;
+    ed.style.display = 'none'; ta.style.display = '';
+    if (btn) btn.classList.add('active');
+  } else {
+    ed.innerHTML = ta.value;
+    ta.style.display = 'none'; ed.style.display = '';
+    if (btn) btn.classList.remove('active');
+  }
+}
+
+function getEditorHTML() {
+  return _ttHtmlMode
+    ? document.getElementById('tiptap-html').value
+    : document.getElementById('tiptap-editor').innerHTML;
+}
+
+function setEditorHTML(h) {
+  document.getElementById('tiptap-editor').innerHTML = h || '';
+  document.getElementById('tiptap-html').value = h || '';
+}
+
+var _DEFAULT_HIGHLIGHTS =
+  '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 28px;margin-bottom:12px;">'
+  + '<span style="font-size:14px;font-weight:700;color:#0f2318;">&#x1F373; Breakfast</span>'
+  + '<span style="font-size:14px;font-weight:700;color:#0f2318;">&#x1F37D; Lunch</span>'
+  + '<span style="font-size:14px;font-weight:700;color:#0f2318;">&#x1F39F; Raffles</span>'
+  + '<span style="font-size:14px;font-weight:700;color:#0f2318;">&#x1F392; Swag Bags</span>'
+  + '<span style="font-size:14px;font-weight:700;color:#0f2318;">&#x1F3C6; Prizes</span>'
+  + '<span style="font-size:14px;font-weight:700;color:#0f2318;">&#x26F3; Hole Contests</span>'
+  + '</div>'
+  + '<div style="font-family:\'Playfair Display\',serif;font-size:16px;font-weight:700;color:#0f2318;margin-bottom:12px;">And Much More!</div>'
+  + '<div style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap;">'
+  + '<span style="font-size:12px;font-weight:600;color:#555;">&#x1F4C5; Registration: <strong style="color:#0f2318;">10:00 AM</strong></span>'
+  + '<span style="font-size:12px;font-weight:600;color:#555;">&#x1F3CC;&#xFE0F; Shot Gun: <strong style="color:#0f2318;">11:30 AM</strong></span>'
+  + '</div>';
+
+function resetToDefault() {
+  if (!confirm('Reset to original default content? Current edits will be lost.')) return;
+  setEditorHTML(_DEFAULT_HIGHLIGHTS);
+  var s = document.getElementById('content-save-status');
+  if (s) { s.textContent = 'Reset to default (not saved yet)'; s.style.color = '#888'; }
+}
+
+function previewContent() {
+  var card = document.getElementById('content-preview-card');
+  var box  = document.getElementById('content-preview-box');
+  if (box)  box.innerHTML = getEditorHTML();
+  if (card) { card.style.display = ''; card.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+}
+
+function loadEventContentOnce() {
+  if (_contentLoaded) return;
+  _contentLoaded = true;
+  fetch('/.netlify/functions/admin-config?key=event-content')
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(d) { setEditorHTML((d && d.html) ? d.html : _DEFAULT_HIGHLIGHTS); })
+    .catch(function()  { setEditorHTML(_DEFAULT_HIGHLIGHTS); });
+}
+
+function saveEventContent() {
+  var html   = getEditorHTML();
+  var key    = getAdminKeyForContent();
+  var btn    = document.getElementById('content-save-btn');
+  var status = document.getElementById('content-save-status');
+  if (!key) { alert('Not authenticated. Please log in first.'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+  if (status) { status.textContent = ''; status.style.color = ''; }
+  fetch('/.netlify/functions/admin-config', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-admin-key': key },
+    body: JSON.stringify({ _key: 'event-content', html: html }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.success) { if (status) { status.textContent = 'Saved & live!'; status.style.color = 'green'; } }
+    else           { if (status) { status.textContent = 'Error: ' + (d.error || 'unknown'); status.style.color = '#c00'; } }
+  })
+  .catch(function() { if (status) { status.textContent = 'Network error'; status.style.color = '#c00'; } })
+  .finally(function() { if (btn) { btn.disabled = false; btn.textContent = 'Save & Publish'; } });
 }
 </script>
 </body>
