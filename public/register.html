@@ -594,22 +594,42 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 <div style="background:#fff;border-bottom:1px solid rgba(0,0,0,0.07);padding:22px 20px 24px;">
   <div style="max-width:720px;margin:0 auto;">
 
-    <!-- Event highlights -->
-    <div style="text-align:center;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid rgba(0,0,0,0.07);">
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 28px;margin-bottom:12px;">
-        <span style="font-size:14px;font-weight:700;color:#0f2318;">🍳 Breakfast</span>
-        <span style="font-size:14px;font-weight:700;color:#0f2318;">🍽 Lunch</span>
-        <span style="font-size:14px;font-weight:700;color:#0f2318;">🎟 Raffles</span>
-        <span style="font-size:14px;font-weight:700;color:#0f2318;">🎒 Swag Bags</span>
-        <span style="font-size:14px;font-weight:700;color:#0f2318;">🏆 Prizes</span>
-        <span style="font-size:14px;font-weight:700;color:#0f2318;">⛳ Hole Contests</span>
+    <!-- Event highlights — editable via Admin > Content panel -->
+    <div id="event-highlights-container" style="text-align:center;margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid rgba(0,0,0,0.07);">
+      <!-- Default shown while loading / if no custom content saved -->
+      <div id="event-highlights-default">
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px 28px;margin-bottom:12px;">
+          <span style="font-size:14px;font-weight:700;color:#0f2318;">🍳 Breakfast</span>
+          <span style="font-size:14px;font-weight:700;color:#0f2318;">🍽 Lunch</span>
+          <span style="font-size:14px;font-weight:700;color:#0f2318;">🎟 Raffles</span>
+          <span style="font-size:14px;font-weight:700;color:#0f2318;">🎒 Swag Bags</span>
+          <span style="font-size:14px;font-weight:700;color:#0f2318;">🏆 Prizes</span>
+          <span style="font-size:14px;font-weight:700;color:#0f2318;">⛳ Hole Contests</span>
+        </div>
+        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#0f2318;margin-bottom:12px;">And Much More!</div>
+        <div style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap;">
+          <span style="font-size:12px;font-weight:600;color:#555;">📅 Registration: <strong style="color:#0f2318;">10:00 AM</strong></span>
+          <span style="font-size:12px;font-weight:600;color:#555;">🏌️ Shot Gun: <strong style="color:#0f2318;">11:30 AM</strong></span>
+        </div>
       </div>
-      <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#0f2318;margin-bottom:12px;">And Much More!</div>
-      <div style="display:flex;justify-content:center;gap:28px;flex-wrap:wrap;">
-        <span style="font-size:12px;font-weight:600;color:#555;">📅 Registration: <strong style="color:#0f2318;">10:00 AM</strong></span>
-        <span style="font-size:12px;font-weight:600;color:#555;">🏌️ Shot Gun: <strong style="color:#0f2318;">11:30 AM</strong></span>
-      </div>
+      <!-- Custom content injected here if saved -->
+      <div id="event-highlights-custom" style="display:none;"></div>
     </div>
+    <script>
+    (function(){
+      fetch('/.netlify/functions/admin-config?key=event-content')
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){
+          if (d && d.html && d.html.trim()) {
+            var def = document.getElementById('event-highlights-default');
+            var cus = document.getElementById('event-highlights-custom');
+            if (def) def.style.display = 'none';
+            if (cus) { cus.innerHTML = d.html; cus.style.display = ''; }
+          }
+        })
+        .catch(function(){});
+    })();
+    </script>
 
     <!-- Sponsor logos -->
     <div id="sponsor-logo-strip" style="display:none;">
