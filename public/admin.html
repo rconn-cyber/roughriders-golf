@@ -1913,7 +1913,7 @@ function openEditEntry(type, idx) {
       var on = currentPkgs.some(function(p){
         return p === lvName || p.indexOf(lvName) >= 0 || lvName.indexOf(p) >= 0;
       });
-      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'" onclick="this.classList.toggle('on');recalcEditSpAmount();var sps=getCurrentSpSponsorships();updateSpPlayerSection(sps);rebuildBenefitsFromPackage(sps);">'+escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
+      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount();var sps=getCurrentSpSponsorships();updateSpPlayerSection(sps);rebuildBenefitsFromPackage(sps);">'+escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
     });
     
     picker.innerHTML = html;
