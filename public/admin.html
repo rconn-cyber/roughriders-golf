@@ -1898,11 +1898,22 @@ function openEditEntry(type, idx) {
     // Build sponsor package picker from STATE and pre-select current ones
     var currentPkgs = (r.sponsorships||[]).map(function(x){return (x.name||x).toLowerCase().trim();});
     if (r.package) currentPkgs = currentPkgs.concat(r.package.split(',').map(function(s){return s.trim().toLowerCase();}));
+    // Fallback: if still no package info, try to match by exact amount against levels
+    if (currentPkgs.length === 0 && (r.total || r.amount)) {
+      var recordAmt = r.total || (r.amount > 10000 ? r.amount/100 : r.amount);
+      var amtMatches = STATE.levels.filter(function(lv){ return lv.price === recordAmt; });
+      if (amtMatches.length === 1) {
+        currentPkgs = [amtMatches[0].name.toLowerCase().trim()];
+      }
+    }
     var picker = document.getElementById('em-sp-picker');
     var html = '';
     sortBy(STATE.levels).forEach(function(lv){
-      var on = currentPkgs.some(function(p){return p===lv.name.toLowerCase()||p.indexOf(lv.name.toLowerCase())>=0;});
-      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount();var sps=getCurrentSpSponsorships();updateSpPlayerSection(sps);rebuildBenefitsFromPackage(sps);">'+escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
+      var lvName = lv.name.toLowerCase().trim();
+      var on = currentPkgs.some(function(p){
+        return p === lvName || p.indexOf(lvName) >= 0 || lvName.indexOf(p) >= 0;
+      });
+      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'" onclick="this.classList.toggle('on');recalcEditSpAmount();var sps=getCurrentSpSponsorships();updateSpPlayerSection(sps);rebuildBenefitsFromPackage(sps);">'+escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
     });
     
     picker.innerHTML = html;
