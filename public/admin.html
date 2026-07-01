@@ -1377,6 +1377,8 @@ async function loadOrders(){
     } else {
       var sps = await sRes.json();
       renderSponsors(Array.isArray(sps) ? sps : (sps.items || []));
+      // Re-render levels so sold counts update
+      renderLevels();
       // Push updated publicSponsors to admin-config so register.html logo strip stays current
       scheduleSave();
     }
@@ -1505,15 +1507,43 @@ function updateSponsorStats(sponsors){
 // ════════════════════════════════
 // RENDER: SPONSOR LEVELS
 // ════════════════════════════════
+function getSoldCount(lv) {
+  // Count non-cancelled sponsors that include this level
+  var lvName = lv.name.toLowerCase().trim();
+  var count = 0;
+  (_loadedSponsors || []).forEach(function(s) {
+    if (!s || s.status === 'cancelled') return;
+    // Check sponsorships array
+    var matched = false;
+    (s.sponsorships || []).forEach(function(sp) {
+      if ((sp.name||'').toLowerCase().trim() === lvName) matched = true;
+    });
+    // Fallback: check package string
+    if (!matched && s.package) {
+      s.package.split(',').forEach(function(p) {
+        if (p.trim().toLowerCase() === lvName) matched = true;
+      });
+    }
+    if (matched) count++;
+  });
+  return count;
+}
+
 function buildLevelCard(lv){
   var thm = THEMES[lv.theme]||THEMES.forest;
   var tags = (lv.benefits||[]).map(function(bid){
     var t=benText(bid); return t?'<span class="lc-tag">'+escH(t)+'</span>':'';
   }).join('');
   var badge = lv.badge ? '<div class="lc-badge-lbl">'+escH(lv.badge)+'</div>' : '';
+  var sold = getSoldCount(lv);
+  var soldBadge = sold > 0
+    ? '<div style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:2px 9px;font-size:11px;font-weight:700;color:#fff;margin-top:5px;">'+
+        '<span style="font-size:10px;opacity:.8;">SOLD</span> <span style="font-size:13px;">'+sold+'</span>'+
+      '</div>'
+    : '<div style="display:inline-flex;align-items:center;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:2px 9px;font-size:11px;color:rgba(255,255,255,0.45);margin-top:5px;">none sold</div>';
   return '<div class="level-card">'+
     '<div class="lc-head" style="background:'+thm+'">'+
-      '<div>'+badge+'<div class="lc-name">'+escH(lv.name)+'</div></div>'+
+      '<div>'+badge+'<div class="lc-name">'+escH(lv.name)+'</div>'+soldBadge+'</div>'+
       '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'+
         (lv.icon?'<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));">'+lv.icon+'</div>':'')+
         '<div class="lc-price">'+fmtMoney(lv.price)+'</div>'+
