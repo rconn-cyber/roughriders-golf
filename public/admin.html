@@ -615,6 +615,15 @@ tr:hover td { background: #f8faf8; }
       </div>
 
     </div>
+      <!-- Hide from public toggle (sponsors only) -->
+      <div id="em-sp-hide-row" style="display:none;margin-top:6px;">
+        <div class="toggle-row">
+          <button class="toggle-switch" id="em-sp-hide-public" onclick="this.classList.toggle('on')"></button>
+          <span style="font-size:13px;color:var(--tm);">Hide from public sponsor strip on register page</span>
+        </div>
+      </div>
+
+    </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
       <button class="btn btn-primary" id="em-save-btn" onclick="saveEditEntry()">Save Changes</button>
@@ -1207,9 +1216,23 @@ function setSaveBadge(state, msg){
 }
 function buildPublicSponsors() {
   // Build a public-safe list from _loadedSponsors for register.html logo strip
-  // Only paid/invoiced sponsors, only name/company/website/logoData fields
+  var ORG_NAMES = ['1st u.s. volunteer cavalry', 'rough riders', 'tampa rough riders'];
   return (_loadedSponsors || [])
-    .filter(function(s){ return s && s.status && s.status !== 'cancelled'; })
+    .filter(function(s){
+      if (!s || !s.status) return false;
+      // Exclude cancelled entries
+      if (s.status === 'cancelled') return false;
+      // Exclude the org's own internal entries (test/comped records for the org itself)
+      var company = (s.company || '').toLowerCase().trim();
+      var isOrgEntry = ORG_NAMES.some(function(n){ return company.indexOf(n) >= 0; });
+      if (isOrgEntry) return false;
+      // Respect manual hide flag set in admin
+      if (s.hideFromPublic) return false;
+      // Must have either a logo or a real company name to be worth showing
+      var hasLogo = s.logoData && s.logoData.length > 100;
+      var hasCompany = company.length > 1;
+      return hasLogo || hasCompany;
+    })
     .sort(function(a, b){
       var aAmt = a.total || (a.amount > 10000 ? a.amount/100 : a.amount) || 0;
       var bAmt = b.total || (b.amount > 10000 ? b.amount/100 : b.amount) || 0;
@@ -1935,6 +1958,14 @@ function openEditEntry(type, idx) {
     initEditLogo(r);
     initSpPlayers(r);
     initSpBenefits(r);
+    // Show hide-from-public toggle
+    var hideRow = document.getElementById('em-sp-hide-row');
+    if (hideRow) hideRow.style.display = '';
+    var hideBtn = document.getElementById('em-sp-hide-public');
+    if (hideBtn) hideBtn.className = 'toggle-switch' + (r.hideFromPublic ? ' on' : '');
+  } else {
+    var hideRow2 = document.getElementById('em-sp-hide-row');
+    if (hideRow2) hideRow2.style.display = 'none';
   }
 
   document.getElementById('edit-modal').classList.add('open');
@@ -2343,6 +2374,9 @@ async function saveEditEntry() {
         sponsorships.push({ name: t.dataset.spName, price: parseInt(t.dataset.spPrice)||0 });
       });
       var pkgText = sponsorships.map(function(s){return s.name;}).join(', ');
+      // Handle hide from public
+      var hidePublic = document.getElementById('em-sp-hide-public');
+      var hideFromPublic = hidePublic && hidePublic.classList.contains('on');
       // Handle logo
       var logoUpdate = {};
       if (_editLogoData) {
@@ -2369,6 +2403,7 @@ async function saveEditEntry() {
         benefits:     spBenList,
         total:        spAmount,
         amount:       spAmount * 100,
+        hideFromPublic: hideFromPublic,
         status:       status,
         notes:        notes,
         updatedAt:    new Date().toISOString(),
