@@ -1216,17 +1216,10 @@ function setSaveBadge(state, msg){
 }
 function buildPublicSponsors() {
   // Build a public-safe list from _loadedSponsors for register.html logo strip
-  var ORG_NAMES = ['1st u.s. volunteer cavalry', 'rough riders', 'tampa rough riders'];
   return (_loadedSponsors || [])
     .filter(function(s){
       if (!s || !s.status) return false;
-      // Exclude cancelled entries
       if (s.status === 'cancelled') return false;
-      // Exclude the org's own internal entries (test/comped records for the org itself)
-      var company = (s.company || '').toLowerCase().trim();
-      var isOrgEntry = ORG_NAMES.some(function(n){ return company.indexOf(n) >= 0; });
-      if (isOrgEntry) return false;
-      // Respect manual hide flag set in admin
       if (s.hideFromPublic) return false;
       return true;
     })
