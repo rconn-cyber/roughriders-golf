@@ -1146,7 +1146,7 @@ var DEFAULT_LEVELS = [
   {id:'title', name:'Title Sponsor',      price:7500,theme:'forest',icon:'🏆',badge:'Top Tier',      featured:true, order:10, benefits:['b1','b4','b7','b11','b12']},
   {id:'gold',  name:'Gold Sponsor',       price:5000,theme:'gold',icon:'🥇',  badge:'',              featured:false,order:20, benefits:['b2','b5','b8','b13']},
   {id:'silver',name:'Silver Sponsor',     price:2500,theme:'silver',icon:'🥈',badge:'',              featured:false,order:30, benefits:['b3','b6','b9','b14']},
-  {id:'vip-tent',name:'VIP Tent',         price:1500,theme:'green',icon:'🌟', badge:'On-Course',     featured:false,order:40, benefits:['b18']},
+  {id:'vip-tent',name:'VIP Tent',         price:1500,theme:'green',icon:'🌟', badge:'On-Course',     featured:false,order:40, benefits:['b2','b18']},
   {id:'bev-cart',name:'Beverage Cart',    price:1500,theme:'bronze',icon:'🍺',badge:'Food & Bev',    featured:false,order:50, benefits:['b11','b12','b17']},
   {id:'bronze',name:'Bronze Sponsor',     price:1000,theme:'bronze',icon:'🥉',badge:'',              featured:false,order:60, benefits:['b3','b10','b14']},
   {id:'lunch', name:'Lunch / Dinner',     price:1250,theme:'bronze',icon:'🍽️',badge:'Food & Bev',    featured:false,order:70, benefits:['b15','b11','b12']},
@@ -1906,6 +1906,12 @@ function openEditEntry(type, idx) {
     });
     
     picker.innerHTML = html;
+    // Immediately populate benefits from the pre-selected packages
+    var preSelected = getCurrentSpSponsorships();
+    if (preSelected.length > 0) {
+      _spBenefits = [];
+      rebuildBenefitsFromPackage(preSelected);
+    }
   }
 
   // Shared
@@ -2079,21 +2085,34 @@ function initSpBenefits(record) {
   _spBenefits = [];
   var existing = record.benefits || [];
 
-  if (existing.length > 0) {
-    // Record has saved benefits — restore them as custom (editable)
+  // Always rebuild from package first so benefits auto-populate
+  var sps = getCurrentSpSponsorships();
+  if (sps.length > 0) {
+    rebuildBenefitsFromPackage(sps);
+    // If record had saved benefits, overlay them: restore on/off states
+    if (existing.length > 0) {
+      var savedSet = {};
+      existing.forEach(function(b){ savedSet[b] = true; });
+      _spBenefits.forEach(function(b){
+        // If saved benefits list exists, match package benefits to it
+        b.on = savedSet[b.text] !== undefined ? savedSet[b.text] : b.on;
+      });
+      // Add any saved benefits not in the package as custom
+      existing.forEach(function(b){
+        if (!_spBenefits.find(function(x){ return x.text === b; })) {
+          _spBenefits.push({ text: b, custom: true, on: true });
+        }
+      });
+      renderSpBenefits();
+    }
+  } else if (existing.length > 0) {
+    // No package selected but record has saved benefits — show them
     existing.forEach(function(b) {
       _spBenefits.push({ text: b, custom: false, on: true });
     });
     renderSpBenefits();
   } else {
-    // No saved benefits — auto-populate from current package selections
-    var sps = getCurrentSpSponsorships();
-    if (sps.length > 0) {
-      rebuildBenefitsFromPackage(sps);
-    } else {
-      // No package selected yet — wait for user to pick one
-      renderSpBenefits();
-    }
+    renderSpBenefits();
   }
 }
 
