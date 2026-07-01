@@ -2274,13 +2274,11 @@ async function loadSponsorLogos() {
     if (!res.ok) return;
     var all = await res.json();
     var sponsors = Array.isArray(all) ? all : (all.items || []);
-    // Filter: exclude cancelled, org's own entries, and hidden entries
-    var ORG_NAMES = ['1st u.s. volunteer cavalry', 'rough riders', 'tampa rough riders'];
+    // Filter: exclude cancelled and manually hidden entries
     sponsors = sponsors.filter(function(s) {
       if (!s || s.status === 'cancelled') return false;
       if (s.hideFromPublic) return false;
-      var company = (s.company || '').toLowerCase().trim();
-      return !ORG_NAMES.some(function(n) { return company.indexOf(n) >= 0; });
+      return true;
     });
     // Sort by amount descending
     sponsors.sort(function(a, b) {
