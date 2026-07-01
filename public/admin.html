@@ -112,7 +112,8 @@ tr:hover td { background: #f8faf8; }
 .empty-icon { font-size: 32px; margin-bottom: 10px; opacity: .35; }
 
 /* SPONSOR LEVELS */
-.levels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.levels-grid { display: block; }
+.levels-grid-inner { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 14px; }
 .level-card { background: var(--w); border: 1.5px solid var(--border); border-radius: 8px; overflow: hidden; transition: box-shadow .2s; }
 .level-card:hover { box-shadow: 0 6px 22px rgba(0,0,0,.1); }
 .lc-head { padding: 14px 16px; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
@@ -128,6 +129,9 @@ tr:hover td { background: #f8faf8; }
 .add-card:hover { background: #f4f8f4; border-color: var(--gl); }
 .add-card span:first-child { font-size: 24px; opacity: .3; }
 .add-card span:last-child { font-size: 12px; color: var(--tl); }
+.levels-section-hdr { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--gd); padding: 6px 0 10px; margin-top: 20px; border-bottom: 2px solid var(--gp); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+.levels-section-hdr:first-child { margin-top: 0; }
+.levels-section-hdr .lsh-count { font-size: 10px; background: var(--gd); color: #fff; border-radius: 10px; padding: 1px 7px; font-weight: 700; margin-left: auto; }
 
 /* ALACARTE */
 .ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
@@ -1501,38 +1505,80 @@ function updateSponsorStats(sponsors){
 // ════════════════════════════════
 // RENDER: SPONSOR LEVELS
 // ════════════════════════════════
+function buildLevelCard(lv){
+  var thm = THEMES[lv.theme]||THEMES.forest;
+  var tags = (lv.benefits||[]).map(function(bid){
+    var t=benText(bid); return t?'<span class="lc-tag">'+escH(t)+'</span>':'';
+  }).join('');
+  var badge = lv.badge ? '<div class="lc-badge-lbl">'+escH(lv.badge)+'</div>' : '';
+  return '<div class="level-card">'+
+    '<div class="lc-head" style="background:'+thm+'">'+
+      '<div>'+badge+'<div class="lc-name">'+escH(lv.name)+'</div></div>'+
+      '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'+
+        (lv.icon?'<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));">'+lv.icon+'</div>':'')+
+        '<div class="lc-price">'+fmtMoney(lv.price)+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="lc-body">'+
+      '<div class="lc-tags">'+(tags||'<span class="lc-none">No benefits — click Edit</span>')+'</div>'+
+      '<div class="lc-actions">'+
+        (lv.hidden?'<span style="font-size:10px;background:#f0f2ef;color:var(--tl);padding:2px 7px;border-radius:3px;font-weight:600;letter-spacing:.04em;margin-right:4px;">HIDDEN</span>':'')+
+        '<button class="btn btn-outline btn-sm" onclick="openLevelModal(\''+lv.id+'\')" >✏ Edit</button>'+
+        '<button class="btn btn-danger btn-sm" onclick="deleteLevel(\''+lv.id+'\')" >✕ Delete</button>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+}
+
 function renderLevels(){
   var grid = document.getElementById('levels-grid');
   if (!grid) return;
-  // Sort all levels by price descending
-  var sorted = STATE.levels.slice().sort(function(a,b){return b.price - a.price;});
-  var html = sorted.map(function(lv){
-    var thm = THEMES[lv.theme]||THEMES.forest;
-    var tags = (lv.benefits||[]).map(function(bid){
-      var t=benText(bid); return t?'<span class="lc-tag">'+escH(t)+'</span>':'';
-    }).join('');
-    var badge = lv.badge ? '<div class="lc-badge-lbl">'+escH(lv.badge)+'</div>' : '';
-    return '<div class="level-card">'+
-      '<div class="lc-head" style="background:'+thm+'">'+
-        '<div>'+badge+
-          '<div class="lc-name">'+escH(lv.name)+'</div></div>'+
-        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'+(lv.icon?'<div style="font-size:22px;line-height:1;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.3));">'+lv.icon+'</div>':'')+'<div class="lc-price">'+fmtMoney(lv.price)+'</div></div>'+
-      '</div>'+
-      '<div class="lc-body">'+
-        '<div class="lc-tags">'+(tags||'<span class="lc-none">No benefits — click Edit</span>')+'</div>'+
-        '<div class="lc-actions">'+
-          (lv.hidden ? '<span style="font-size:10px;background:#f0f2ef;color:var(--tl);padding:2px 7px;border-radius:3px;font-weight:600;letter-spacing:.04em;margin-right:4px;">HIDDEN</span>' : '')+
-          '<button class="btn btn-outline btn-sm" onclick="openLevelModal(\''+lv.id+'\')">✏ Edit</button>'+
-          '<button class="btn btn-danger btn-sm" onclick="deleteLevel(\''+lv.id+'\')">✕ Delete</button>'+
-        '</div>'+
-      '</div>'+
-    '</div>';
-  }).join('');
-  html += '<button class="add-card" onclick="openLevelModal(null)"><span>＋</span><span>Add new level</span></button>';
+
+  var sorted = STATE.levels.slice().sort(function(a,b){ return b.price - a.price; });
+
+  // Split: Tiers (>=1000) vs Add-ons (<1000) — matches register.html
+  var tiers  = sorted.filter(function(lv){ return lv.price >= 1000; });
+  var addons = sorted.filter(function(lv){ return lv.price < 1000; });
+
+  var html = '';
+
+  // ── TIERS SECTION ──
+  if (tiers.length) {
+    html += '<div class="levels-section-hdr">🏆 Sponsorship Tiers <span class="lsh-count">'+tiers.length+'</span></div>';
+    html += '<div class="levels-grid-inner">'+tiers.map(buildLevelCard).join('')+'</div>';
+  }
+
+  // ── ADD-ONS SECTION — grouped by badge/category ──
+  if (addons.length) {
+    var GROUP_ORDER = ['Food & Bev', 'Contest', 'On-Course', 'Gifts & Swag', 'Branding', ''];
+    var GROUP_LABELS = {
+      'Food & Bev':   '🍽️  Food & Beverage',
+      'Contest':      '🏆  Contests',
+      'On-Course':    '⛳  On-Course',
+      'Gifts & Swag': '🎁  Gifts & Swag',
+      'Branding':     '🖨️  Branding',
+      '':             '➕  Other'
+    };
+    var groups = {};
+    GROUP_ORDER.forEach(function(g){ groups[g] = []; });
+    addons.forEach(function(lv){
+      var key = (lv.badge||'').trim();
+      if (!groups.hasOwnProperty(key)) groups[key] = [];
+      groups[key].push(lv);
+    });
+    html += '<div class="levels-section-hdr" style="margin-top:28px;">➕ Add-On Sponsorships <span class="lsh-count">'+addons.length+'</span></div>';
+    GROUP_ORDER.forEach(function(key){
+      var items = groups[key];
+      if (!items || !items.length) return;
+      html += '<div style="margin-bottom:6px;"><div class="group-label">'+escH(GROUP_LABELS[key]||key)+'</div>';
+      html += '<div class="levels-grid-inner">'+items.map(buildLevelCard).join('')+'</div></div>';
+    });
+  }
+
+  html += '<button class="add-card" style="margin-top:14px;" onclick="openLevelModal(null)"><span>＋</span><span>Add new level</span></button>';
   grid.innerHTML = html;
   updateCounts();
 }
-
 
 function deleteLevel(id){
   if (!confirm('Delete this sponsor level?')) return;
