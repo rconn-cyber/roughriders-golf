@@ -1228,10 +1228,7 @@ function buildPublicSponsors() {
       if (isOrgEntry) return false;
       // Respect manual hide flag set in admin
       if (s.hideFromPublic) return false;
-      // Must have either a logo or a real company name to be worth showing
-      var hasLogo = s.logoData && s.logoData.length > 100;
-      var hasCompany = company.length > 1;
-      return hasLogo || hasCompany;
+      return true;
     })
     .sort(function(a, b){
       var aAmt = a.total || (a.amount > 10000 ? a.amount/100 : a.amount) || 0;
@@ -1239,14 +1236,12 @@ function buildPublicSponsors() {
       return bAmt - aAmt;
     })
     .map(function(s){
-      // Keep logoData only if reasonably sized (under 200KB base64)
-      var logo = s.logoData && s.logoData.length < 200000 ? s.logoData : null;
       return {
         company:   s.company   || null,
         firstName: s.firstName || null,
         lastName:  s.lastName  || null,
         website:   s.website   || null,
-        logoData:  logo,
+        logoData:  s.logoData  || null,
       };
     });
 }
