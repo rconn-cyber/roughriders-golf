@@ -817,11 +817,11 @@ tr:hover td { background: #f8faf8; }
       <div id="me-sponsor-section" style="display:none;">
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">First Name *</label>
+            <label class="form-label">First Name <span>(optional if company entered)</span></label>
             <input class="form-input" id="me-sp-fn" type="text" maxlength="40">
           </div>
           <div class="form-group">
-            <label class="form-label">Last Name *</label>
+            <label class="form-label">Last Name <span>(optional if company entered)</span></label>
             <input class="form-input" id="me-sp-ln" type="text" maxlength="40">
           </div>
         </div>
@@ -2998,7 +2998,8 @@ async function saveManualRegistration(paymentType, notes) {
 async function saveManualSponsor(paymentType, notes) {
   var fn      = document.getElementById('me-sp-fn').value.trim();
   var ln      = document.getElementById('me-sp-ln').value.trim();
-  if (!fn && !ln) throw new Error('Name is required');
+  var company = document.getElementById('me-sp-company').value.trim();
+  if (!fn && !ln && !company) throw new Error('Enter a name or company name');
 
   var sponsorships = [];
   document.querySelectorAll('#me-sp-levels .benefit-toggle.on').forEach(function(t){
