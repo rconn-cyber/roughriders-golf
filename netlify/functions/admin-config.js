@@ -9,10 +9,12 @@ const ADMIN_KEY  = process.env.ADMIN_PASSWORD;
 const BLOB_KEYS  = {
   'sponsor-config': 'golf-admin/sponsor-config',
   'event-content':  'golf-admin/event-content',
+  'team-capacity':  'golf-admin/team-capacity',
 };
 const DEFAULT_VALS = {
   'sponsor-config': JSON.stringify({ benefits: [], levels: [], alacarte: [] }),
   'event-content':  JSON.stringify({ html: '' }),
+  'team-capacity':  JSON.stringify({ totalTeams: 18, confirmedTeams: 0, reservedTeams: 0, usedSlots: 0, openSlots: 18, individuals: 0 }),
 };
 
 const CORS = {
