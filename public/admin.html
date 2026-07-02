@@ -2936,6 +2936,7 @@ async function saveManualEntry() {
       })).then(function(){ loadReserved(); }).catch(function(){});
     }
     loadOrders();
+    updateCapacityOnRegPage();
     toast('Entry saved ✓');
   } catch(e) {
     toast('Save failed: ' + e.message);
@@ -3054,6 +3055,7 @@ async function initApp(){
   setTimeout(function(){setSaveBadge('idle');},2000);
   loadOrders();
   loadReserved();
+  updateCapacityOnRegPage();
 }
 
 /* ====== CONTENT PANEL - TipTap-lite editor ====== */
@@ -3515,12 +3517,16 @@ async function deleteReserved(id) {
 }
 
 // Push capacity summary to admin-config so register.html can read it publicly
+// Individuals count toward capacity: every 4 individuals consume 1 team slot.
 async function updateCapacityOnRegPage() {
   var confirmed = getConfirmedTeamCount();
   var reserved  = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; }).length;
-  var used = confirmed + reserved;
+  var indiv     = getIndividualCount();
+  // Each full group of 4 individuals takes a slot; remainder are "forming"
+  var indivSlots   = Math.floor(indiv / 4);
+  var indivPartial = indiv % 4;  // players not yet filling a slot
+  var used = confirmed + reserved + indivSlots;
   var open = Math.max(0, MAX_TEAMS - used);
-  var indiv = getIndividualCount();
   // Store via admin-config (publicly readable)
   try {
     var key = typeof ADMIN_KEY !== 'undefined' ? ADMIN_KEY : (localStorage.getItem('golf-admin-key') || '');
@@ -3528,7 +3534,17 @@ async function updateCapacityOnRegPage() {
     await fetch(NETLIFY_BASE+'/.netlify/functions/admin-config', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-key': key },
-      body: JSON.stringify({ _key: 'team-capacity', confirmedTeams: confirmed, reservedTeams: reserved, totalTeams: MAX_TEAMS, usedSlots: used, openSlots: open, individuals: indiv })
+      body: JSON.stringify({
+        _key: 'team-capacity',
+        confirmedTeams: confirmed,
+        reservedTeams: reserved,
+        totalTeams: MAX_TEAMS,
+        usedSlots: used,
+        openSlots: open,
+        individuals: indiv,
+        indivSlots: indivSlots,
+        indivPartial: indivPartial
+      })
     });
   } catch(e) {}
 }
