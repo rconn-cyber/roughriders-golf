@@ -77,6 +77,12 @@ exports.handler = async (event) => {
         golfer_details: golferDetails.slice(0, 500),
       },
 
+      // Payment description shown in Stripe transaction list
+      payment_intent_data: {
+        description: golfers[0]
+          ? `Golf Registration — ${golfers[0].firstName} ${golfers[0].lastName}, ${golfers.length} player${golfers.length !== 1 ? 's' : ''}`
+          : `Golf Registration — ${sponsorships.map(s => s.name).join(', ')}`,
+      },
       // Where to go after payment
       success_url: process.env.SUCCESS_URL + '?session_id={CHECKOUT_SESSION_ID}',
       cancel_url:  process.env.CANCEL_URL,
