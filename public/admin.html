@@ -1139,24 +1139,38 @@ tr:hover td { background: #f8faf8; }
 
 <!-- CONVERT RESERVED → REGISTRATION TYPE PICKER -->
 <div class="modal-overlay" id="convert-type-modal">
-  <div class="modal-box" style="max-width:400px;">
+  <div class="modal-box" style="max-width:420px;">
     <div class="modal-header">
       <span class="modal-title">Convert Reserved Slot</span>
       <button class="modal-close" onclick="document.getElementById('convert-type-modal').classList.remove('open');_convertingReservedId=null;">×</button>
     </div>
-    <div class="modal-body" style="text-align:center;padding:28px 24px;">
-      <div style="font-size:13px;color:var(--tl);margin-bottom:20px;">
-        Converting <strong id="ctr-name">this slot</strong> to a real entry.<br>What type of team is this?
+    <div class="modal-body" style="text-align:center;padding:24px;">
+      <div style="font-size:13px;color:var(--tl);margin-bottom:18px;">
+        Converting <strong id="ctr-name">this slot</strong> to a real entry.
       </div>
       <input type="hidden" id="ctr-id">
+
+      <!-- How many teams -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:22px;padding:14px;background:#f8faf6;border-radius:8px;border:1px solid var(--border);">
+        <span style="font-size:13px;font-weight:700;color:var(--td);">How many teams?</span>
+        <div style="display:flex;align-items:center;gap:0;border:1.5px solid var(--border);border-radius:6px;overflow:hidden;">
+          <button onclick="ctrQtyAdj(-1)"
+            style="width:34px;height:34px;border:none;background:#f0f4f0;font-size:18px;font-weight:700;cursor:pointer;color:var(--gd);font-family:'DM Sans',sans-serif;">−</button>
+          <span id="ctr-qty" style="min-width:36px;text-align:center;font-size:18px;font-weight:800;color:var(--gd);font-family:'Playfair Display',serif;padding:0 4px;">1</span>
+          <button onclick="ctrQtyAdj(1)"
+            style="width:34px;height:34px;border:none;background:#f0f4f0;font-size:18px;font-weight:700;cursor:pointer;color:var(--gd);font-family:'DM Sans',sans-serif;">+</button>
+        </div>
+      </div>
+
+      <!-- Type buttons -->
       <div style="display:flex;flex-direction:column;gap:12px;">
         <button class="btn btn-primary" onclick="openConvertAsType('registration')"
-          style="padding:16px;font-size:14px;justify-content:center;">
+          style="padding:14px;font-size:14px;justify-content:center;">
           🏌️ Player Team
           <span style="display:block;font-size:11px;font-weight:400;opacity:0.75;margin-top:3px;">Golfers paying or comped — $650/team or $165/individual</span>
         </button>
         <button class="btn btn-primary" onclick="openConvertAsType('sponsor')"
-          style="padding:16px;font-size:14px;justify-content:center;background:var(--gold);color:#1a1a00;">
+          style="padding:14px;font-size:14px;justify-content:center;background:var(--gold);color:#1a1a00;">
           🤝 Sponsor Team
           <span style="display:block;font-size:11px;font-weight:400;opacity:0.75;margin-top:3px;">Company or individual sponsoring — includes golfer slots</span>
         </button>
@@ -2887,13 +2901,39 @@ async function saveManualEntry() {
       await saveManualSponsor(paymentType, notes);
     }
     closeManualModal();
-    // If converting from a reserved slot, delete it now
+    // If converting from reserved slot(s), save additional copies and delete reserved slots
     if (_convertingReservedId) {
       var rid = _convertingReservedId;
+      var qty = _convertingQty || 1;
       _convertingReservedId = null;
-      fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=reserved-teams&id='+encodeURIComponent(rid), {
-        method: 'DELETE', headers: { 'Authorization': 'Bearer ' + _jwt }
-      }).then(function(){ loadReserved(); }).catch(function(){});
+      _convertingQty = 1;
+      // For qty > 1, save additional registration copies (same data, new IDs)
+      var extraSaves = [];
+      if (qty > 1 && _manualTab === 'registration') {
+        for (var qi = 1; qi < qty; qi++) {
+          extraSaves.push(saveManualRegistration(
+            document.getElementById('me-payment-type').value,
+            document.getElementById('me-notes').value.trim()
+          ));
+        }
+      } else if (qty > 1 && _manualTab === 'sponsor') {
+        for (var qi = 1; qi < qty; qi++) {
+          extraSaves.push(saveManualSponsor(
+            document.getElementById('me-payment-type').value,
+            document.getElementById('me-notes').value.trim()
+          ));
+        }
+      }
+      // Delete this reserved slot + (qty-1) additional reserved slots
+      var activeSlots = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; });
+      var toDelete = [rid];
+      activeSlots.forEach(function(r){ if (r.id !== rid && toDelete.length < qty) toDelete.push(r.id); });
+      Promise.all(extraSaves).catch(function(){});
+      Promise.all(toDelete.map(function(delId){
+        return fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=reserved-teams&id='+encodeURIComponent(delId), {
+          method: 'DELETE', headers: { 'Authorization': 'Bearer ' + _jwt }
+        });
+      })).then(function(){ loadReserved(); }).catch(function(){});
     }
     loadOrders();
     toast('Entry saved ✓');
@@ -3136,25 +3176,37 @@ function saveEventContent() {
 // CONVERT RESERVED SLOT → REGISTRATION
 // ════════════════════════════════
 var _convertingReservedId = null;
+var _convertingQty = 1;
 
 function openConvertToReg(id) {
   var rec = _loadedReserved.find(function(r){ return r.id === id; });
   if (!rec) return;
   _convertingReservedId = id;
-
-  // Open the manual entry modal — ask which type first
-  // Show a mini-picker modal inline
   var pick = document.getElementById('convert-type-modal');
   if (pick) {
     document.getElementById('ctr-name').textContent = rec.name ? rec.name : 'this reserved slot';
     document.getElementById('ctr-id').value = id;
+    document.getElementById('ctr-qty').textContent = '1'; // reset qty
     pick.classList.add('open');
   }
+}
+
+function ctrQtyAdj(delta) {
+  var el = document.getElementById('ctr-qty');
+  if (!el) return;
+  var active = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; }).length;
+  var confirmed = getConfirmedTeamCount();
+  var maxAllowed = Math.max(1, MAX_TEAMS - confirmed); // can't exceed capacity
+  var val = Math.min(maxAllowed, Math.max(1, (parseInt(el.textContent) || 1) + delta));
+  el.textContent = val;
 }
 
 function openConvertAsType(type) {
   var pick = document.getElementById('convert-type-modal');
   if (pick) pick.classList.remove('open');
+
+  var qty = parseInt(document.getElementById('ctr-qty').textContent) || 1;
+  _convertingQty = qty;
 
   var rec = _loadedReserved.find(function(r){ return r.id === _convertingReservedId; });
 
@@ -3215,8 +3267,9 @@ function openConvertAsType(type) {
   }
 
   // Update modal title
+  var qtyLabel = qty > 1 ? ' ('+qty+' teams)' : '';
   document.getElementById('manual-modal-title').textContent =
-    type === 'registration' ? 'Convert Reserved Slot → Player Team' : 'Convert Reserved Slot → Sponsor';
+    type === 'registration' ? 'Convert Reserved Slot → Player Team'+qtyLabel : 'Convert Reserved Slot → Sponsor'+qtyLabel;
 }
 
 // ════════════════════════════════
