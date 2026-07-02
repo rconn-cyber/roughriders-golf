@@ -1136,6 +1136,35 @@ tr:hover td { background: #f8faf8; }
 </div>
 
 
+
+<!-- CONVERT RESERVED → REGISTRATION TYPE PICKER -->
+<div class="modal-overlay" id="convert-type-modal">
+  <div class="modal-box" style="max-width:400px;">
+    <div class="modal-header">
+      <span class="modal-title">Convert Reserved Slot</span>
+      <button class="modal-close" onclick="document.getElementById('convert-type-modal').classList.remove('open');_convertingReservedId=null;">×</button>
+    </div>
+    <div class="modal-body" style="text-align:center;padding:28px 24px;">
+      <div style="font-size:13px;color:var(--tl);margin-bottom:20px;">
+        Converting <strong id="ctr-name">this slot</strong> to a real entry.<br>What type of team is this?
+      </div>
+      <input type="hidden" id="ctr-id">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button class="btn btn-primary" onclick="openConvertAsType('registration')"
+          style="padding:16px;font-size:14px;justify-content:center;">
+          🏌️ Player Team
+          <span style="display:block;font-size:11px;font-weight:400;opacity:0.75;margin-top:3px;">Golfers paying or comped — $650/team or $165/individual</span>
+        </button>
+        <button class="btn btn-primary" onclick="openConvertAsType('sponsor')"
+          style="padding:16px;font-size:14px;justify-content:center;background:var(--gold);color:#1a1a00;">
+          🤝 Sponsor Team
+          <span style="display:block;font-size:11px;font-weight:400;opacity:0.75;margin-top:3px;">Company or individual sponsoring — includes golfer slots</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- RESERVED TEAM MODAL (Add / Edit) -->
 <div class="modal-overlay" id="reserved-modal">
   <div class="modal-box" style="max-width:480px;">
@@ -2858,6 +2887,14 @@ async function saveManualEntry() {
       await saveManualSponsor(paymentType, notes);
     }
     closeManualModal();
+    // If converting from a reserved slot, delete it now
+    if (_convertingReservedId) {
+      var rid = _convertingReservedId;
+      _convertingReservedId = null;
+      fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=reserved-teams&id='+encodeURIComponent(rid), {
+        method: 'DELETE', headers: { 'Authorization': 'Bearer ' + _jwt }
+      }).then(function(){ loadReserved(); }).catch(function(){});
+    }
     loadOrders();
     toast('Entry saved ✓');
   } catch(e) {
@@ -3094,6 +3131,94 @@ function saveEventContent() {
   .finally(function() { if (btn) { btn.disabled = false; btn.textContent = 'Save & Publish'; } });
 }
 
+
+// ════════════════════════════════
+// CONVERT RESERVED SLOT → REGISTRATION
+// ════════════════════════════════
+var _convertingReservedId = null;
+
+function openConvertToReg(id) {
+  var rec = _loadedReserved.find(function(r){ return r.id === id; });
+  if (!rec) return;
+  _convertingReservedId = id;
+
+  // Open the manual entry modal — ask which type first
+  // Show a mini-picker modal inline
+  var pick = document.getElementById('convert-type-modal');
+  if (pick) {
+    document.getElementById('ctr-name').textContent = rec.name ? rec.name : 'this reserved slot';
+    document.getElementById('ctr-id').value = id;
+    pick.classList.add('open');
+  }
+}
+
+function openConvertAsType(type) {
+  var pick = document.getElementById('convert-type-modal');
+  if (pick) pick.classList.remove('open');
+
+  var rec = _loadedReserved.find(function(r){ return r.id === _convertingReservedId; });
+
+  // Open manual entry modal with type pre-set
+  openManualEntry(type);
+
+  // Pre-fill name/contact from reserved slot
+  if (rec) {
+    if (type === 'registration') {
+      // Split name into first/last if possible
+      var parts = (rec.name || '').trim().split(/\s+/);
+      var fn = parts[0] || '';
+      var ln = parts.slice(1).join(' ') || '';
+      var fnEl = document.getElementById('me-p1-fn');
+      var lnEl = document.getElementById('me-p1-ln');
+      var emEl = document.getElementById('me-p1-email');
+      if (fnEl) fnEl.value = fn;
+      if (lnEl) lnEl.value = ln;
+      if (emEl && rec.email) emEl.value = rec.email;
+      // Default to comped-team — most likely use case for reserved slots
+      var rtEl = document.getElementById('me-reg-type');
+      if (rtEl) { rtEl.value = 'comped-team'; updateManualRegType(); }
+      var pyEl = document.getElementById('me-payment-type');
+      if (pyEl) { pyEl.value = 'comped'; updateManualPaymentNote(); }
+    } else {
+      // Sponsor tab
+      var spFn = document.getElementById('me-sp-fn');
+      var spLn = document.getElementById('me-sp-ln');
+      var spCo = document.getElementById('me-sp-company');
+      var spEm = document.getElementById('me-sp-email');
+      if (rec.name) {
+        // Try splitting; if it looks like a company put it in company field
+        var parts = rec.name.trim().split(/\s+/);
+        if (parts.length >= 3 || /[,&]|LLC|Inc|Corp|Co/i.test(rec.name)) {
+          if (spCo) spCo.value = rec.name;
+          // Use contact name for person fields if available
+          if (rec.contact) {
+            var cp = rec.contact.trim().split(/\s+/);
+            if (spFn) spFn.value = cp[0] || '';
+            if (spLn) spLn.value = cp.slice(1).join(' ') || '';
+          }
+        } else {
+          if (spFn) spFn.value = parts[0] || '';
+          if (spLn) spLn.value = parts.slice(1).join(' ') || '';
+        }
+      } else if (rec.contact) {
+        var cp = rec.contact.trim().split(/\s+/);
+        if (spFn) spFn.value = cp[0] || '';
+        if (spLn) spLn.value = cp.slice(1).join(' ') || '';
+      }
+      if (spEm && rec.email) spEm.value = rec.email;
+      var pyEl = document.getElementById('me-payment-type');
+      if (pyEl) { pyEl.value = 'comped'; updateManualPaymentNote(); }
+    }
+    // Pre-fill notes with any existing notes from reserved slot
+    var notesEl = document.getElementById('me-notes');
+    if (notesEl && rec.notes) notesEl.value = rec.notes;
+  }
+
+  // Update modal title
+  document.getElementById('manual-modal-title').textContent =
+    type === 'registration' ? 'Convert Reserved Slot → Player Team' : 'Convert Reserved Slot → Sponsor';
+}
+
 // ════════════════════════════════
 // RESERVED TEAMS
 // ════════════════════════════════
@@ -3220,6 +3345,7 @@ function renderReserved() {
         '</span>'+
       '</div>'+
       '<div class="res-actions">'+
+        '<button class="btn btn-primary btn-sm" onclick="openConvertToReg(&quot;'+escH(r.id)+'&quot;)" style="background:#1a6b3a;">→ Register</button>'+
         '<button class="btn btn-outline btn-sm" onclick="openEditReserved(&quot;'+escH(r.id)+'&quot;)">✏ Edit</button>'+
         '<button class="btn btn-danger btn-sm" onclick="deleteReserved(&quot;'+escH(r.id)+'&quot;)">✕</button>'+
       '</div>'+
