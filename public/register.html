@@ -663,6 +663,9 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
           <span id="cap-open" style="font-size:11px;font-weight:600;color:#555;"></span>
         </div>
       </div>
+      <div id="cap-indiv-row" style="display:none;margin-top:7px;font-size:11px;color:#7a5c00;font-weight:600;padding:5px 8px;background:#fffbef;border-radius:4px;border:1px solid #e8c040;">
+        👤 <span id="cap-indiv-detail"></span>
+      </div>
     </div>
 
     <script>
@@ -671,18 +674,21 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         .then(function(r){ return r.ok ? r.json() : null; })
         .then(function(d){
           if (!d || d.totalTeams == null) return;
-          var total     = d.totalTeams || 18;
-          var confirmed = d.confirmedTeams || 0;
-          var reserved  = d.reservedTeams  || 0;
-          var open      = Math.max(0, d.openSlots != null ? d.openSlots : (total - confirmed - reserved));
-          var indiv     = d.individuals || 0;
-          var used      = confirmed + reserved;
-          var pct       = Math.min(100, Math.round(used / total * 100));
+          var total        = d.totalTeams || 18;
+          var confirmed    = d.confirmedTeams || 0;
+          var reserved     = d.reservedTeams  || 0;
+          var indiv        = d.individuals || 0;
+          var indivSlots   = d.indivSlots   != null ? d.indivSlots   : Math.floor(indiv / 4);
+          var indivPartial = d.indivPartial != null ? d.indivPartial : (indiv % 4);
+          // usedSlots = confirmed teams + reserved slots + full groups of 4 individuals
+          var used  = confirmed + reserved + indivSlots;
+          var open  = Math.max(0, d.openSlots != null ? d.openSlots : (total - used));
+          var pct   = Math.min(100, Math.round(used / total * 100));
 
           var block = document.getElementById('team-capacity-block');
           if (block) block.style.display = '';
 
-          // Big number — confirmed + reserved combined
+          // Big number — all consumed slots
           var rn = document.getElementById('cap-registered-num');
           if (rn) rn.textContent = used;
 
@@ -701,9 +707,23 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
           setT('cap-confirmed', confirmed + ' confirmed team'+(confirmed===1?'':'s'));
           setT('cap-reserved',  reserved  + ' reserved');
           setT('cap-open',      open      + ' open');
+          // Show individuals: full groups already counted in bar; partial shown as "forming"
           if (indiv > 0) {
+            var msg = '';
+            if (indivSlots > 0 && indivPartial > 0) {
+              msg = indiv + ' individual'+(indiv===1?' player':' players')+' — '+indivSlots+' slot'+(indivSlots===1?'':'s')+' filled + '+indivPartial+' still forming a team';
+            } else if (indivSlots > 0) {
+              msg = indiv + ' individual'+(indiv===1?' player':' players')+' filling '+indivSlots+' slot'+(indivSlots===1?'':'s');
+            } else {
+              msg = indivPartial + ' individual'+(indivPartial===1?' player':' players')+' — team forming (need '+(4-indivPartial)+' more)';
+            }
+            var ir = document.getElementById('cap-indiv-row');
+            var id2 = document.getElementById('cap-indiv-detail');
+            if (id2) id2.textContent = msg;
+            if (ir) ir.style.display = '';
+            // Also update inline badge next to the big number
             var ii = document.getElementById('cap-indiv-inline');
-            if (ii) { ii.textContent = '+ '+indiv+' individual'+(indiv===1?' player':' players'); ii.style.display=''; }
+            if (ii) { ii.textContent = '(+'+indiv+' ind.)'; ii.style.display=''; }
           }
         })
         .catch(function(){});
