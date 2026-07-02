@@ -3220,9 +3220,9 @@ function renderReserved() {
         '</span>'+
       '</div>'+
       '<div class="res-actions">'+
-        (isConfirmed ? '' : '<button class="btn btn-primary btn-sm" onclick="openConvertReserved(''+escH(r.id)+'')">✓ Confirm</button>')+
-        '<button class="btn btn-outline btn-sm" onclick="openEditReserved(''+escH(r.id)+'')">✏ Edit</button>'+
-        '<button class="btn btn-danger btn-sm" onclick="deleteReserved(''+escH(r.id)+'')">✕</button>'+
+        (isConfirmed ? '' : '<button class="btn btn-primary btn-sm" onclick="openConvertReserved(&quot;'+escH(r.id)+'&quot;)">✓ Confirm</button>')+
+        '<button class="btn btn-outline btn-sm" onclick="openEditReserved(&quot;'+escH(r.id)+'&quot;)">✏ Edit</button>'+
+        '<button class="btn btn-danger btn-sm" onclick="deleteReserved(&quot;'+escH(r.id)+'&quot;)">✕</button>'+
       '</div>'+
     '</div>';
   }).join('');
