@@ -2374,6 +2374,21 @@ function renderSponsorLogos(sponsors) {
   var strip = document.getElementById('sponsor-logo-strip');
   var logoContainer = document.getElementById('sponsor-logos');
   if (!strip || !logoContainer || !sponsors.length) return;
+  // Deduplicate by company name — keep the entry with a logo if available
+  var seen = {};
+  var deduped = [];
+  sponsors.forEach(function(s) {
+    var key = (s.company || ((s.firstName||'') + ' ' + (s.lastName||'')).trim() || '').toLowerCase().trim();
+    if (!key) { deduped.push(s); return; }
+    if (!seen[key]) { seen[key] = s; deduped.push(s); }
+    else if (s.logoData && !seen[key].logoData) {
+      // Replace with the version that has a logo
+      var idx = deduped.indexOf(seen[key]);
+      if (idx !== -1) deduped[idx] = s;
+      seen[key] = s;
+    }
+  });
+  sponsors = deduped;
   var html = '';
   for (var i = 0; i < sponsors.length; i++) {
     var s = sponsors[i];
