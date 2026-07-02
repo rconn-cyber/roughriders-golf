@@ -1150,7 +1150,7 @@ tr:hover td { background: #f8faf8; }
           <option value="reserved">Reserved (TBD sponsor)</option>
           <option value="confirmed">Confirmed (sponsor known)</option>
         </select>
-        <div class="form-hint">Use <em>Reserved</em> to hold the slot now; switch to <em>Confirmed</em> when you have details.</div>
+        <div class="form-hint">Switch to <em>Confirmed</em> once you have the sponsor details.</div>
       </div>
       <div class="form-group">
         <label class="form-label">Sponsor / Company Name <span>optional for reserved slots</span></label>
@@ -3220,7 +3220,6 @@ function renderReserved() {
         '</span>'+
       '</div>'+
       '<div class="res-actions">'+
-        (isConfirmed ? '' : '<button class="btn btn-primary btn-sm" onclick="openConvertReserved(&quot;'+escH(r.id)+'&quot;)">✓ Confirm</button>')+
         '<button class="btn btn-outline btn-sm" onclick="openEditReserved(&quot;'+escH(r.id)+'&quot;)">✏ Edit</button>'+
         '<button class="btn btn-danger btn-sm" onclick="deleteReserved(&quot;'+escH(r.id)+'&quot;)">✕</button>'+
       '</div>'+
@@ -3252,13 +3251,14 @@ function openEditReserved(id) {
   var rec = _loadedReserved.find(function(r){ return r.id === id; });
   if (!rec) return;
   _editingReservedId = id;
-  document.getElementById('reserved-modal-title').textContent = 'Edit Reserved Slot';
-  document.getElementById('res-modal-status').value  = rec.status || 'reserved';
+  document.getElementById('reserved-modal-title').textContent = (rec.status === 'reserved') ? 'Confirm Sponsor Details' : 'Edit Slot';
+  // Auto-advance to confirmed when editing a reserved slot — skip if already confirmed
+  document.getElementById('res-modal-status').value  = (rec.status === 'reserved') ? 'confirmed' : 'confirmed';
   document.getElementById('res-modal-name').value    = rec.name    || '';
   document.getElementById('res-modal-contact').value = rec.contact || '';
   document.getElementById('res-modal-email').value   = rec.email   || '';
   document.getElementById('res-modal-notes').value   = rec.notes   || '';
-  document.getElementById('res-modal-save-btn').textContent = 'Update Slot';
+  document.getElementById('res-modal-save-btn').textContent = (rec.status === 'reserved') ? 'Confirm Sponsor' : 'Update Slot';
   document.getElementById('reserved-modal').classList.add('open');
 }
 
