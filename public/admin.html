@@ -416,6 +416,7 @@ tr:hover td { background: #f8faf8; }
             <div style="display:flex;gap:12px;flex-wrap:wrap;">
               <div class="stat-card" style="flex:1;min-width:100px;"><div class="stat-label">Confirmed Teams</div><div class="stat-value" id="res-stat-confirmed">0</div><div class="stat-sub">from registrations</div></div>
               <div class="stat-card" style="flex:1;min-width:100px;"><div class="stat-label">Reserved Slots</div><div class="stat-value" id="res-stat-reserved">0</div><div class="stat-sub">future sponsors</div></div>
+              <div class="stat-card" style="flex:1;min-width:100px;"><div class="stat-label">Individuals</div><div class="stat-value" id="res-stat-indiv">0</div><div class="stat-sub" id="res-stat-indiv-sub">not yet on a team</div></div>
               <div class="stat-card" style="flex:1;min-width:100px;"><div class="stat-label">Open Slots</div><div class="stat-value" id="res-stat-open">18</div><div class="stat-sub">available to sell</div></div>
             </div>
           </div>
@@ -431,6 +432,9 @@ tr:hover td { background: #f8faf8; }
               </span>
               <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--tm);">
                 <span style="width:14px;height:14px;border-radius:3px;background:#fff8e1;border:2px solid #e8c040;display:inline-block;"></span> Reserved (future sponsor)
+              </span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--tm);">
+                <span style="width:14px;height:14px;border-radius:3px;background:#e8f0ff;border:2px solid #5b8dee;display:inline-block;"></span> Individuals (forming)
               </span>
               <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--tm);">
                 <span style="width:14px;height:14px;border-radius:3px;background:#f4f6f4;border:2px dashed #d0d8d0;display:inline-block;"></span> Open slot
@@ -3327,13 +3331,16 @@ function getIndividualCount() {
 }
 
 function renderReserved() {
-  var confirmed = getConfirmedTeamCount();
-  var reserved  = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; }).length;
-  var used      = confirmed + reserved;
-  var open      = Math.max(0, MAX_TEAMS - used);
-  var pct       = Math.min(100, Math.round(used / MAX_TEAMS * 100));
+  var confirmed    = getConfirmedTeamCount();
+  var reserved     = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; }).length;
+  var indiv        = getIndividualCount();
+  var indivSlots   = Math.floor(indiv / 4);   // full slots consumed by individuals
+  var indivPartial = indiv % 4;               // players not yet filling a slot
+  var used         = confirmed + reserved + indivSlots;
+  var open         = Math.max(0, MAX_TEAMS - used);
+  var pct          = Math.min(100, Math.round(used / MAX_TEAMS * 100));
 
-  // Update nav count
+  // Update nav count (reserved only)
   var nc = document.getElementById('cnt-reserved');
   if (nc) nc.textContent = reserved;
 
@@ -3341,8 +3348,23 @@ function renderReserved() {
   var se = function(id, v) { var e = document.getElementById(id); if (e) e.textContent = v; };
   se('res-stat-confirmed', confirmed);
   se('res-stat-reserved',  reserved);
+  se('res-stat-indiv',     indiv);
   se('res-stat-open',      open);
   se('stat-slots-open',    open);  // also update Registrations panel
+
+  // Individuals sub-label
+  var indivSub = document.getElementById('res-stat-indiv-sub');
+  if (indivSub) {
+    if (indiv === 0) {
+      indivSub.textContent = 'not yet on a team';
+    } else if (indivSlots > 0 && indivPartial > 0) {
+      indivSub.textContent = indivSlots+' slot'+(indivSlots===1?'':'s')+' full · '+indivPartial+' forming';
+    } else if (indivSlots > 0) {
+      indivSub.textContent = indivSlots+' slot'+(indivSlots===1?'':'s')+' consumed';
+    } else {
+      indivSub.textContent = indivPartial+' of 4 forming a team';
+    }
+  }
 
   // Capacity bar
   var fill = document.getElementById('res-bar-fill');
@@ -3350,10 +3372,13 @@ function renderReserved() {
     fill.style.width = pct + '%';
     fill.className = 'capacity-bar-fill' + (pct >= 100 ? ' full' : pct >= 80 ? ' warn' : '');
   }
-  se('res-bar-left',  used + ' of ' + MAX_TEAMS + ' slots used');
+  var barLeft = used + ' of ' + MAX_TEAMS + ' slots used';
+  if (indiv > 0) barLeft += ' (incl. ' + indiv + ' individual'+(indiv===1?' player':' players')+')';
+  se('res-bar-left',  barLeft);
   se('res-bar-right', open + ' open' + (open === 1 ? ' slot' : ' slots'));
 
   // Slot grid
+  var activeReserved = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; });
   var grid = document.getElementById('team-slots-grid');
   if (grid) {
     var html = '';
@@ -3362,9 +3387,15 @@ function renderReserved() {
         html += '<div class="team-slot filled" title="Confirmed team #'+i+'">T'+i+'</div>';
       } else if (i <= confirmed + reserved) {
         var resIdx = i - confirmed - 1;
-        var res = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; })[resIdx];
+        var res = activeReserved[resIdx];
         var label = res && res.name ? res.name.slice(0,4) : 'RES';
         html += '<div class="team-slot reserved" title="Reserved: '+(res && res.name ? res.name : 'TBD')+'">'+escH(label)+'</div>';
+      } else if (i <= confirmed + reserved + indivSlots) {
+        // Full group of 4 individuals occupying this slot
+        html += '<div class="team-slot indiv" title="4 individual players (team forming)" style="background:#e8f0ff;border:2px solid #5b8dee;color:#1a3a8f;">IND</div>';
+      } else if (indivPartial > 0 && i === confirmed + reserved + indivSlots + 1) {
+        // Partial slot — individuals not yet a full team
+        html += '<div class="team-slot indiv-partial" title="'+indivPartial+' individual'+(indivPartial===1?' player':' players')+' — needs '+(4-indivPartial)+' more" style="background:#f0f4ff;border:2px dashed #5b8dee;color:#5b8dee;">'+indivPartial+'/4</div>';
       } else {
         html += '<div class="team-slot open" title="Open slot">'+i+'</div>';
       }
