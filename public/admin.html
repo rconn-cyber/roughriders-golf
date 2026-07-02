@@ -352,8 +352,8 @@ tr:hover td { background: #f8faf8; }
           <div class="card-body" style="padding:0;">
             <div class="tbl-wrap">
               <table id="reg-table">
-                <thead><tr><th>Name</th><th>Email</th><th>Players</th><th>Add-ons</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead>
-                <tbody id="reg-tbody"><tr><td colspan="7" class="empty-table"><div class="empty-icon">🏌️</div>Loading registrations…</td></tr></tbody>
+                <thead><tr><th>Name</th><th>Team Name</th><th>Email</th><th>Players</th><th>Add-ons</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead>
+                <tbody id="reg-tbody"><tr><td colspan="9" class="empty-table"><div class="empty-icon">🏌️</div>Loading registrations…</td></tr></tbody>
               </table>
             </div>
           </div>
@@ -779,6 +779,12 @@ tr:hover td { background: #f8faf8; }
           <div class="form-group">
             <label class="form-label">Total Amount</label>
             <input class="form-input" id="me-reg-amount" type="number" placeholder="650" min="0" step="5">
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:6px;">
+          <div class="form-group" style="flex:2;">
+            <label class="form-label">Team Name <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#888;">(optional)</span></label>
+            <input class="form-input" id="me-team-name" type="text" placeholder="e.g. The Rough Riders" maxlength="60">
           </div>
         </div>
         <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gd);margin:14px 0 8px;">Player 1 (Primary Contact)</div>
@@ -1567,7 +1573,7 @@ function renderRegistrations(orders){
   _loadedRegs = (orders || []).filter(function(o){ return o && (o.type === 'registration' || o.golfers); });
   var tbody = document.getElementById('reg-tbody');
   if (!_loadedRegs.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty-table"><div class="empty-icon">🏌️</div>No registrations yet</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-table"><div class="empty-icon">🏌️</div>No registrations yet</td></tr>';
     updateRegStats(_loadedRegs); return;
   }
   tbody.innerHTML = _loadedRegs.map(function(r, idx){
@@ -1578,8 +1584,10 @@ function renderRegistrations(orders){
     var status = r.status || r.paymentStatus || 'paid';
     var date = r.created ? new Date(r.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.date ? new Date(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'));
     var src = r.source === 'manual' ? ' <span style="font-size:9px;background:#f0f2ef;color:var(--tl);padding:1px 5px;border-radius:3px;vertical-align:middle;">manual</span>' : '';
+    var teamName = r.teamName || '';
     return '<tr>'+
       '<td><strong>'+escH(name.trim()||'—')+'</strong>'+src+'</td>'+
+      '<td style="font-size:12px;color:var(--tl);">'+escH(teamName||'—')+'</td>'+
       '<td>'+escH(r.email||'—')+'</td>'+
       '<td>'+players+'</td>'+
       '<td style="font-size:11px;color:var(--tl)">'+escH(addons)+'</td>'+
@@ -2780,7 +2788,7 @@ function resetManualLogo() {
 function openManualEntry(type) {
   _manualTab = type || 'registration';
   // Reset form
-  ['me-p1-fn','me-p1-ln','me-p1-email','me-p1-phone','me-sp-fn','me-sp-ln',
+  ['me-team-name','me-p1-fn','me-p1-ln','me-p1-email','me-p1-phone','me-sp-fn','me-sp-ln',
    'me-sp-email','me-sp-company','me-sp-website','me-notes','me-reg-amount','me-sp-amount'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.value = '';
   });
@@ -2951,6 +2959,7 @@ async function saveManualEntry() {
 
 async function saveManualRegistration(paymentType, notes) {
   var regType  = document.getElementById('me-reg-type').value;
+  var teamName = (document.getElementById('me-team-name') || {}).value || '';
   var isTeam   = (regType === 'team' || regType === 'comped-team');
   var amount   = parseFloat(document.getElementById('me-reg-amount').value) || 0;
   var fn       = document.getElementById('me-p1-fn').value.trim();
@@ -2982,6 +2991,7 @@ async function saveManualRegistration(paymentType, notes) {
     phone:        golfers[0].phone,
     golfers:      golfers,
     playerCount:  golfers.length,
+    teamName:     teamName,
     addons:       addons,
     total:        amount,
     status:       paymentType === 'check' ? 'pending' : paymentType === 'paid' ? 'paid' : paymentType,
@@ -3227,6 +3237,8 @@ function openConvertAsType(type) {
       var parts = (rec.name || '').trim().split(/\s+/);
       var fn = parts[0] || '';
       var ln = parts.slice(1).join(' ') || '';
+      var tnEl = document.getElementById('me-team-name');
+      if (tnEl) tnEl.value = r.teamName || '';
       var fnEl = document.getElementById('me-p1-fn');
       var lnEl = document.getElementById('me-p1-ln');
       var emEl = document.getElementById('me-p1-email');
