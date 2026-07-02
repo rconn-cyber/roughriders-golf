@@ -805,8 +805,14 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
       <!-- Team confirmation (shown when team selected) -->
       <div id="team-row" style="display:none;margin-bottom:14px;">
-        <div style="background:#f0faf4;border:1px solid rgba(45,122,74,0.25);border-radius:6px;padding:12px 16px;font-size:13px;color:#1a3320;">
+        <div style="background:#f0faf4;border:1px solid rgba(45,122,74,0.25);border-radius:6px;padding:12px 16px;font-size:13px;color:#1a3320;margin-bottom:10px;">
           ⛳ <strong>Full team of 4 registered — $650</strong> &nbsp;&middot;&nbsp; <span style="color:#555;font-weight:400;">Enter all 4 player names below</span>
+        </div>
+        <div class="field">
+          <label style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#1a3320;">Team Name <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#888;">(optional)</span></label>
+          <input id="inp-team-name" type="text" placeholder="e.g. The Rough Riders" maxlength="60"
+            style="width:100%;padding:10px 12px;border:1.5px solid rgba(0,0,0,0.18);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s;"
+            onfocus="this.style.borderColor='#2d7a4a'" onblur="this.style.borderColor='rgba(0,0,0,0.18)'">
         </div>
       </div>
 
@@ -826,6 +832,15 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
       </div><!-- end individual-qty-row -->
       <!-- Additional player name fields -->
       <div class="additional-players" id="additional-players"></div>
+      <!-- Team name for multi-individual (shown when 2+ players) -->
+      <div id="multi-indiv-team-name-row" style="display:none;margin-top:10px;">
+        <div class="field">
+          <label style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#1a3320;">Group / Team Name <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#888;">(optional)</span></label>
+          <input id="inp-indiv-team-name" type="text" placeholder="e.g. The Rough Riders" maxlength="60"
+            style="width:100%;padding:10px 12px;border:1.5px solid rgba(0,0,0,0.18);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s;"
+            onfocus="this.style.borderColor='#2d7a4a'" onblur="this.style.borderColor='rgba(0,0,0,0.18)'">
+        </div>
+      </div>
     </div>
 
     <!-- Add-ons -->
@@ -1337,6 +1352,8 @@ function changePlayerCount(delta) {
   document.getElementById('player-count').textContent = playerCount;
   document.getElementById('player-minus').disabled = playerCount <= 1;
   document.getElementById('player-plus').disabled  = playerCount >= MAX_PLAYERS;
+  var mitn = document.getElementById('multi-indiv-team-name-row');
+  if (mitn) mitn.style.display = playerCount >= 2 ? '' : 'none';
   renderAdditionalPlayers();
   updateAddonPrices();
   updateRegTotal();
@@ -1784,6 +1801,16 @@ async function doCheckout() {
     return;
   }
 
+  // Collect team name
+  var teamNameVal = '';
+  if (regType === 'team') {
+    var tnInp = document.getElementById('inp-team-name');
+    if (tnInp) teamNameVal = tnInp.value.trim();
+  } else if (playerCount >= 2) {
+    var itnInp = document.getElementById('inp-indiv-team-name');
+    if (itnInp) teamNameVal = itnInp.value.trim();
+  }
+
   var allPlayers = hasGolfer ? [
     { firstName: primary.firstName, lastName: primary.lastName, email: primary.email, phone: primary.phone },
     ...additional,
@@ -1793,7 +1820,7 @@ async function doCheckout() {
     var res = await fetch(`${NETLIFY_BASE}/.netlify/functions/create-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ golfers: allPlayers, sponsorships }),
+      body: JSON.stringify({ golfers: allPlayers, sponsorships, teamName: teamNameVal }),
     });
     var data = await res.json();
     if (!res.ok || !data.url) throw new Error(data.error || 'Could not create checkout');
@@ -1805,6 +1832,7 @@ async function doCheckout() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           golfers: allPlayers,
+          teamName: teamNameVal,
           addons: Object.entries(addons).map(function(e){ return {name:e[0],price:e[1]}; }),
           sponsorships: Object.values(sponsorSelections).map(function(s){ return {name:s.name,price:s.price}; }),
           total: allPlayers.length * PLAYER_PRICE + Object.values(addons).reduce(function(s,v){return s+v;},0) + Object.values(sponsorSelections).reduce(function(s,v){return s+v.price;},0),
