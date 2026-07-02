@@ -100,6 +100,28 @@ tr:hover td { background: #f8faf8; }
 .status-invoice { background: #fff8e1; color: #7a5c00; }
 .status-pending { background: #f3f0ff; color: #4a3080; }
 .status-cancelled { background: #fdf0ef; color: var(--red); }
+.status-reserved { background: #fff8e1; color: #7a5c00; }
+.status-confirmed { background: #e8f5e9; color: #1b5e20; }
+
+/* RESERVED TEAMS */
+.res-card { background: var(--w); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+.res-num { width: 36px; height: 36px; border-radius: 50%; background: #fff8e1; border: 2px solid #e8c040; color: #7a5c00; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.res-info { flex: 1; min-width: 0; }
+.res-name { font-size: 14px; font-weight: 700; color: var(--td); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.res-name.placeholder { color: var(--tl); font-style: italic; font-weight: 400; }
+.res-note { font-size: 11px; color: var(--tl); margin-top: 2px; }
+.res-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.capacity-bar-wrap { margin-bottom: 20px; }
+.capacity-bar-track { height: 14px; background: #e8edea; border-radius: 7px; overflow: hidden; margin-bottom: 5px; }
+.capacity-bar-fill { height: 100%; border-radius: 7px; transition: width .4s ease; background: linear-gradient(90deg, var(--gd), var(--gl)); }
+.capacity-bar-fill.warn { background: linear-gradient(90deg, #b8940e, #e8c040); }
+.capacity-bar-fill.full { background: linear-gradient(90deg, #b02020, #e05050); }
+.capacity-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--tl); font-weight: 600; }
+.team-slots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; margin-bottom: 20px; }
+.team-slot { width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; border: 2px solid transparent; cursor: default; }
+.team-slot.filled { background: var(--gp); border-color: var(--gl); color: var(--gd); }
+.team-slot.reserved { background: #fff8e1; border-color: #e8c040; color: #7a5c00; }
+.team-slot.open { background: #f4f6f4; border-color: #d0d8d0; color: #aaa; border-style: dashed; }
 .empty-table { text-align: center; padding: 40px 20px; color: var(--tl); font-size: 13px; }
 .tt-btn { background:#fff;border:1px solid #ccc;border-radius:4px;padding:3px 9px;cursor:pointer;font-size:13px;line-height:1.5;transition:background .12s; }
 .tt-btn:hover { background:#e8f0e8;border-color:#6b9a6b; }
@@ -280,6 +302,10 @@ tr:hover td { background: #f8faf8; }
         <span class="nav-icon">🤝</span> Sponsors
         <span class="nav-count orange" id="cnt-sponsors">0</span>
       </div>
+      <div class="nav-item" id="nav-reserved" onclick="showPanel('reserved')">
+        <span class="nav-icon">📌</span> Reserved Teams
+        <span class="nav-count" id="cnt-reserved" style="background:#7a5c00;color:#fff;">0</span>
+      </div>
       <div class="sb-label">Sponsorship Setup</div>
       <div class="nav-item" id="nav-levels" onclick="showPanel('levels')">
         <span class="nav-icon">🏆</span> Sponsor Levels
@@ -316,8 +342,9 @@ tr:hover td { background: #f8faf8; }
         </div>
         <div class="stats-row" id="reg-stats">
           <div class="stat-card"><div class="stat-label">Total Golfers</div><div class="stat-value" id="stat-golfers">—</div></div>
-          <div class="stat-card"><div class="stat-label">Teams</div><div class="stat-value" id="stat-teams">—</div></div>
-          <div class="stat-card"><div class="stat-label">Individuals</div><div class="stat-value" id="stat-indiv">—</div></div>
+          <div class="stat-card"><div class="stat-label">Teams</div><div class="stat-value" id="stat-teams">—</div><div class="stat-sub">confirmed</div></div>
+          <div class="stat-card"><div class="stat-label">Individuals</div><div class="stat-value" id="stat-indiv">—</div><div class="stat-sub">not yet on a team</div></div>
+          <div class="stat-card"><div class="stat-label">Team Slots Open</div><div class="stat-value" id="stat-slots-open">18</div><div class="stat-sub">of 18 total</div></div>
           <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value" id="stat-reg-rev">—</div></div>
         </div>
         <div class="card">
@@ -360,6 +387,64 @@ tr:hover td { background: #f8faf8; }
                 <tbody id="sponsor-tbody"><tr><td colspan="7" class="empty-table"><div class="empty-icon">🤝</div>Loading sponsors…</td></tr></tbody>
               </table>
             </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- RESERVED TEAMS -->
+      <div class="panel" id="panel-reserved">
+        <div class="page-hdr">
+          <div class="page-hdr-l">
+            <h1>Reserved Teams</h1>
+            <p>Hold team slots for future sponsors. Convert to confirmed when details are known.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddReserved()">+ Add Reserved Slot</button>
+        </div>
+
+        <!-- Capacity bar -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><h2>Team Capacity — 18 Total Slots</h2></div>
+          <div class="card-body">
+            <div class="capacity-bar-wrap">
+              <div class="capacity-bar-track"><div class="capacity-bar-fill" id="res-bar-fill" style="width:0%"></div></div>
+              <div class="capacity-labels">
+                <span id="res-bar-left">0 slots used</span>
+                <span id="res-bar-right">18 available</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <div class="stat-card" style="flex:1;min-width:100px;"><div class="stat-label">Confirmed Teams</div><div class="stat-value" id="res-stat-confirmed">0</div><div class="stat-sub">from registrations</div></div>
+              <div class="stat-card" style="flex:1;min-width:100px;"><div class="stat-label">Reserved Slots</div><div class="stat-value" id="res-stat-reserved">0</div><div class="stat-sub">future sponsors</div></div>
+              <div class="stat-card" style="flex:1;min-width:100px;"><div class="stat-label">Open Slots</div><div class="stat-value" id="res-stat-open">18</div><div class="stat-sub">available to sell</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slot grid visual -->
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><h2>Slot Overview</h2></div>
+          <div class="card-body">
+            <div style="display:flex;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
+              <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--tm);">
+                <span style="width:14px;height:14px;border-radius:3px;background:var(--gp);border:2px solid var(--gl);display:inline-block;"></span> Confirmed teams
+              </span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--tm);">
+                <span style="width:14px;height:14px;border-radius:3px;background:#fff8e1;border:2px solid #e8c040;display:inline-block;"></span> Reserved (future sponsor)
+              </span>
+              <span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--tm);">
+                <span style="width:14px;height:14px;border-radius:3px;background:#f4f6f4;border:2px dashed #d0d8d0;display:inline-block;"></span> Open slot
+              </span>
+            </div>
+            <div class="team-slots-grid" id="team-slots-grid"></div>
+          </div>
+        </div>
+
+        <!-- Reserved list -->
+        <div class="card">
+          <div class="card-header"><h2>Reserved Slots</h2></div>
+          <div class="card-body" id="reserved-list">
+            <div class="empty-table"><div class="empty-icon">📌</div>No reserved slots yet — click + Add Reserved Slot</div>
           </div>
         </div>
       </div>
@@ -1050,6 +1135,47 @@ tr:hover td { background: #f8faf8; }
   </div>
 </div>
 
+
+<!-- RESERVED TEAM MODAL (Add / Edit) -->
+<div class="modal-overlay" id="reserved-modal">
+  <div class="modal-box" style="max-width:480px;">
+    <div class="modal-header">
+      <span class="modal-title" id="reserved-modal-title">Add Reserved Team Slot</span>
+      <button class="modal-close" onclick="closeReservedModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="res-modal-status">
+          <option value="reserved">Reserved (TBD sponsor)</option>
+          <option value="confirmed">Confirmed (sponsor known)</option>
+        </select>
+        <div class="form-hint">Use <em>Reserved</em> to hold the slot now; switch to <em>Confirmed</em> when you have details.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sponsor / Company Name <span>optional for reserved slots</span></label>
+        <input class="form-input" id="res-modal-name" type="text" placeholder="e.g. Acme Corp or leave blank">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact Name <span>optional</span></label>
+        <input class="form-input" id="res-modal-contact" type="text" placeholder="e.g. John Smith">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact Email <span>optional</span></label>
+        <input class="form-input" id="res-modal-email" type="email" placeholder="e.g. john@acme.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes <span>optional</span></label>
+        <textarea class="form-input" id="res-modal-notes" rows="2" placeholder="e.g. Verbal commitment from Joe — follow up next week"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeReservedModal()">Cancel</button>
+      <button class="btn btn-primary" id="res-modal-save-btn" onclick="saveReservedSlot()">Save Slot</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -1436,6 +1562,8 @@ function updateRegStats(regs){
   s('stat-teams',teams||'0');
   s('stat-indiv',indiv||'0');
   s('stat-reg-rev',fmtMoney(rev));
+  // Refresh reserved panel capacity counts when reg data changes
+  if (typeof renderReserved === 'function') renderReserved();
 }
 
 function renderSponsors(sponsors){
@@ -2847,6 +2975,7 @@ async function initApp(){
   setSaveBadge('ok');
   setTimeout(function(){setSaveBadge('idle');},2000);
   loadOrders();
+  loadReserved();
 }
 
 /* ====== CONTENT PANEL - TipTap-lite editor ====== */
@@ -2964,6 +3093,266 @@ function saveEventContent() {
   .catch(function() { if (status) { status.textContent = 'Network error'; status.style.color = '#c00'; } })
   .finally(function() { if (btn) { btn.disabled = false; btn.textContent = 'Save & Publish'; } });
 }
+
+// ════════════════════════════════
+// RESERVED TEAMS
+// ════════════════════════════════
+var MAX_TEAMS = 18;
+var _loadedReserved = [];
+var _editingReservedId = null;
+
+async function loadReserved() {
+  if (!_jwt) return;
+  try {
+    var r = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=reserved-teams', {
+      headers: { 'Authorization': 'Bearer ' + _jwt }
+    });
+    if (r.ok) {
+      var data = await r.json();
+      _loadedReserved = Array.isArray(data) ? data : [];
+    }
+  } catch(e) { _loadedReserved = []; }
+  renderReserved();
+}
+
+function getConfirmedTeamCount() {
+  // Count teams from registrations (playerCount==4 or type==team or comped-team)
+  var count = 0;
+  (_loadedRegs || []).forEach(function(r) {
+    if (r.status === 'cancelled') return;
+    var p = r.playerCount || (r.golfers && r.golfers.length) || 1;
+    var t = r.registrationType || r.type || '';
+    if (p >= 4 || t === 'team' || t === 'comped-team') count++;
+  });
+  // Also count sponsor teams (from sponsors with golfers)
+  (_loadedSponsors || []).forEach(function(s) {
+    if (s.status === 'cancelled') return;
+    if (s.golfers && s.golfers.length > 0) {
+      count += Math.ceil(s.golfers.length / 4);
+    }
+  });
+  return count;
+}
+
+function getIndividualCount() {
+  var count = 0;
+  (_loadedRegs || []).forEach(function(r) {
+    if (r.status === 'cancelled') return;
+    var p = r.playerCount || (r.golfers && r.golfers.length) || 1;
+    var t = r.registrationType || r.type || '';
+    if (p < 4 && t !== 'team' && t !== 'comped-team') count += p;
+  });
+  return count;
+}
+
+function renderReserved() {
+  var confirmed = getConfirmedTeamCount();
+  var reserved  = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; }).length;
+  var used      = confirmed + reserved;
+  var open      = Math.max(0, MAX_TEAMS - used);
+  var pct       = Math.min(100, Math.round(used / MAX_TEAMS * 100));
+
+  // Update nav count
+  var nc = document.getElementById('cnt-reserved');
+  if (nc) nc.textContent = reserved;
+
+  // Stats
+  var se = function(id, v) { var e = document.getElementById(id); if (e) e.textContent = v; };
+  se('res-stat-confirmed', confirmed);
+  se('res-stat-reserved',  reserved);
+  se('res-stat-open',      open);
+  se('stat-slots-open',    open);  // also update Registrations panel
+
+  // Capacity bar
+  var fill = document.getElementById('res-bar-fill');
+  if (fill) {
+    fill.style.width = pct + '%';
+    fill.className = 'capacity-bar-fill' + (pct >= 100 ? ' full' : pct >= 80 ? ' warn' : '');
+  }
+  se('res-bar-left',  used + ' of ' + MAX_TEAMS + ' slots used');
+  se('res-bar-right', open + ' open' + (open === 1 ? ' slot' : ' slots'));
+
+  // Slot grid
+  var grid = document.getElementById('team-slots-grid');
+  if (grid) {
+    var html = '';
+    for (var i = 1; i <= MAX_TEAMS; i++) {
+      if (i <= confirmed) {
+        html += '<div class="team-slot filled" title="Confirmed team #'+i+'">T'+i+'</div>';
+      } else if (i <= confirmed + reserved) {
+        var resIdx = i - confirmed - 1;
+        var res = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; })[resIdx];
+        var label = res && res.name ? res.name.slice(0,4) : 'RES';
+        html += '<div class="team-slot reserved" title="Reserved: '+(res && res.name ? res.name : 'TBD')+'">'+escH(label)+'</div>';
+      } else {
+        html += '<div class="team-slot open" title="Open slot">'+i+'</div>';
+      }
+    }
+    grid.innerHTML = html;
+  }
+
+  // Reserved list
+  var list = document.getElementById('reserved-list');
+  if (!list) return;
+  var active = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; });
+  if (!active.length) {
+    list.innerHTML = '<div class="empty-table"><div class="empty-icon">📌</div>No reserved slots yet — click + Add Reserved Slot</div>';
+    return;
+  }
+  list.innerHTML = active.map(function(r, idx) {
+    var isConfirmed = r.status === 'confirmed';
+    var nameHtml = r.name
+      ? '<div class="res-name">'+escH(r.name)+'</div>'
+      : '<div class="res-name placeholder">TBD — slot #'+(confirmed+idx+1)+'</div>';
+    var noteHtml = [];
+    if (r.contact) noteHtml.push(escH(r.contact));
+    if (r.email)   noteHtml.push('<a href="mailto:'+escH(r.email)+'">'+escH(r.email)+'</a>');
+    if (r.notes)   noteHtml.push('<em>'+escH(r.notes)+'</em>');
+    return '<div class="res-card">'+
+      '<div class="res-num">'+(confirmed+idx+1)+'</div>'+
+      '<div class="res-info">'+
+        nameHtml+
+        (noteHtml.length ? '<div class="res-note">'+noteHtml.join(' · ')+'</div>' : '')+
+      '</div>'+
+      '<div style="flex-shrink:0;">'+
+        '<span class="status-pill '+(isConfirmed?'status-confirmed':'status-reserved')+'" style="margin-right:6px;">'+
+          (isConfirmed ? '✓ Confirmed' : '📌 Reserved')+
+        '</span>'+
+      '</div>'+
+      '<div class="res-actions">'+
+        (isConfirmed ? '' : '<button class="btn btn-primary btn-sm" onclick="openConvertReserved(''+escH(r.id)+'')">✓ Confirm</button>')+
+        '<button class="btn btn-outline btn-sm" onclick="openEditReserved(''+escH(r.id)+'')">✏ Edit</button>'+
+        '<button class="btn btn-danger btn-sm" onclick="deleteReserved(''+escH(r.id)+'')">✕</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function openAddReserved() {
+  if (!_jwt) return;
+  var confirmed = getConfirmedTeamCount();
+  var reserved  = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; }).length;
+  if (confirmed + reserved >= MAX_TEAMS) {
+    alert('All '+MAX_TEAMS+' team slots are full. Cannot add more reserved slots.');
+    return;
+  }
+  _editingReservedId = null;
+  document.getElementById('reserved-modal-title').textContent = 'Add Reserved Team Slot';
+  document.getElementById('res-modal-status').value = 'reserved';
+  document.getElementById('res-modal-name').value = '';
+  document.getElementById('res-modal-contact').value = '';
+  document.getElementById('res-modal-email').value = '';
+  document.getElementById('res-modal-notes').value = '';
+  document.getElementById('res-modal-save-btn').textContent = 'Save Slot';
+  document.getElementById('reserved-modal').classList.add('open');
+  document.getElementById('res-modal-name').focus();
+}
+
+function openEditReserved(id) {
+  var rec = _loadedReserved.find(function(r){ return r.id === id; });
+  if (!rec) return;
+  _editingReservedId = id;
+  document.getElementById('reserved-modal-title').textContent = 'Edit Reserved Slot';
+  document.getElementById('res-modal-status').value  = rec.status || 'reserved';
+  document.getElementById('res-modal-name').value    = rec.name    || '';
+  document.getElementById('res-modal-contact').value = rec.contact || '';
+  document.getElementById('res-modal-email').value   = rec.email   || '';
+  document.getElementById('res-modal-notes').value   = rec.notes   || '';
+  document.getElementById('res-modal-save-btn').textContent = 'Update Slot';
+  document.getElementById('reserved-modal').classList.add('open');
+}
+
+function openConvertReserved(id) {
+  // Pre-fills the edit modal in "confirmed" mode so admin just needs to fill name/contact
+  var rec = _loadedReserved.find(function(r){ return r.id === id; });
+  if (!rec) return;
+  _editingReservedId = id;
+  document.getElementById('reserved-modal-title').textContent = 'Confirm Sponsor Details';
+  document.getElementById('res-modal-status').value  = 'confirmed';
+  document.getElementById('res-modal-name').value    = rec.name    || '';
+  document.getElementById('res-modal-contact').value = rec.contact || '';
+  document.getElementById('res-modal-email').value   = rec.email   || '';
+  document.getElementById('res-modal-notes').value   = rec.notes   || '';
+  document.getElementById('res-modal-save-btn').textContent = 'Confirm Sponsor';
+  document.getElementById('reserved-modal').classList.add('open');
+  document.getElementById('res-modal-name').focus();
+}
+
+function closeReservedModal() {
+  document.getElementById('reserved-modal').classList.remove('open');
+  _editingReservedId = null;
+}
+
+async function saveReservedSlot() {
+  var status  = document.getElementById('res-modal-status').value;
+  var name    = document.getElementById('res-modal-name').value.trim();
+  var contact = document.getElementById('res-modal-contact').value.trim();
+  var email   = document.getElementById('res-modal-email').value.trim();
+  var notes   = document.getElementById('res-modal-notes').value.trim();
+
+  if (status === 'confirmed' && !name) {
+    document.getElementById('res-modal-name').focus();
+    document.getElementById('res-modal-name').style.borderColor = 'var(--red)';
+    toast('⚠ Sponsor name required for confirmed slots');
+    return;
+  }
+  document.getElementById('res-modal-name').style.borderColor = '';
+
+  var payload = { status, name, contact, email, notes, type: 'reserved-team' };
+  var authHdr = { 'Authorization': 'Bearer ' + _jwt, 'Content-Type': 'application/json' };
+
+  try {
+    if (_editingReservedId) {
+      // PATCH existing
+      await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=reserved-teams&id='+encodeURIComponent(_editingReservedId), {
+        method: 'PATCH', headers: authHdr, body: JSON.stringify(payload)
+      });
+      toast(status === 'confirmed' ? 'Sponsor confirmed ✓' : 'Slot updated ✓');
+    } else {
+      // POST new
+      await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=reserved-teams', {
+        method: 'POST', headers: authHdr, body: JSON.stringify(payload)
+      });
+      toast('Reserved slot added ✓');
+    }
+    closeReservedModal();
+    await loadReserved();
+    updateCapacityOnRegPage();
+  } catch(e) {
+    toast('Error saving: ' + e.message);
+  }
+}
+
+async function deleteReserved(id) {
+  if (!confirm('Remove this reserved slot?')) return;
+  try {
+    await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=reserved-teams&id='+encodeURIComponent(id), {
+      method: 'DELETE', headers: { 'Authorization': 'Bearer ' + _jwt }
+    });
+    toast('Slot removed ✓');
+    await loadReserved();
+  } catch(e) { toast('Error: '+e.message); }
+}
+
+// Push capacity summary to admin-config so register.html can read it publicly
+async function updateCapacityOnRegPage() {
+  var confirmed = getConfirmedTeamCount();
+  var reserved  = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; }).length;
+  var used = confirmed + reserved;
+  var open = Math.max(0, MAX_TEAMS - used);
+  var indiv = getIndividualCount();
+  // Store via admin-config (publicly readable)
+  try {
+    var key = typeof ADMIN_KEY !== 'undefined' ? ADMIN_KEY : (localStorage.getItem('golf-admin-key') || '');
+    if (!key) return;
+    await fetch(NETLIFY_BASE+'/.netlify/functions/admin-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': key },
+      body: JSON.stringify({ _key: 'team-capacity', confirmedTeams: confirmed, reservedTeams: reserved, totalTeams: MAX_TEAMS, usedSlots: used, openSlots: open, individuals: indiv })
+    });
+  } catch(e) {}
+}
+
 </script>
 </body>
 </html>

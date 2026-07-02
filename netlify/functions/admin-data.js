@@ -67,7 +67,7 @@ function getDefaults(resource) {
 const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
 exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type,Authorization', 'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE' }, body: '' };
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: { ...CORS, 'Access-Control-Allow-Headers': 'Content-Type,Authorization', 'Access-Control-Allow-Methods': 'GET,POST,PUT,PATCH,DELETE' }, body: '' };
 
   const resource = (event.queryStringParameters || {}).resource;
   const id       = (event.queryStringParameters || {}).id;
@@ -101,6 +101,20 @@ exports.handler = async (event) => {
       arr.push(record);
       await store.set(resource, JSON.stringify(arr));
       return { statusCode: 201, headers: CORS, body: JSON.stringify(record) };
+    }
+
+    // PATCH — partial update of a single record by id
+    if (event.httpMethod === 'PATCH') {
+      if (!id) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'id required for PATCH' }) };
+      const body = JSON.parse(event.body);
+      const raw  = await store.get(resource);
+      const data = raw ? JSON.parse(raw) : [];
+      const arr  = Array.isArray(data) ? data : (data.items || []);
+      const idx  = arr.findIndex(r => r.id === id);
+      if (idx === -1) return { statusCode: 404, headers: CORS, body: JSON.stringify({ error: 'Record not found' }) };
+      arr[idx] = { ...arr[idx], ...body, id, updatedAt: new Date().toISOString() };
+      await store.set(resource, JSON.stringify(arr));
+      return { statusCode: 200, headers: CORS, body: JSON.stringify(arr[idx]) };
     }
 
     if (event.httpMethod === 'DELETE') {

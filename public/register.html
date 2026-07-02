@@ -631,6 +631,77 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
     })();
     </script>
 
+
+    <!-- Team capacity bar — sales tool -->
+    <div id="team-capacity-block" style="display:none;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid rgba(0,0,0,0.07);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#0f2318;">Team Availability</div>
+        <div id="cap-label-right" style="font-size:12px;font-weight:700;color:#0f2318;"></div>
+      </div>
+      <div style="height:12px;background:#e8edea;border-radius:6px;overflow:hidden;margin-bottom:8px;">
+        <div id="cap-bar-fill" style="height:100%;border-radius:6px;background:linear-gradient(90deg,#0f2318,#2d7a4a);transition:width .5s ease;width:0%;"></div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#0f2318,#2d7a4a);"></div>
+          <span id="cap-confirmed" style="font-size:12px;font-weight:600;color:#333;">0 confirmed teams</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:12px;height:12px;border-radius:3px;background:#e8c040;border:1px solid #b8940e;"></div>
+          <span id="cap-reserved" style="font-size:12px;font-weight:600;color:#7a5c00;">0 reserved</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:12px;height:12px;border-radius:3px;background:#f4f6f4;border:2px dashed #aaa;"></div>
+          <span id="cap-open" style="font-size:12px;font-weight:600;color:#555;"></span>
+        </div>
+        <div id="cap-indiv-wrap" style="display:none;display:flex;align-items:center;gap:6px;">
+          <div style="width:12px;height:12px;border-radius:3px;background:#dce8ff;border:1px solid #7090c0;"></div>
+          <span id="cap-indiv" style="font-size:12px;font-weight:600;color:#3a5080;"></span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    (function(){
+      fetch('/.netlify/functions/admin-config?key=team-capacity')
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){
+          if (!d || d.totalTeams == null) return;
+          var total     = d.totalTeams || 18;
+          var confirmed = d.confirmedTeams || 0;
+          var reserved  = d.reservedTeams  || 0;
+          var open      = Math.max(0, d.openSlots != null ? d.openSlots : (total - confirmed - reserved));
+          var indiv     = d.individuals || 0;
+          var used      = confirmed + reserved;
+          var pct       = Math.min(100, Math.round(used / total * 100));
+
+          var block = document.getElementById('team-capacity-block');
+          if (block) block.style.display = '';
+          var fill = document.getElementById('cap-bar-fill');
+          if (fill) {
+            fill.style.width = pct + '%';
+            if (pct >= 100) fill.style.background = 'linear-gradient(90deg,#b02020,#e05050)';
+            else if (pct >= 80) fill.style.background = 'linear-gradient(90deg,#b8940e,#e8c040)';
+          }
+          var lbl = document.getElementById('cap-label-right');
+          if (lbl) {
+            if (open <= 0) lbl.innerHTML = '<span style="color:#b02020;font-weight:800;">⚠️ All team slots filled!</span>';
+            else lbl.innerHTML = '<span style="color:#1b5e20;">'+open+' team slot'+(open===1?'':'s')+' remaining</span>';
+          }
+          var setT = function(id, v){ var e=document.getElementById(id); if(e) e.textContent=v; };
+          setT('cap-confirmed', confirmed + ' confirmed team'+(confirmed===1?'':'s'));
+          setT('cap-reserved',  reserved  + ' reserved');
+          setT('cap-open',      open      + ' open slot'+(open===1?'':'s'));
+          if (indiv > 0) {
+            setT('cap-indiv', indiv + ' individual'+(indiv===1?' player':' players')+' (teams forming)');
+            var iw = document.getElementById('cap-indiv-wrap');
+            if (iw) iw.style.display = 'flex';
+          }
+        })
+        .catch(function(){});
+    })();
+    </script>
+
     <!-- Sponsor logos -->
     <div id="sponsor-logo-strip" style="display:none;">
       <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-light);text-align:center;margin-bottom:14px;">Thank you to our sponsors</div>
