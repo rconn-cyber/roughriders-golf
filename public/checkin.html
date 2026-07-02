@@ -426,6 +426,7 @@ function buildCheckinSheet(e, num, total) {
   var type    = getDisplayType(e);
   var source  = e._source;
   var name    = displayName(e);
+  var teamName = e.teamName || '';
   var isTeam  = (type === 'team');
   var isSp    = (source === 'sponsor');
   var players = e.golfers || [];
@@ -488,6 +489,7 @@ function buildCheckinSheet(e, num, total) {
     det('Amount', amt) +
     (isSp ? det('Package', pkg || '—') : '') +
     (!isSp ? det('Players', playerCount + (isTeam ? ' (Team)' : ' (Individual)')) : '') +
+    (!isSp && teamName ? det('Team Name', teamName) : '') +
     det('Registered', date) +
     (e.notes ? det('Notes', e.notes) : '');
 
@@ -515,12 +517,14 @@ function buildCheckinSheet(e, num, total) {
     '</div>' +
     // Title bar
     '<div class="ci-title-bar">' +
-      '<div class="ci-title-main">'+esc(name)+'</div>' +
+      '<div>' +
+        '<div class="ci-title-main">'+esc(name)+'</div>' +
+        (teamName ? '<div style="font-size:11px;color:rgba(255,255,255,.7);font-weight:600;margin-top:2px;">⛳ '+esc(teamName)+'</div>' : '') +
+      '</div>' +
       '<div class="ci-title-badges">' +
         '<span class="ci-badge '+badgeClass+'">'+badgeLabel+'</span>' +
         statusBadge +
-        '<span style="font-size:10px;color:rgba(255,255,255,.4);margin-left:8px;">#'+num+' of '+total+'</span>' +
-      '</div>' +
+        '<span style="font-size:10px;color:rgba(255,255,255,.4);margin-left:8px;">#'+num+' of '+total+'</span>' +      '</div>' +
     '</div>' +
     // Body
     '<div class="ci-body">' +
@@ -564,6 +568,7 @@ function buildBagSheet(e) {
   var type    = getDisplayType(e);
   var source  = e._source;
   var name    = displayName(e);
+  var teamName = e.teamName || '';
   var isSp    = (source === 'sponsor');
   var isTeam  = (type === 'team');
   var players = e.golfers || [];
@@ -662,6 +667,7 @@ function buildBagSheet(e) {
       '<div class="bag-name-box">' +
         (logoHtml ? logoHtml : '') +
         '<div class="bag-name">'+esc(name)+'</div>' +
+        (teamName ? '<div style="font-size:11px;color:#2d7a4a;font-weight:700;margin-top:2px;">⛳ '+esc(teamName)+'</div>' : '') +
         '<span class="bag-type-badge '+badgeClass+'">'+badgeLabel+'</span>' +
       '</div>' +
     '</div>' +
@@ -670,7 +676,7 @@ function buildBagSheet(e) {
     '<div class="bag-footer">' +
       '<span>VOLUNTEER COPY — BAG SHEET</span>' +
       '<div class="bag-staple-note">✂ Staple to outside of bag</div>' +
-      '<span>'+esc(name)+'</span>' +
+      '<span>'+esc(name)+(teamName ? ' — '+esc(teamName) : '')+'</span>' +
     '</div>' +
   '</div>';
 }
