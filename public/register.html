@@ -657,8 +657,8 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
       fetch('/.netlify/functions/admin-config?key=team-capacity')
         .then(function(r){ return r.ok ? r.json() : null; })
         .then(function(d){
-          if (!d || d.totalTeams == null) return;
-          var total        = d.totalTeams || 18;
+          // Show block with defaults even if blob has no data yet
+          var total = (d && d.totalTeams) ? d.totalTeams : 18;
           var confirmed    = d.confirmedTeams || 0;
           var reserved     = d.reservedTeams  || 0;
           var indiv        = d.individuals || 0;
