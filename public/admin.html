@@ -2263,6 +2263,19 @@ function getIncludedPlayers(sponsorships) {
   return total;
 }
 
+// Get team player count from a sponsor's saved benefits text array
+function getPlayersFromBenefitText(benefits) {
+  var best = 0;
+  (benefits || []).forEach(function(bt) {
+    var bl = (bt || '').toLowerCase();
+    var mTeams   = bl.match(/(\d+)\s*teams?/);
+    var mGolfers = bl.match(/(\d+)\s*(?:golfers?|players?)/);
+    if (mTeams)   best = Math.max(best, parseInt(mTeams[1]) * 4);
+    else if (mGolfers) best = Math.max(best, parseInt(mGolfers[1]));
+  });
+  return best;
+}
+
 // State for sponsor player editing
 var _spPlayers = []; // kept for legacy refs; players now managed via Registrations tab
 function initSpPlayers(r) { _spPlayers = []; } // no-op: players live in Registrations
@@ -3539,7 +3552,23 @@ async function syncSponsorTeamReg(sponsor) {
   if (!_jwt || !sponsor) return;
   var sps = sponsor.sponsorships || (sponsor.package ? [{name: sponsor.package}] : (sponsor.tier ? [{name: sponsor.tier}] : []));
   var includedPlayers = getIncludedPlayers(sps);
-  var teamsIncluded   = includedPlayers > 0 ? Math.ceil(includedPlayers / 4) : 0;
+
+  // Also scan the sponsor's saved benefits array for team-count text
+  // e.g. "2 teams — 8 golfers", "1 team — 4 golfers", "3 teams — 12 golfers"
+  if (sponsor.benefits && sponsor.benefits.length) {
+    var bestFromBenefits = 0;
+    sponsor.benefits.forEach(function(bt) {
+      var bl = (bt || '').toLowerCase();
+      // Match "N team(s)" or "N golfers" patterns
+      var mTeams = bl.match(/(\d+)\s*teams?/);
+      var mGolfers = bl.match(/(\d+)\s*(?:golfers?|players?)/);
+      if (mTeams) bestFromBenefits = Math.max(bestFromBenefits, parseInt(mTeams[1]) * 4);
+      else if (mGolfers) bestFromBenefits = Math.max(bestFromBenefits, parseInt(mGolfers[1]));
+    });
+    if (bestFromBenefits > includedPlayers) includedPlayers = bestFromBenefits;
+  }
+
+  var teamsIncluded = includedPlayers > 0 ? Math.ceil(includedPlayers / 4) : 0;
   var authHdr = { 'Authorization': 'Bearer ' + _jwt };
 
   // Fetch current registrations to find existing sponsor-team record for this sponsor
