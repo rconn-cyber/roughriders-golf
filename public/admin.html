@@ -185,7 +185,7 @@ tr:hover td { background: #f8faf8; }
 .modal-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 900; color: var(--gd); }
 .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--tl); line-height: 1; }
 .modal-close:hover { color: var(--td); }
-.modal-body { padding: 20px 22px; }
+.modal-body { padding: 20px; }
 .modal-footer { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 9px; justify-content: flex-end; }
 .form-group { margin-bottom: 15px; }
 .form-group:last-child { margin-bottom: 0; }
@@ -714,13 +714,7 @@ tr:hover td { background: #f8faf8; }
         </div>
         <div class="form-group">
           <label class="form-label">Add-ons <span>— click to toggle</span></label>
-          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:2px;" id="em-addons-picker">
-            <div class="benefit-toggle" data-addon="Super Ticket" data-price="50" onclick="this.classList.toggle('on');recalcEditRegAmount()">⭐ Super Ticket — $50</div>
-            <div class="benefit-toggle" data-addon="Mulligan Pack" data-price="20" onclick="this.classList.toggle('on');recalcEditRegAmount()">Mulligan Pack — $20</div>
-            <div class="benefit-toggle" data-addon="Closest to Pin" data-price="20" onclick="this.classList.toggle('on');recalcEditRegAmount()">Closest to Pin — $20</div>
-            <div class="benefit-toggle" data-addon="Longest Drive" data-price="20" onclick="this.classList.toggle('on');recalcEditRegAmount()">Longest Drive — $20</div>
-            <div class="benefit-toggle" data-addon="Hole Sponsor" data-price="250" onclick="this.classList.toggle('on');recalcEditRegAmount()">Hole Sponsor — $250</div>
-          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:2px;" id="em-addons-picker"><!-- built by buildAddonPicker() --></div>
         </div>
       </div>
 
@@ -753,6 +747,10 @@ tr:hover td { background: #f8faf8; }
           </div>
         </div>
         <div class="form-group" style="margin-top:12px;">
+          <label class="form-label">Add-Ons <span>— click to toggle</span></label>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:2px;" id="em-sp-addons-picker"><!-- built by buildAddonPicker() --></div>
+        </div>
+        <div class="form-group">
           <label class="form-label">Amount ($) <span>— auto-fills from selections</span></label>
           <input class="form-input" id="em-sp-amount" type="number" min="0" step="50">
         </div>
@@ -2310,11 +2308,7 @@ function openEditEntry(type, idx) {
     document.getElementById('em-players').value = r.playerCount || (r.golfers && r.golfers.length) || 1;
     document.getElementById('em-amount').value  = normAmt(r) || '';
     // Pre-select add-on toggles
-    var currentAddons = (r.addons||[]).map(function(a){return (a.name||a).toLowerCase().trim();});
-    document.querySelectorAll('#em-addons-picker .benefit-toggle').forEach(function(t){
-      var name = (t.dataset.addon||'').toLowerCase().trim();
-      t.classList.toggle('on', currentAddons.some(function(a){return a===name||a.indexOf(name)>=0||name.indexOf(a)>=0;}));
-    });
+    buildAddonPicker('em-addons-picker', 'recalcEditRegAmount()', r.addons||[]);
   } else {
     document.getElementById('em-sp-fn').value      = r.firstName || '';
     document.getElementById('em-sp-ln').value      = r.lastName  || '';
@@ -2323,6 +2317,7 @@ function openEditEntry(type, idx) {
     document.getElementById('em-sp-website').value = r.website   || '';
     document.getElementById('em-sp-amount').value  = r.total || (r.amount ? (r.amount > 10000 ? r.amount/100 : r.amount) : '');
     delete document.getElementById('em-sp-amount').dataset.dirty;
+    buildAddonPicker('em-sp-addons-picker', 'recalcEditSpAmount()', r.addons||[]);
     // Build sponsor package picker from STATE and pre-select current ones
     var currentPkgs = (r.sponsorships||[]).map(function(x){return (x.name||x).toLowerCase().trim();});
     if (r.package) currentPkgs = currentPkgs.concat(r.package.split(',').map(function(s){return s.trim().toLowerCase();}));
@@ -2656,6 +2651,28 @@ function showEditLogoHint(msg, isError) {
   hint.style.display = 'block';
 }
 
+// Build add-on toggles dynamically from STATE.levels (alacarte items = price < 1000)
+// containerId: 'em-addons-picker' or 'em-sp-addons-picker'
+// recalcFn:    'recalcEditRegAmount()' or 'recalcEditSpAmount()'
+// currentAddons: array of {name, price} or strings already selected
+function buildAddonPicker(containerId, recalcFn, currentAddons) {
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  var isSp = containerId === 'em-sp-addons-picker';
+  var addonLevels = sortBy(STATE.levels).filter(function(lv){ return lv.price < 1000; });
+  var currentNames = (currentAddons||[]).map(function(a){ return (a.name||a||'').toLowerCase().trim(); });
+  var html = addonLevels.map(function(lv) {
+    var on = currentNames.some(function(n){ return n === lv.name.toLowerCase().trim(); });
+    var icon = lv.icon ? lv.icon + ' ' : '';
+    return '<div class="benefit-toggle' + (on ? ' on' : '') + '"' +
+      ' data-addon="' + escH(lv.name) + '"' +
+      ' data-price="' + lv.price + '"' +
+      ' onclick="this.classList.toggle(\'on\');' + recalcFn + '">' +
+      icon + escH(lv.name) + ' — ' + fmtMoney(lv.price) + '</div>';
+  }).join('');
+  el.innerHTML = html || '<span style="font-size:13px;color:#aaa;">No add-ons configured in Sponsor Levels.</span>';
+}
+
 function recalcEditRegAmount() {
   var base = parseInt(document.getElementById('em-players').value)||1;
   var regPrice = base === 4 ? 650 : base * 165;
@@ -2671,6 +2688,9 @@ function recalcEditSpAmount() {
   var total = 0;
   document.querySelectorAll('#em-sp-picker .benefit-toggle.on').forEach(function(t){
     total += parseInt(t.dataset.spPrice)||0;
+  });
+  document.querySelectorAll('#em-sp-addons-picker .benefit-toggle.on').forEach(function(t){
+    total += parseInt(t.dataset.price)||0;
   });
   document.getElementById('em-sp-amount').value = total || '';
 }
@@ -2722,6 +2742,10 @@ async function saveEditEntry() {
       document.querySelectorAll('#em-sp-picker .benefit-toggle.on').forEach(function(t){
         sponsorships.push({ name: t.dataset.spName, price: parseInt(t.dataset.spPrice)||0 });
       });
+      var spAddons = [];
+      document.querySelectorAll('#em-sp-addons-picker .benefit-toggle.on').forEach(function(t){
+        spAddons.push({ name: t.dataset.addon, price: parseInt(t.dataset.price)||0 });
+      });
       var pkgText = sponsorships.map(function(s){return s.name;}).join(', ');
       // Handle hide from public
       var hidePublic = document.getElementById('em-sp-hide-public');
@@ -2748,6 +2772,7 @@ async function saveEditEntry() {
         sponsorships: sponsorships,
         package:      pkgText,
         benefits:     spBenList,
+        addons:       spAddons,
         total:        spAmount,
         amount:       spAmount * 100,
         hideFromPublic: hideFromPublic,
@@ -4120,6 +4145,7 @@ async function generateReport() {
     // ── Add-on summary ──────────────────────────────────────────────────────
     var addonCount = {};
     regs.forEach(function(r){ (r.addons||[]).forEach(function(a){ var nm=a.name||a; addonCount[nm]=(addonCount[nm]||0)+1; }); });
+    sponsors.forEach(function(s){ (s.addons||[]).forEach(function(a){ var nm=a.name||a; addonCount[nm]=(addonCount[nm]||0)+1; }); });
     var addonRows = Object.keys(addonCount).map(function(k){
       return '<tr><td style="padding:5px 10px;">'+escH(k)+'</td><td style="padding:5px 10px;text-align:center;">'+addonCount[k]+'</td></tr>';
     }).join('') || '<tr><td colspan="2" style="padding:8px 10px;color:#888;">None recorded</td></tr>';
