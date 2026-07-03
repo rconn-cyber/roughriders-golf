@@ -1646,7 +1646,7 @@ function renderRegistrations(orders){
     var playersDisplay = isSponsorTeam ? (teamsCount + ' team' + (teamsCount!==1?'s':'') + ' (' + (r.playerCount||4) + ' golfers)') : players;
     var editBtn = isSponsorTeam
       ? '<button class="btn btn-outline btn-sm" onclick="alert(\'Edit this entry via the Sponsors tab.\')">🔗 Sponsor</button>'
-      : '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'registration\','+idx+')">✏ Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteEntry(\'registrations\',\''+escH(r.id||'')+'\','+idx+')">✕</button>';
+      : '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'registration\',' + idx + ')">✏ Edit</button> <button class="btn btn-outline btn-sm" onclick="resendConfirmation(\'' + escH(r.id||'') + '\',this)" title="Resend confirmation email">✉</button> <button class="btn btn-danger btn-sm" onclick="deleteEntry(\'registrations\',\'' + escH(r.id||'') + '\',' + idx + ')">✕</button>';
     return '<tr'+(isSponsorTeam?' style="background:rgba(232,244,234,0.35);"':'')+'>'+
       '<td><strong>'+escH(displayName)+'</strong>'+srcBadge+'</td>'+
       '<td style="font-size:12px;color:var(--tl);">'+escH(teamName||'—')+'</td>'+
@@ -2707,6 +2707,32 @@ async function saveEditEntry() {
     toast('Save failed: ' + e.message);
   } finally {
     btn.disabled = false; btn.textContent = 'Save Changes';
+  }
+}
+
+
+async function resendConfirmation(id, btn) {
+  if (!id) { toast('No registration ID'); return; }
+  if (!_jwt) { toast('Not authenticated'); return; }
+  var orig = btn.textContent;
+  btn.textContent = '…';
+  btn.disabled = true;
+  try {
+    var res = await fetch(NETLIFY_BASE + '/.netlify/functions/resend-confirmation', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + _jwt, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id }),
+    });
+    var data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+    btn.textContent = '✅';
+    toast('Confirmation email sent to ' + (data.sentTo || 'registrant'));
+    // Refresh the table so the ✅ email column updates
+    setTimeout(loadAllData, 800);
+  } catch (err) {
+    btn.textContent = orig;
+    btn.disabled = false;
+    toast('Email failed: ' + err.message, 'error');
   }
 }
 
