@@ -320,6 +320,9 @@ tr:hover td { background: #f8faf8; }
       <div class="nav-item" id="nav-content" onclick="showPanel('content')">
         <span class="nav-icon">&#x270F;&#xFE0F;</span> Home Page
       </div>
+      <div class="nav-item" id="nav-members" onclick="showPanel('members')">
+        <span class="nav-icon">👥</span> Members
+      </div>
       <div class="sb-label" style="margin-top:8px;">Print</div>
       <div class="nav-item" onclick="openCheckin()" style="color:var(--gold);">
         <span class="nav-icon">🖨</span> Check-In Sheets
@@ -538,6 +541,60 @@ tr:hover td { background: #f8faf8; }
           <div class="card-header"><h2>Preview</h2></div>
           <div class="card-body">
             <div id="content-preview-box" style="text-align:center;padding:20px;border:2px dashed #ccc;border-radius:6px;background:#fafcfa;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEMBERS -->
+      <div class="panel" id="panel-members">
+        <div class="page-hdr">
+          <div class="page-hdr-l">
+            <h1>Members</h1>
+            <p>Sync Wild Apricot member data into Supabase for registration lookups.</p>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" id="sync-now-btn" onclick="syncMembersNow()">⟳ Sync Members Now</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><h2>Sync Status</h2></div>
+          <div class="card-body">
+            <div id="sync-status-box" style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:16px;">
+              <div class="stat-card" style="min-width:140px;">
+                <div class="stat-label">Last Sync</div>
+                <div class="stat-value" id="sync-last-time" style="font-size:18px;">—</div>
+              </div>
+              <div class="stat-card" style="min-width:140px;">
+                <div class="stat-label">Members in Supabase</div>
+                <div class="stat-value" id="sync-member-count">—</div>
+              </div>
+              <div class="stat-card" style="min-width:140px;">
+                <div class="stat-label">Last Result</div>
+                <div class="stat-value" id="sync-last-result" style="font-size:14px;">—</div>
+              </div>
+            </div>
+            <div id="sync-progress" style="display:none;padding:12px 16px;background:#f0faf4;border:1px solid rgba(45,122,74,0.25);border-radius:6px;font-size:13px;color:#2d7a4a;">
+              <span id="sync-progress-msg">⟳ Syncing members from Wild Apricot…</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h2>Sync Log</h2></div>
+          <div class="card-body" style="padding:0;">
+            <table class="data-table">
+              <thead><tr>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Updated</th>
+                <th>Skipped</th>
+                <th>Errors</th>
+              </tr></thead>
+              <tbody id="sync-log-body">
+                <tr><td colspan="5" class="empty-table"><div class="empty-icon">📋</div>Loading sync log…</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1493,9 +1550,10 @@ async function loadConfig(){
 function showPanel(name){
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
   if (name === 'content') { loadEventContentOnce(); }
+  if (name === 'members') { loadMemberSyncStatus(); }
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   document.getElementById('panel-'+name).classList.add('active');
-  document.getElementById('nav-'+name).classList.add('active');
+  document.getElementById('nav-'+name) && document.getElementById('nav-'+name).classList.add('active');
 }
 
 // ════════════════════════════════
@@ -3693,6 +3751,95 @@ async function updateCapacityOnRegPage() {
     });
   } catch(e) {}
 }
+
+// ════════════════════════════════
+// MEMBER SYNC
+// ════════════════════════════════
+async function loadMemberSyncStatus() {
+  const key = sessionStorage.getItem('admin_key');
+  try {
+    // Get member count from Supabase via admin-data
+    const countRes = await fetch(`${NETLIFY_BASE}/.netlify/functions/sync-member-status`, {
+      headers: { 'x-admin-key': key }
+    });
+    if (countRes.ok) {
+      const data = await countRes.json();
+      if (data.member_count != null)
+        document.getElementById('sync-member-count').textContent = data.member_count.toLocaleString();
+      if (data.last_sync) {
+        const d = new Date(data.last_sync);
+        document.getElementById('sync-last-time').textContent = d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      }
+      if (data.last_result) {
+        const r = data.last_result;
+        document.getElementById('sync-last-result').textContent =
+          r.status === 'complete' ? `✓ ${r.wa_to_sb || 0} updated` :
+          r.status === 'error'    ? `✗ Error` : r.status;
+        document.getElementById('sync-last-result').style.color =
+          r.status === 'complete' ? '#2d7a4a' : r.status === 'error' ? '#b44' : '';
+      }
+      // Populate log
+      const tbody = document.getElementById('sync-log-body');
+      if (data.log && data.log.length) {
+        tbody.innerHTML = data.log.map(row => {
+          const t = new Date(row.started_at || row.created_at);
+          const timeStr = t.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' + t.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+          const res = row.results || {};
+          const mr = res.members || res;
+          const statusColor = row.status === 'complete' ? '#2d7a4a' : row.status === 'error' ? '#b44' : '#888';
+          const errors = mr.errors && mr.errors.length ? mr.errors.length : 0;
+          return `<tr>
+            <td style="font-size:12px;">${timeStr}</td>
+            <td><span style="color:${statusColor};font-weight:600;">${row.status}</span></td>
+            <td>${mr.wa_to_sb != null ? mr.wa_to_sb : '—'}</td>
+            <td>${mr.skipped   != null ? mr.skipped   : '—'}</td>
+            <td style="color:${errors ? '#b44' : '#888'}">${errors || '—'}</td>
+          </tr>`;
+        }).join('');
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-table"><div class="empty-icon">📋</div>No sync history yet</td></tr>';
+      }
+    }
+  } catch(e) {
+    console.error('loadMemberSyncStatus:', e);
+  }
+}
+
+async function syncMembersNow() {
+  const btn = document.getElementById('sync-now-btn');
+  const progress = document.getElementById('sync-progress');
+  const msg = document.getElementById('sync-progress-msg');
+  const key = sessionStorage.getItem('admin_key');
+
+  btn.disabled = true;
+  btn.textContent = '⟳ Syncing…';
+  progress.style.display = 'block';
+  msg.textContent = '⟳ Connecting to Wild Apricot…';
+
+  try {
+    const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/sync-member-now`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': key }
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Sync failed');
+
+    const r = data.results || {};
+    msg.textContent = `✓ Sync complete — ${r.wa_to_sb || 0} updated, ${r.skipped || 0} skipped${r.errors && r.errors.length ? `, ${r.errors.length} error(s)` : ''}`;
+    msg.style.color = '#2d7a4a';
+    toast('Members synced ✓');
+    setTimeout(() => loadMemberSyncStatus(), 500);
+  } catch(e) {
+    msg.textContent = '✗ ' + e.message;
+    msg.style.color = '#b44';
+    toast('Sync failed: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⟳ Sync Members Now';
+  }
+}
+
 
 </script>
 </body>
