@@ -3545,22 +3545,22 @@ async function syncAllSponsorTeams() {
 
 async function syncSponsorTeamReg(sponsor) {
   if (!_jwt || !sponsor) return;
-  var sps = sponsor.sponsorships || (sponsor.package ? [{name: sponsor.package}] : (sponsor.tier ? [{name: sponsor.tier}] : []));
-  var includedPlayers = getIncludedPlayers(sps);
+  var includedPlayers = 0;
 
-  // Also scan the sponsor's saved benefits array for team-count text
-  // e.g. "2 teams — 8 golfers", "1 team — 4 golfers", "3 teams — 12 golfers"
   if (sponsor.benefits && sponsor.benefits.length) {
-    var bestFromBenefits = 0;
+    // Saved benefits array is authoritative — user may have overridden package defaults.
+    // Read team count ONLY from the saved benefits text.
     sponsor.benefits.forEach(function(bt) {
       var bl = (bt || '').toLowerCase();
-      // Match "N team(s)" or "N golfers" patterns
-      var mTeams = bl.match(/(\d+)\s*teams?/);
+      var mTeams   = bl.match(/(\d+)\s*teams?/);
       var mGolfers = bl.match(/(\d+)\s*(?:golfers?|players?)/);
-      if (mTeams) bestFromBenefits = Math.max(bestFromBenefits, parseInt(mTeams[1]) * 4);
-      else if (mGolfers) bestFromBenefits = Math.max(bestFromBenefits, parseInt(mGolfers[1]));
+      if (mTeams)        includedPlayers = Math.max(includedPlayers, parseInt(mTeams[1]) * 4);
+      else if (mGolfers) includedPlayers = Math.max(includedPlayers, parseInt(mGolfers[1]));
     });
-    if (bestFromBenefits > includedPlayers) includedPlayers = bestFromBenefits;
+  } else {
+    // No saved benefits yet — fall back to package-level inference
+    var sps = sponsor.sponsorships || (sponsor.package ? [{name: sponsor.package}] : (sponsor.tier ? [{name: sponsor.tier}] : []));
+    includedPlayers = getIncludedPlayers(sps);
   }
 
   var teamsIncluded = includedPlayers > 0 ? Math.ceil(includedPlayers / 4) : 0;
