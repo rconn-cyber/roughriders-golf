@@ -4144,7 +4144,7 @@ async function generateReport() {
   <!-- KPI row -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#ddd;border:1px solid #ddd;">
     ${kpiBox('🏌️', 'Teams Registered', totalUsed + ' / ' + TEAM_CAP, spotsLeft === 0 ? '#b44' : spotsLeft <= 3 ? '#a86000' : '#2d7a4a')}
-    ${kpiBox('👤', 'Individuals', individuals.length + (individuals.length > 0 ? ' <span style="font-size:11px;color:#888;">('+indivSlots+' slot'+(indivSlots!==1?'s':'))'):'')+')', '#0d1f3c')}
+    ${kpiBox('👤', 'Individuals', individuals.length + (individuals.length > 0 ? ' ('+indivSlots+' slot'+(indivSlots!==1?'s':'')+')' : ''), '#0d1f3c')}
     ${kpiBox('🤝', 'Sponsors', sponsors.length + '', '#0d1f3c')}
     ${kpiBox('💰', 'Total Revenue', fmtMoney(totalRev), '#2d7a4a')}
   </div>
