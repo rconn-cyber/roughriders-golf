@@ -336,6 +336,7 @@ tr:hover td { background: #f8faf8; }
             <p>All golfer registrations. Updates automatically from Stripe.</p>
           </div>
           <div style="display:flex;gap:8px;">
+            <button class="btn btn-outline" onclick="syncAllSponsorTeams()" title="Re-sync sponsor team slots into registrations">⟳ Sync Sponsor Teams</button>
             <button class="btn btn-primary" onclick="openManualEntry('registration')">+ Add Entry</button>
             <button class="btn btn-outline" onclick="loadOrders()">↺ Refresh</button>
           </div>
@@ -635,15 +636,7 @@ tr:hover td { background: #f8faf8; }
           <label class="form-label">Website</label>
           <input class="form-input" id="em-sp-website" type="url" placeholder="https://example.com">
         </div>
-        <!-- INCLUDED PLAYERS -->
-        <div class="form-group" id="em-sp-players-section" style="display:none;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <label class="form-label" style="margin-bottom:0;">Included Players <span id="em-sp-slots-note" style="color:var(--tl);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;"></span></label>
-            <button class="btn btn-outline btn-sm" onclick="addSpTeam()" id="em-sp-add-team-btn">+ Add Team</button>
-          </div>
-          <div id="em-sp-players-list" style="display:flex;flex-direction:column;gap:6px;"></div>
-          <button class="btn btn-outline btn-sm" onclick="addSpPlayer()" style="margin-top:8px;">+ Add Player</button>
-        </div>
+        <!-- Golfer slots managed via Registrations tab as sponsor-team entries -->
 
         <!-- BENEFITS -->
         <div class="form-group">
@@ -1583,21 +1576,27 @@ function renderRegistrations(orders){
     var amt = r.amount ? fmtMoney(r.amount/100) : (r.total ? fmtMoney(r.total) : '—');
     var status = r.status || r.paymentStatus || 'paid';
     var date = r.created ? new Date(r.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.date ? new Date(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'));
-    var src = r.source === 'manual' ? ' <span style="font-size:9px;background:#f0f2ef;color:var(--tl);padding:1px 5px;border-radius:3px;vertical-align:middle;">manual</span>' : '';
+    var isSponsorTeam = (r.type === 'sponsor-team');
+    var srcBadge = isSponsorTeam
+      ? ' <span style="font-size:9px;background:#e8f4ea;color:#1b5e20;padding:1px 5px;border-radius:3px;vertical-align:middle;border:1px solid #a5d6a7;">sponsor</span>'
+      : (r.source === 'manual' ? ' <span style="font-size:9px;background:#f0f2ef;color:var(--tl);padding:1px 5px;border-radius:3px;vertical-align:middle;">manual</span>' : '');
     var teamName = r.teamName || '';
-    return '<tr>'+
-      '<td><strong>'+escH(name.trim()||'—')+'</strong>'+src+'</td>'+
+    var displayName = isSponsorTeam ? (name.trim() || r.firstName || '—') : (name.trim() || '—');
+    var teamsCount = isSponsorTeam ? Math.ceil((r.playerCount||4)/4) : '';
+    var playersDisplay = isSponsorTeam ? (teamsCount + ' team' + (teamsCount!==1?'s':'') + ' (' + (r.playerCount||4) + ' golfers)') : players;
+    var editBtn = isSponsorTeam
+      ? '<button class="btn btn-outline btn-sm" onclick="alert(\'Edit this entry via the Sponsors tab.\')">🔗 Sponsor</button>'
+      : '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'registration\','+idx+')">✏ Edit</button> <button class="btn btn-danger btn-sm" onclick="deleteEntry(\'registrations\',\''+escH(r.id||'')+'\','+idx+')">✕</button>';
+    return '<tr'+(isSponsorTeam?' style="background:rgba(232,244,234,0.35);"':'')+'>'+
+      '<td><strong>'+escH(displayName)+'</strong>'+srcBadge+'</td>'+
       '<td style="font-size:12px;color:var(--tl);">'+escH(teamName||'—')+'</td>'+
       '<td>'+escH(r.email||'—')+'</td>'+
-      '<td>'+players+'</td>'+
+      '<td>'+playersDisplay+'</td>'+
       '<td style="font-size:11px;color:var(--tl)">'+escH(addons)+'</td>'+
       '<td>'+amt+'</td>'+
       '<td><span class="status-pill status-'+escH(status)+'">'+escH(status)+'</span></td>'+
       '<td>'+escH(date)+'</td>'+
-      '<td style="white-space:nowrap;">'+
-        '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'registration\','+idx+')">✏ Edit</button> '+
-        '<button class="btn btn-danger btn-sm" onclick="deleteEntry(\'registrations\',\''+escH(r.id||'')+'\','+idx+')">✕</button>'+
-      '</td>'+
+      '<td style="white-space:nowrap;">'+editBtn+'</td>'+
     '</tr>';
   }).join('');
   updateRegStats(_loadedRegs);
@@ -1608,9 +1607,13 @@ function updateRegStats(regs){
   var totalGolfers=0, teams=0, indiv=0, rev=0;
   regs.forEach(function(r){
     var p = r.playerCount || (r.golfers && r.golfers.length) || 1;
+    var t = r.type || '';
     totalGolfers += p;
-    if (p===4) teams++; else indiv++;
-    rev += r.amount ? r.amount/100 : (r.total||0);
+    if (t === 'sponsor-team') { teams += Math.ceil(p/4); }
+    else if (p >= 4 || t === 'team' || t === 'comped-team') { teams++; }
+    else { indiv += p; }
+    // Don't double-count sponsor revenue (tracked in sponsors tab)
+    if (t !== 'sponsor-team') rev += r.amount ? r.amount/100 : (r.total||0);
   });
   var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   s('stat-golfers',totalGolfers||'0');
@@ -2633,8 +2636,6 @@ async function saveEditEntry() {
         logoUpdate.logoData = null;
         logoUpdate.logoFileName = null;
       }
-      // Collect players (filter blanks)
-      var spGolfers = _spPlayers.filter(function(p){ return p.firstName || p.lastName || p.email; });
       // Collect active benefits
       var spBenList = _spBenefits.filter(function(b){ return b.on; }).map(function(b){ return b.text; });
       Object.assign(updated, {
@@ -2645,8 +2646,6 @@ async function saveEditEntry() {
         website:      document.getElementById('em-sp-website').value.trim(),
         sponsorships: sponsorships,
         package:      pkgText,
-        golfers:      spGolfers,
-        playerCount:  spGolfers.length,
         benefits:     spBenList,
         total:        spAmount,
         amount:       spAmount * 100,
@@ -2693,7 +2692,14 @@ async function saveEditEntry() {
     if (!putRes.ok) throw new Error('HTTP ' + putRes.status);
 
     closeEditModal();
-    loadOrders(); // loadOrders will scheduleSave which pushes publicSponsors
+    // For sponsors: auto-sync sponsor-team registration records
+    if (_editType === 'sponsor') {
+      await syncSponsorTeamReg(updated);
+    }
+    loadOrders().then(function(){
+    // Auto-sync sponsor teams into registrations on load
+    setTimeout(function(){ syncAllSponsorTeams(); }, 1500);
+  }); // loadOrders will scheduleSave which pushes publicSponsors
     toast('Entry updated ✓');
   } catch(e) {
     toast('Save failed: ' + e.message);
@@ -2911,6 +2917,20 @@ async function saveManualEntry() {
       await saveManualRegistration(paymentType, notes);
     } else {
       await saveManualSponsor(paymentType, notes);
+    }
+    // For sponsors: auto-sync sponsor-team registration records
+    if (_manualTab === 'sponsor') {
+      // Re-fetch the sponsor we just saved to get its ID
+      try {
+        var authHdr2 = { 'Authorization': 'Bearer ' + _jwt };
+        var freshSps = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=sponsors', { headers: authHdr2 });
+        var allSps = freshSps.ok ? await freshSps.json() : [];
+        if (!Array.isArray(allSps)) allSps = allSps.items || [];
+        // Find most recently added sponsor (no id yet in manual save, use date)
+        var newest = allSps.filter(function(s){ return s && s.source === 'manual'; })
+          .sort(function(a,b){ return new Date(b.date||b.createdAt||0) - new Date(a.date||a.createdAt||0); })[0];
+        if (newest) await syncSponsorTeamReg(newest);
+      } catch(e2) {}
     }
     closeManualModal();
     // If converting from reserved slot(s), save additional copies and delete reserved slots
@@ -3319,22 +3339,9 @@ function getConfirmedTeamCount() {
     if (r.status === 'cancelled') return;
     var p = r.playerCount || (r.golfers && r.golfers.length) || 1;
     var t = r.registrationType || r.type || '';
-    if (p >= 4 || t === 'team' || t === 'comped-team') count++;
+    if (p >= 4 || t === 'team' || t === 'comped-team' || t === 'sponsor-team') count += (t === 'sponsor-team' ? (Math.ceil(p/4)||1) : 1);
   });
-  // Also count sponsor teams — use golfers if entered, otherwise infer from tier benefits
-  (_loadedSponsors || []).forEach(function(s) {
-    if (s.status === 'cancelled') return;
-    if (s.golfers && s.golfers.length > 0) {
-      count += Math.ceil(s.golfers.length / 4);
-    } else {
-      // No golfers entered yet — infer teams from sponsorship tier
-      var sps = s.sponsorships || (s.package ? [{name: s.package}] : (s.tier ? [{name: s.tier}] : []));
-      if (sps.length > 0) {
-        var players = getIncludedPlayers(sps);
-        if (players > 0) count += Math.ceil(players / 4);
-      }
-    }
-  });
+  // Sponsor teams are now stored as registrations with type='sponsor-team' — no need to scan sponsors here.
   return count;
 }
 
@@ -3344,7 +3351,9 @@ function getIndividualCount() {
     if (r.status === 'cancelled') return;
     var p = r.playerCount || (r.golfers && r.golfers.length) || 1;
     var t = r.registrationType || r.type || '';
-    if (p < 4 && t !== 'team' && t !== 'comped-team') count += p;
+    // Skip sponsor-team entries (they're full teams) and skip full teams
+    if (t === 'sponsor-team' || t === 'team' || t === 'comped-team' || p >= 4) return;
+    count += p;
   });
   return count;
 }
@@ -3566,12 +3575,120 @@ async function deleteReserved(id) {
   } catch(e) { toast('Error: '+e.message); }
 }
 
+
+// ════════════════════════════════
+// SPONSOR-TEAM SYNC
+// ════════════════════════════════
+// When a sponsor has team-including benefits, maintain a corresponding
+// 'sponsor-team' registration record in the registrations resource.
+// This keeps Registrations as the single source of truth for capacity.
+
+// Sync ALL active sponsors with team benefits into registrations
+async function syncAllSponsorTeams() {
+  if (!_jwt) { toast('Not authenticated'); return; }
+  var active = (_loadedSponsors || []).filter(function(s){ return s && s.status !== 'cancelled'; });
+  if (!active.length) { toast('No active sponsors to sync'); return; }
+  toast('Syncing sponsor teams…');
+  try {
+    for (var i = 0; i < active.length; i++) {
+      await syncSponsorTeamReg(active[i]);
+    }
+    await loadOrders();
+    await updateCapacityOnRegPage();
+    toast('Sponsor teams synced ✓');
+  } catch(e) {
+    toast('Sync error: ' + e.message);
+  }
+}
+
+async function syncSponsorTeamReg(sponsor) {
+  if (!_jwt || !sponsor) return;
+  var sps = sponsor.sponsorships || (sponsor.package ? [{name: sponsor.package}] : (sponsor.tier ? [{name: sponsor.tier}] : []));
+  var includedPlayers = getIncludedPlayers(sps);
+  var teamsIncluded   = includedPlayers > 0 ? Math.ceil(includedPlayers / 4) : 0;
+  var authHdr = { 'Authorization': 'Bearer ' + _jwt };
+
+  // Fetch current registrations to find existing sponsor-team record for this sponsor
+  var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', { headers: authHdr });
+  var allRegs = res.ok ? await res.json() : [];
+  if (!Array.isArray(allRegs)) allRegs = allRegs.items || [];
+
+  var sponsorId = sponsor.id || sponsor.createdAt || sponsor.date;
+  var existing  = allRegs.filter(function(r){ return r && r.type === 'sponsor-team' && r.sponsorId === sponsorId; });
+
+  var companyName = sponsor.company || ((sponsor.firstName||'')+' '+(sponsor.lastName||'')).trim() || 'Sponsor';
+  var pkgText = sps.map(function(s){return s.name||s;}).join(', ');
+
+  if (sponsor.status === 'cancelled') {
+    // Cancel any linked sponsor-team records
+    if (existing.length === 0) return;
+    existing.forEach(function(r){ r.status = 'cancelled'; });
+    await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', {
+      method: 'PUT',
+      headers: Object.assign({'Content-Type':'application/json'}, authHdr),
+      body: JSON.stringify(allRegs),
+    });
+    return;
+  }
+
+  if (teamsIncluded === 0) {
+    // No team benefit — remove any existing sponsor-team records for this sponsor
+    if (existing.length === 0) return;
+    allRegs = allRegs.filter(function(r){ return !(r && r.type === 'sponsor-team' && r.sponsorId === sponsorId); });
+    await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', {
+      method: 'PUT',
+      headers: Object.assign({'Content-Type':'application/json'}, authHdr),
+      body: JSON.stringify(allRegs),
+    });
+    return;
+  }
+
+  // Build the sponsor-team record
+  var record = {
+    id:           (existing[0] && existing[0].id) || ('sp-team-' + (sponsorId||Date.now())),
+    sponsorId:    sponsorId,
+    type:         'sponsor-team',
+    source:       'sponsor',
+    firstName:    companyName,
+    lastName:     '',
+    email:        sponsor.email || '',
+    teamName:     pkgText,
+    playerCount:  includedPlayers,
+    golfers:      (sponsor.golfers || []),
+    total:        sponsor.total || 0,
+    status:       sponsor.status || 'paid',
+    notes:        'Auto-linked from sponsor record: ' + companyName,
+    date:         sponsor.date || sponsor.createdAt || new Date().toISOString(),
+    createdAt:    sponsor.createdAt || sponsor.date || new Date().toISOString(),
+    updatedAt:    new Date().toISOString(),
+  };
+
+  if (existing.length > 0) {
+    // Update existing record
+    for (var i = 0; i < allRegs.length; i++) {
+      if (allRegs[i] && allRegs[i].type === 'sponsor-team' && allRegs[i].sponsorId === sponsorId) {
+        allRegs[i] = Object.assign({}, allRegs[i], record);
+        break;
+      }
+    }
+  } else {
+    // Insert new
+    allRegs.push(record);
+  }
+
+  await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', {
+    method: 'PUT',
+    headers: Object.assign({'Content-Type':'application/json'}, authHdr),
+    body: JSON.stringify(allRegs),
+  });
+}
+
 // Push capacity summary to admin-config so register.html can read it publicly
 // Individuals count toward capacity: every 4 individuals consume 1 team slot.
 async function updateCapacityOnRegPage() {
   var confirmed = getConfirmedTeamCount();
   var reserved  = _loadedReserved.filter(function(r){ return r.status !== 'cancelled'; }).length;
-  var indiv     = getIndividualCount();
+  var indiv     = getIndividualCount(); // individuals NOT in a full team
   // Each full group of 4 individuals takes a slot; remainder are "forming"
   var indivSlots   = Math.floor(indiv / 4);
   var indivPartial = indiv % 4;  // players not yet filling a slot
