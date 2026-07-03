@@ -93,7 +93,7 @@ exports.handler = async (event) => {
   const logStartRes = await fetch(`${SUPABASE_URL}/rest/v1/sync_log`, {
     method: 'POST',
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-    body: JSON.stringify({ sync_type: 'members', status: 'running' })
+    body: JSON.stringify({ sync_type: 'members', status: 'running', started_at: new Date().toISOString() })
   });
   const logRows = logStartRes.ok ? await logStartRes.json() : [];
   const logId = logRows[0]?.id;
@@ -150,7 +150,7 @@ exports.handler = async (event) => {
       });
     }
 
-    return { statusCode: 200, headers, body: JSON.stringify({ success: true, results }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ success: true, results, error_detail: results.errors }) };
 
   } catch (e) {
     if (logId) {

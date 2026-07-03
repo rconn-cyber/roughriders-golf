@@ -3823,10 +3823,12 @@ async function syncMembersNow() {
     if (!res.ok) throw new Error(data.error || 'Sync failed');
 
     const r = data.results || {};
-    msg.textContent = `✓ Sync complete — ${r.wa_to_sb || 0} updated, ${r.skipped || 0} skipped${r.errors && r.errors.length ? `, ${r.errors.length} error(s)` : ''}`;
+    const errCount = r.errors ? r.errors.length : 0;
+    msg.innerHTML = `✓ Sync complete — <strong>${r.wa_to_sb || 0} updated</strong>, ${r.skipped || 0} skipped` +
+      (errCount ? ` · <span style="color:#b44;">${errCount} error(s): ${(r.errors||[]).slice(0,2).join('; ')}</span>` : '');
     msg.style.color = '#2d7a4a';
     toast('Members synced ✓');
-    setTimeout(() => loadMemberSyncStatus(), 500);
+    setTimeout(() => loadMemberSyncStatus(), 800);
   } catch(e) {
     msg.textContent = '✗ ' + e.message;
     msg.style.color = '#b44';
