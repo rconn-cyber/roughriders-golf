@@ -85,23 +85,35 @@ exports.handler = async (event) => {
     return { firstName: s, lastName: '', email: '' };
   });
 
+  // --- FIX 1: Parse first/last name from primary_contact ---
+  // primary_contact is stored as "First Last" in metadata
+  const primaryContact = meta.primary_contact || '';
+  const contactParts   = primaryContact.trim().split(/\s+/);
+  const firstName      = contactParts[0] || '';
+  const lastName       = contactParts.slice(1).join(' ') || '';
+
+  // --- FIX 2: amount_total is in cents — divide by 100 ---
+  const amountDollars = (session.amount_total || 0) / 100;
+
   // Build registration record matching admin-data.js POST format
   const newId  = 'rr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
   const record = {
-    id:             newId,
-    stripeSessionId: session.id,
+    id:                  newId,
+    stripeSessionId:     session.id,
     stripePaymentIntent: session.payment_intent,
-    name:           meta.primary_contact || '',
-    email:          meta.primary_email   || session.customer_email || '',
-    phone:          meta.primary_phone   || '',
-    players:        parseInt(meta.golfer_count || '1', 10),
+    name:                primaryContact,          // full name for display
+    firstName,                                    // split for Edit modal
+    lastName,
+    email:               meta.primary_email   || session.customer_email || '',
+    phone:               meta.primary_phone   || '',
+    players:             parseInt(meta.golfer_count || '1', 10),
     golfers,
-    amount:         (session.amount_total || 0) / 100,
-    status:         'paid',
-    paymentMethod:  'card',
-    source:         'stripe',
-    createdAt:      new Date().toISOString(),
-    updatedAt:      new Date().toISOString(),
+    amount:              amountDollars,            // ← fixed: dollars not cents
+    status:              'paid',
+    paymentMethod:       'card',
+    source:              'stripe',
+    createdAt:           new Date().toISOString(),
+    updatedAt:           new Date().toISOString(),
   };
 
   try {
