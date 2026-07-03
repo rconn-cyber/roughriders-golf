@@ -2186,7 +2186,7 @@ function openEditEntry(type, idx) {
       var on = currentPkgs.some(function(p){
         return p === lvName || p.indexOf(lvName) >= 0 || lvName.indexOf(p) >= 0;
       });
-      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount();var sps=getCurrentSpSponsorships();updateSpPlayerSection(sps);rebuildBenefitsFromPackage(sps);">'+escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
+      html += '<div class="benefit-toggle'+(on?' on':'')+'" data-sp-name="'+escH(lv.name)+'" data-sp-price="'+lv.price+'" onclick="this.classList.toggle(\'on\');recalcEditSpAmount();var sps=getCurrentSpSponsorships();rebuildBenefitsFromPackage(sps);">'+escH(lv.name)+' — '+fmtMoney(lv.price)+'</div>';
     });
     
     picker.innerHTML = html;
@@ -2206,7 +2206,6 @@ function openEditEntry(type, idx) {
   // Init logo + players + benefits for sponsors
   if (type === 'sponsor') {
     initEditLogo(r);
-    initSpPlayers(r);
     initSpBenefits(r);
     // Show hide-from-public toggle
     var hideRow = document.getElementById('em-sp-hide-row');
@@ -2265,100 +2264,16 @@ function getIncludedPlayers(sponsorships) {
 }
 
 // State for sponsor player editing
-var _spPlayers = []; // [{firstName,lastName,email,phone}]
+var _spPlayers = []; // kept for legacy refs; players now managed via Registrations tab
+function initSpPlayers(r) { _spPlayers = []; } // no-op: players live in Registrations
+function updateSpPlayerSection(sps) {} // no-op
+function renderSpPlayersList(n) {} // no-op
+function addSpPlayer() { toast('Add golfers via the Registrations tab (sponsor-team entry).'); }
+function addSpTeam()   { toast('Add golfers via the Registrations tab (sponsor-team entry).'); }
+function removeSpPlayer(i) {}
 var _spBenefits = []; // [{text, custom:bool, on:bool}]
 
-function initSpPlayers(record) {
-  // Load existing players
-  _spPlayers = (record.golfers || []).map(function(g) {
-    return { firstName: g.firstName||'', lastName: g.lastName||'', email: g.email||'', phone: g.phone||'' };
-  });
-  renderSpPlayersList();
-  updateSpPlayerSection(record.sponsorships || []);
-}
-
-function updateSpPlayerSection(sponsorships) {
-  var included = getIncludedPlayers(sponsorships);
-  var sec  = document.getElementById('em-sp-players-section');
-  var note = document.getElementById('em-sp-slots-note');
-  if (included > 0) {
-    sec.style.display = '';
-    note.textContent  = '(' + included + ' included with package)';
-    // Expand player list to match included slots if under
-    while (_spPlayers.length < included) {
-      _spPlayers.push({ firstName:'', lastName:'', email:'', phone:'' });
-    }
-    renderSpPlayersList(included);
-  } else {
-    // No included players but still show section if they have players
-    if (_spPlayers.length > 0) {
-      sec.style.display = '';
-      note.textContent  = '';
-      renderSpPlayersList(0);
-    } else {
-      sec.style.display = 'none';
-    }
-  }
-}
-
-function renderSpPlayersList(includedCount) {
-  var list = document.getElementById('em-sp-players-list');
-  if (!list) return;
-  includedCount = includedCount || 0;
-  var html = '';
-  for (var i = 0; i < _spPlayers.length; i++) {
-    var p = _spPlayers[i];
-    var isExtra = (i >= includedCount && includedCount > 0);
-    var teamNum = Math.floor(i / 4) + 1;
-    var posInTeam = i % 4;
-    // Team divider
-    if (i > 0 && posInTeam === 0 && includedCount > 4) {
-      html += '<div class="sp-team-divider">Team ' + teamNum + '</div>';
-    } else if (i === 0 && includedCount > 4) {
-      html += '<div class="sp-team-divider">Team 1</div>';
-    }
-    var numClass = isExtra ? 'sp-player-num extra' : 'sp-player-num';
-    html += '<div class="sp-player-row" id="sp-pr-' + i + '">' +
-      '<div class="' + numClass + '">' + (i+1) + '</div>' +
-      '<div class="sp-player-inputs">' +
-        '<input type="text" placeholder="First name" value="' + escH(p.firstName) + '" oninput="_spPlayers[' + i + '].firstName=this.value">' +
-        '<input type="text" placeholder="Last name" value="' + escH(p.lastName) + '" oninput="_spPlayers[' + i + '].lastName=this.value">' +
-        '<input type="email" placeholder="Email (optional)" value="' + escH(p.email) + '" oninput="_spPlayers[' + i + '].email=this.value" style="min-width:140px;">' +
-      '</div>' +
-      '<button class="btn btn-danger btn-sm" onclick="removeSpPlayer(' + i + ')" style="padding:3px 7px;font-size:11px;">✕</button>' +
-    '</div>';
-  }
-  list.innerHTML = html;
-}
-
-function addSpPlayer() {
-  _spPlayers.push({ firstName:'', lastName:'', email:'', phone:'' });
-  var included = getIncludedPlayers(getCurrentSpSponsorships());
-  renderSpPlayersList(included);
-  // Focus first empty name field
-  setTimeout(function(){
-    var rows = document.querySelectorAll('#em-sp-players-list .sp-player-row');
-    var last = rows[rows.length-1];
-    if (last) { var inp = last.querySelector('input'); if(inp) inp.focus(); }
-  }, 30);
-}
-
-function addSpTeam() {
-  var included = getIncludedPlayers(getCurrentSpSponsorships());
-  for (var i = 0; i < 4; i++) {
-    _spPlayers.push({ firstName:'', lastName:'', email:'', phone:'' });
-  }
-  renderSpPlayersList(included);
-  document.getElementById('em-sp-players-section').style.display = '';
-  setTimeout(function(){
-    var rows = document.querySelectorAll('#em-sp-players-list .sp-player-row');
-    var first = rows[rows.length - 4];
-    if (first) { var inp = first.querySelector('input'); if(inp) inp.focus(); }
-  }, 30);
-  toast('Team of 4 added (' + _spPlayers.length + ' total players)');
-}
-
-function removeSpPlayer(idx) {
+function removeSpPlayer_REMOVED(idx) {
   _spPlayers.splice(idx, 1);
   var included = getIncludedPlayers(getCurrentSpSponsorships());
   renderSpPlayersList(included);
