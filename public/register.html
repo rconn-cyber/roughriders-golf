@@ -740,6 +740,26 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
     <!-- Primary registrant -->
     <div class="reg-section">
       <div class="reg-section-title">Register to Golf <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional if sponsoring only</span></div>
+
+      <!-- Member lookup -->
+      <div style="background:#f0faf4;border:1px solid rgba(45,122,74,0.25);border-radius:8px;padding:14px 16px;margin-bottom:18px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#2d7a4a;margin-bottom:10px;">Member Lookup <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#666;">— enter your member number to auto-fill your info</span></div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="flex:1;">
+            <input id="inp-member-number" type="text" placeholder="e.g. 1042"
+              style="width:100%;padding:10px 12px;border:1.5px solid rgba(0,0,0,0.18);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s;box-sizing:border-box;"
+              onfocus="this.style.borderColor='#2d7a4a'" onblur="this.style.borderColor='rgba(0,0,0,0.18)'"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();lookupMember();}">
+          </div>
+          <button onclick="lookupMember()"
+            style="padding:10px 18px;background:#0f2318;color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;white-space:nowrap;transition:background 0.15s;"
+            onmouseover="this.style.background='#1e4a2c'" onmouseout="this.style.background='#0f2318'">
+            Look Up
+          </button>
+        </div>
+        <div id="member-lookup-status" style="margin-top:8px;font-size:13px;min-height:18px;"></div>
+      </div>
+
       <div class="field-row">
         <div class="field" id="f-fn">
           <label>First name</label>
@@ -1252,6 +1272,59 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 var NETLIFY_BASE = 'https://rr-golf.netlify.app';
 var EVENT_DATE     = 'Monday, September 14, 2026';
 var EVENT_VENUE    = 'Hunter\'s Green Country Club · Tampa, FL';
+
+// ════════════════════════════════
+// MEMBER LOOKUP
+// ════════════════════════════════
+async function lookupMember() {
+  const input  = document.getElementById('inp-member-number');
+  const status = document.getElementById('member-lookup-status');
+  const mn = (input.value || '').trim();
+
+  if (!mn) {
+    status.innerHTML = '<span style="color:#b44;">Please enter your member number.</span>';
+    return;
+  }
+
+  status.innerHTML = '<span style="color:#2d7a4a;">🔍 Looking up…</span>';
+
+  try {
+    const res  = await fetch(`${NETLIFY_BASE}/.netlify/functions/lookup-member?member_number=${encodeURIComponent(mn)}`);
+    const data = await res.json();
+
+    if (res.status === 404 || data.error) {
+      status.innerHTML = '<span style="color:#b44;">⚠️ Member number not found. Please check and try again, or fill in your details below.</span>';
+      return;
+    }
+
+    // Fill golfer fields
+    const fn = document.getElementById('inp-fn');
+    const ln = document.getElementById('inp-ln');
+    const em = document.getElementById('inp-em');
+    const ph = document.getElementById('inp-ph');
+
+    if (data.first_name) fn.value = data.first_name;
+    if (data.last_name)  ln.value = data.last_name;
+    if (data.email)      em.value = data.email;
+    if (data.phone)      ph.value = data.phone;
+
+    const name = [data.first_name, data.last_name].filter(Boolean).join(' ');
+    status.innerHTML = `<span style="color:#2d7a4a;">✓ Found: <strong>${name}</strong> — fields filled in below. Update anything that needs correcting.</span>`;
+
+    // Highlight filled fields briefly
+    [fn, ln, em, ph].forEach(el => {
+      if (el.value) {
+        el.style.transition = 'background 0.3s';
+        el.style.background = '#edfaf2';
+        setTimeout(() => { el.style.background = ''; }, 2000);
+      }
+    });
+
+  } catch (err) {
+    console.error('Member lookup error:', err);
+    status.innerHTML = '<span style="color:#b44;">Lookup failed — please fill in your details below.</span>';
+  }
+}
 
 // Hardcoded fallback levels — used if admin-config is unavailable
 var FALLBACK_LEVELS = [
