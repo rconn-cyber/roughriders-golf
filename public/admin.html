@@ -4072,10 +4072,26 @@ async function generateReport() {
 
     // ── Capacity counting (mirror admin logic) ──────────────────────────────
     var TEAM_CAP = 18;
-    var publicTeams  = regs.filter(function(r){ return r.type === 'team'; });
-    var sponsorTeams = regs.filter(function(r){ return r.type === 'sponsor-team'; });
-    var individuals  = regs.filter(function(r){ return r.type === 'individual'; });
-    var indivSlots   = Math.ceil(individuals.length / 4);
+    // Mirror the existing getConfirmedTeamCount / getIndividualCount logic
+    var activeRegs   = regs.filter(function(r){ return r.status !== 'cancelled'; });
+    var sponsorTeams = activeRegs.filter(function(r){ return (r.registrationType||r.type) === 'sponsor-team'; });
+    var publicTeams  = activeRegs.filter(function(r){
+      var t = r.registrationType || r.type || '';
+      var p = r.playerCount || (r.golfers && r.golfers.length) || 1;
+      return (t === 'team' || t === 'comped-team' || p >= 4) && t !== 'sponsor-team';
+    });
+    var individualPlayers = activeRegs.reduce(function(sum, r){
+      var t = r.registrationType || r.type || '';
+      var p = r.playerCount || (r.golfers && r.golfers.length) || 1;
+      if (t === 'sponsor-team' || t === 'team' || t === 'comped-team' || p >= 4) return sum;
+      return sum + p;
+    }, 0);
+    var individuals  = activeRegs.filter(function(r){
+      var t = r.registrationType || r.type || '';
+      var p = r.playerCount || (r.golfers && r.golfers.length) || 1;
+      return t !== 'sponsor-team' && t !== 'team' && t !== 'comped-team' && p < 4;
+    });
+    var indivSlots   = Math.floor(individualPlayers / 4);
     var reservedOpen = reserved.filter(function(r){ return r.status !== 'converted' && r.status !== 'cancelled'; });
 
     var totalUsed = publicTeams.length + sponsorTeams.length + indivSlots;
@@ -4146,7 +4162,7 @@ async function generateReport() {
   <!-- KPI row -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#ddd;border:1px solid #ddd;">
     ${kpiBox('🏌️', 'Teams Registered', totalUsed + ' / ' + TEAM_CAP, spotsLeft === 0 ? '#b44' : spotsLeft <= 3 ? '#a86000' : '#2d7a4a')}
-    ${kpiBox('👤', 'Individuals', individuals.length + (individuals.length > 0 ? ' ('+indivSlots+' slot'+(indivSlots!==1?'s':'')+')' : ''), '#0d1f3c')}
+    ${kpiBox('👤', 'Individuals', individualPlayers + (individualPlayers > 0 ? ' ('+indivSlots+' slot'+(indivSlots!==1?'s':'')+')' : ''), '#0d1f3c')}
     ${kpiBox('🤝', 'Sponsors', sponsors.length + '', '#0d1f3c')}
     ${kpiBox('💰', 'Total Revenue', fmtMoney(totalRev), '#2d7a4a')}
   </div>
@@ -4163,7 +4179,7 @@ async function generateReport() {
     <div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:#888;">
       <span>🟢 Public teams: ${publicTeams.length}</span>
       <span>🟡 Sponsor teams: ${sponsorTeams.length}</span>
-      <span>🔵 Individual slots: ${indivSlots} (${individuals.length} players)</span>
+      <span>🔵 Individual slots: ${indivSlots} (${individualPlayers} players)</span>
     </div>
   </div>
 
