@@ -3031,7 +3031,8 @@ async function initApp(){
   setTimeout(function(){setSaveBadge('idle');},2000);
   loadOrders();
   loadReserved();
-  updateCapacityOnRegPage();
+  // Push capacity after a short delay to ensure _loadedRegs is populated
+  setTimeout(function(){ updateCapacityOnRegPage(); }, 2000);
 }
 
 /* ====== CONTENT PANEL - TipTap-lite editor ====== */
