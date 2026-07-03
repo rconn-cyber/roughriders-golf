@@ -3606,34 +3606,27 @@ async function syncSponsorTeamReg(sponsor) {
   var teamsIncluded = includedPlayers > 0 ? Math.ceil(includedPlayers / 4) : 0;
   var authHdr = { 'Authorization': 'Bearer ' + _jwt };
 
-  // Fetch current registrations to find existing sponsor-team record for this sponsor
+  // Always define these regardless of which branch set includedPlayers
+  var companyName = sponsor.company || ((sponsor.firstName||'')+' '+(sponsor.lastName||'')).trim() || 'Sponsor';
+  var allSps = sponsor.sponsorships || (sponsor.package ? [{name: sponsor.package}] : (sponsor.tier ? [{name: sponsor.tier}] : []));
+  var pkgText = allSps.map(function(s){return s.name||s;}).join(', ');
+
+  // Fetch current registrations
   var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', { headers: authHdr });
   var allRegs = res.ok ? await res.json() : [];
   if (!Array.isArray(allRegs)) allRegs = allRegs.items || [];
 
-  // Build a robust sponsorId — always prefer the server-assigned id
   var sponsorId = sponsor.id || sponsor.createdAt || sponsor.date;
-  // Find existing records — match by sponsorId OR by company name as fallback
-  var companyMatch = (sponsor.company || ((sponsor.firstName||'')+' '+(sponsor.lastName||'')).trim() || '').toLowerCase();
+  // Find existing sponsor-team record — match by sponsorId only (most reliable)
   var existing = allRegs.filter(function(r) {
-    if (!r || r.type !== 'sponsor-team') return false;
-    if (r.sponsorId === sponsorId) return true;
-    // Fallback: match by company name if sponsorId was previously set differently
-    if (companyMatch && r.firstName && r.firstName.toLowerCase() === companyMatch) return true;
-    return false;
+    return r && r.type === 'sponsor-team' && r.sponsorId === sponsorId;
   });
-  // Deduplicate — keep only the first match, remove extras
+  // Deduplicate — keep only the first, remove extras
   if (existing.length > 1) {
-    var keep = existing[0];
-    allRegs = allRegs.filter(function(r) {
-      if (r && r.type === 'sponsor-team' && existing.indexOf(r) > 0) return false;
-      return true;
-    });
-    existing = [keep];
+    var toRemoveIds = existing.slice(1).map(function(r){ return r.id; });
+    allRegs = allRegs.filter(function(r){ return !r || toRemoveIds.indexOf(r.id) === -1; });
+    existing = [existing[0]];
   }
-
-  var companyName = sponsor.company || ((sponsor.firstName||'')+' '+(sponsor.lastName||'')).trim() || 'Sponsor';
-  var pkgText = sps.map(function(s){return s.name||s;}).join(', ');
 
   if (sponsor.status === 'cancelled') {
     // Cancel any linked sponsor-team records
@@ -3692,11 +3685,18 @@ async function syncSponsorTeamReg(sponsor) {
     allRegs.push(record);
   }
 
-  await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', {
+  var writeRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', {
     method: 'PUT',
     headers: Object.assign({'Content-Type':'application/json'}, authHdr),
     body: JSON.stringify(allRegs),
   });
+  if (!writeRes.ok) {
+    var errText = await writeRes.text();
+    console.error('[syncSponsorTeamReg] PUT failed:', writeRes.status, errText);
+    toast('Sync write failed: ' + writeRes.status);
+  } else {
+    console.log('[syncSponsorTeamReg] Wrote', companyName, '→', Math.ceil(includedPlayers/4), 'team(s),', includedPlayers, 'players');
+  }
 }
 
 // Push capacity summary to admin-config so register.html can read it publicly
