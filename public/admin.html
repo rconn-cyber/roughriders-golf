@@ -329,6 +329,13 @@ tr:hover td { background: #f8faf8; }
       <div class="nav-item" onclick="openCheckin()" style="color:var(--gold);">
         <span class="nav-icon">🖨</span> Check-In Sheets
       </div>
+      <div class="nav-item" id="nav-report" onclick="showPanel('report')" style="color:var(--gold);">
+        <span class="nav-icon">📊</span> Status Report
+      </div>
+      <div class="sb-label" style="margin-top:8px;">Admin</div>
+      <div class="nav-item" id="nav-settings" onclick="showPanel('settings')">
+        <span class="nav-icon">⚙️</span> Settings
+      </div>
     </nav>
 
     <main class="main">
@@ -598,6 +605,64 @@ tr:hover td { background: #f8faf8; }
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="panel" id="panel-settings">
+        <div class="page-hdr">
+          <div class="page-hdr-l"><h1>Settings</h1><p class="page-sub">Email notification recipients and tournament preferences</p></div>
+        </div>
+
+        <div class="card" style="max-width:680px;">
+          <div class="card-hdr">
+            <span class="card-hdr-title">📧 Notification Email Recipients</span>
+          </div>
+          <div class="card-body" style="padding:20px;">
+            <p style="font-size:13px;color:#666;margin:0 0 14px;">These addresses receive an admin notification whenever a new registration or sponsorship is submitted. All addresses are BCC'd together.</p>
+
+            <div id="settings-email-list" style="margin-bottom:14px;"></div>
+
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="email" id="settings-new-email" class="form-input" placeholder="name@example.com" style="flex:1;max-width:320px;" onkeydown="if(event.key==='Enter'){addSettingsEmail();}">
+              <button class="btn btn-primary btn-sm" onclick="addSettingsEmail()">+ Add</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="max-width:680px;margin-top:18px;">
+          <div class="card-hdr">
+            <span class="card-hdr-title">🔔 Notification Preferences</span>
+          </div>
+          <div class="card-body" style="padding:20px;">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:12px;">
+              <input type="checkbox" id="settings-notify-entry" style="width:16px;height:16px;">
+              <span style="font-size:14px;">Notify on new registration (team or individual)</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="settings-notify-sponsor" style="width:16px;height:16px;">
+              <span style="font-size:14px;">Notify on new sponsorship inquiry</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-top:18px;max-width:680px;display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+          <span id="settings-save-msg" style="font-size:13px;color:#2d7a4a;align-self:center;"></span>
+        </div>
+      </div>
+
+      <!-- REPORT -->
+      <div class="panel" id="panel-report">
+        <div class="page-hdr">
+          <div class="page-hdr-l"><h1>Tournament Status Report</h1><p class="page-sub">Current snapshot — 39th Annual Charity Golf Tournament</p></div>
+          <div class="page-hdr-r">
+            <button class="btn btn-primary" onclick="generateReport()">⟳ Refresh Report</button>
+            <button class="btn btn-outline" onclick="printReport()" style="margin-left:8px;">🖨 Print / Save PDF</button>
+          </div>
+        </div>
+        <div id="report-output" style="font-size:13px;color:#888;padding:40px 0 0;text-align:center;">
+          Click <strong>Refresh Report</strong> to generate the current tournament status.
         </div>
       </div>
 
@@ -3898,6 +3963,291 @@ async function syncMembersNow() {
 }
 
 
-</script>
-</body>
-</html>
+// ════════════════════════════════
+// SETTINGS
+// ════════════════════════════════
+var SETTINGS = { adminEmails: [], notifyOnEntry: true, notifyOnSponsor: true };
+
+async function loadSettings() {
+  try {
+    var res = await apiFetch('admin-data?resource=settings');
+    if (res.ok) {
+      var d = await res.json();
+      SETTINGS = Object.assign({ adminEmails: [], notifyOnEntry: true, notifyOnSponsor: true }, d);
+    }
+  } catch(e) { console.warn('loadSettings:', e); }
+  renderSettingsUI();
+}
+
+function renderSettingsUI() {
+  var list = document.getElementById('settings-email-list');
+  if (!list) return;
+  if (!SETTINGS.adminEmails || SETTINGS.adminEmails.length === 0) {
+    list.innerHTML = '<p style="font-size:13px;color:#888;margin:0 0 8px;">No additional recipients configured. The primary admin email from Netlify env vars will always be used.</p>';
+  } else {
+    list.innerHTML = SETTINGS.adminEmails.map(function(em, i) {
+      return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+        '<span style="flex:1;font-size:14px;padding:6px 10px;background:#f5f5f0;border-radius:4px;border:1px solid #ddd;">' + escH(em) + '</span>' +
+        '<button class="btn btn-danger btn-sm" onclick="removeSettingsEmail(' + i + ')">✕</button>' +
+        '</div>';
+    }).join('');
+  }
+  var notifyEntry   = document.getElementById('settings-notify-entry');
+  var notifySponsor = document.getElementById('settings-notify-sponsor');
+  if (notifyEntry)   notifyEntry.checked   = SETTINGS.notifyOnEntry   !== false;
+  if (notifySponsor) notifySponsor.checked = SETTINGS.notifyOnSponsor !== false;
+}
+
+function addSettingsEmail() {
+  var inp = document.getElementById('settings-new-email');
+  var val = (inp.value || '').trim().toLowerCase();
+  if (!val || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { toast('Enter a valid email address'); return; }
+  if (SETTINGS.adminEmails.indexOf(val) !== -1) { toast('Already in the list'); inp.value = ''; return; }
+  SETTINGS.adminEmails.push(val);
+  inp.value = '';
+  renderSettingsUI();
+}
+
+function removeSettingsEmail(idx) {
+  SETTINGS.adminEmails.splice(idx, 1);
+  renderSettingsUI();
+}
+
+async function saveSettings() {
+  var notifyEntry   = document.getElementById('settings-notify-entry');
+  var notifySponsor = document.getElementById('settings-notify-sponsor');
+  SETTINGS.notifyOnEntry   = notifyEntry   ? notifyEntry.checked   : true;
+  SETTINGS.notifyOnSponsor = notifySponsor ? notifySponsor.checked : true;
+
+  var msg = document.getElementById('settings-save-msg');
+  msg.textContent = 'Saving…';
+  try {
+    var res = await apiFetch('admin-data?resource=settings', { method: 'PUT', body: JSON.stringify(SETTINGS) });
+    if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
+    msg.textContent = '✓ Saved';
+    toast('Settings saved ✓');
+    setTimeout(function(){ msg.textContent = ''; }, 3000);
+  } catch(e) {
+    msg.textContent = '✗ ' + e.message;
+    msg.style.color = '#b44';
+    toast('Save failed: ' + e.message);
+  }
+}
+
+// Load settings when Settings panel opens
+var _origShowPanel = showPanel;
+showPanel = function(name) {
+  _origShowPanel(name);
+  if (name === 'settings') loadSettings();
+  if (name === 'report')   generateReport();
+};
+
+// ════════════════════════════════
+// TOURNAMENT STATUS REPORT
+// ════════════════════════════════
+async function generateReport() {
+  var out = document.getElementById('report-output');
+  out.innerHTML = '<p style="color:#888;padding:20px 0;">Loading data…</p>';
+
+  try {
+    var [regsRes, spRes, resRes, cfgRes] = await Promise.all([
+      apiFetch('admin-data?resource=registrations'),
+      apiFetch('admin-data?resource=sponsors'),
+      apiFetch('admin-data?resource=reserved-teams'),
+      fetch(NETLIFY_BASE + '/.netlify/functions/admin-config').then(function(r){ return r.ok ? r.json() : {}; }),
+    ]);
+
+    var regs     = regsRes.ok ? await regsRes.json() : [];
+    var sponsors = spRes.ok   ? await spRes.json()   : [];
+    var reserved = resRes.ok  ? await resRes.json()  : [];
+    var cfg      = cfgRes || {};
+
+    if (!Array.isArray(regs))     regs     = [];
+    if (!Array.isArray(sponsors)) sponsors = [];
+    if (!Array.isArray(reserved)) reserved = [];
+
+    var levels = cfg.levels || [];
+
+    // ── Capacity counting (mirror admin logic) ──────────────────────────────
+    var TEAM_CAP = 18;
+    var publicTeams  = regs.filter(function(r){ return r.type === 'team'; });
+    var sponsorTeams = regs.filter(function(r){ return r.type === 'sponsor-team'; });
+    var individuals  = regs.filter(function(r){ return r.type === 'individual'; });
+    var indivSlots   = Math.ceil(individuals.length / 4);
+    var reservedOpen = reserved.filter(function(r){ return r.status !== 'converted' && r.status !== 'cancelled'; });
+
+    var totalUsed = publicTeams.length + sponsorTeams.length + indivSlots;
+    var spotsLeft = Math.max(0, TEAM_CAP - totalUsed);
+
+    // ── Revenue ─────────────────────────────────────────────────────────────
+    var regRevenue = regs.reduce(function(s,r){ return s + (parseFloat(r.amount)||0); }, 0);
+    var spRevenue  = sponsors.reduce(function(s,sp){ return s + (parseFloat(sp.totalAmount||sp.amount)||0); }, 0);
+    var totalRev   = regRevenue + spRevenue;
+
+    // ── Sponsor breakdown by level ──────────────────────────────────────────
+    var levelMap = {};
+    levels.forEach(function(lv){ levelMap[lv.id] = lv; });
+    var spByLevel = {};
+    sponsors.forEach(function(sp) {
+      var lid = sp.levelId || sp.level || 'unknown';
+      if (!spByLevel[lid]) spByLevel[lid] = { name: (levelMap[lid] ? levelMap[lid].name : lid), count: 0, rev: 0 };
+      spByLevel[lid].count++;
+      spByLevel[lid].rev += parseFloat(sp.totalAmount || sp.amount || 0);
+    });
+    var spLevelRows = Object.keys(spByLevel).sort(function(a,b){ return spByLevel[b].rev - spByLevel[a].rev; }).map(function(k){
+      var l = spByLevel[k];
+      return '<tr><td style="padding:6px 10px;">'+escH(l.name)+'</td><td style="padding:6px 10px;text-align:center;">'+l.count+'</td><td style="padding:6px 10px;text-align:right;">'+fmtMoney(l.rev)+'</td></tr>';
+    }).join('');
+
+    // ── Add-on summary ──────────────────────────────────────────────────────
+    var addonCount = {};
+    regs.forEach(function(r){ (r.addons||[]).forEach(function(a){ var nm=a.name||a; addonCount[nm]=(addonCount[nm]||0)+1; }); });
+    var addonRows = Object.keys(addonCount).map(function(k){
+      return '<tr><td style="padding:5px 10px;">'+escH(k)+'</td><td style="padding:5px 10px;text-align:center;">'+addonCount[k]+'</td></tr>';
+    }).join('') || '<tr><td colspan="2" style="padding:8px 10px;color:#888;">None recorded</td></tr>';
+
+    // ── Recent registrations (last 5) ────────────────────────────────────────
+    var sorted = regs.slice().sort(function(a,b){ return (b.createdAt||'') > (a.createdAt||'') ? 1 : -1; });
+    var recentRows = sorted.slice(0,5).map(function(r){
+      var name = r.teamName || r.name || [r.firstName, r.lastName].filter(Boolean).join(' ') || '—';
+      var dt   = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+      var type = r.type === 'team' ? 'Team' : r.type === 'sponsor-team' ? 'Sponsor Team' : r.type === 'individual' ? 'Individual' : r.type || '—';
+      return '<tr><td style="padding:5px 10px;">'+escH(name)+'</td><td style="padding:5px 10px;color:#555;">'+escH(type)+'</td><td style="padding:5px 10px;color:#555;text-align:right;">'+fmtMoney(r.amount||0)+'</td><td style="padding:5px 10px;color:#888;font-size:12px;">'+dt+'</td></tr>';
+    }).join('') || '<tr><td colspan="4" style="padding:8px 10px;color:#888;">No registrations yet</td></tr>';
+
+    // ── Reserved summary ────────────────────────────────────────────────────
+    var reservedRows = reservedOpen.map(function(r){
+      var name = r.name || r.contact || '—';
+      return '<tr><td style="padding:5px 10px;">'+escH(name)+'</td><td style="padding:5px 10px;color:#888;font-size:12px;">'+(r.notes?escH(r.notes.slice(0,60)):'')+'</td></tr>';
+    }).join('') || '<tr><td colspan="2" style="padding:8px 10px;color:#888;">None</td></tr>';
+
+    // ── Build HTML ──────────────────────────────────────────────────────────
+    var now = new Date().toLocaleString('en-US',{dateStyle:'full',timeStyle:'short'});
+    var capPct = Math.round((totalUsed / TEAM_CAP) * 100);
+
+    out.innerHTML = `
+<div id="report-printable" style="max-width:900px;font-family:Georgia,serif;">
+
+  <!-- Header -->
+  <div style="background:#0d1f3c;color:#fff;padding:24px 28px;border-radius:8px 8px 0 0;display:flex;align-items:center;gap:20px;">
+    <div style="flex:1;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#c9a84c;margin-bottom:4px;">1st U.S. Volunteer Cavalry Regiment</div>
+      <div style="font-size:22px;font-weight:700;">39th Annual Charity Golf Tournament</div>
+      <div style="font-size:13px;color:#aab;">September 14, 2026 · Hunter's Green Country Club</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:11px;color:#888;">Report generated</div>
+      <div style="font-size:13px;color:#ddd;">${now}</div>
+    </div>
+  </div>
+
+  <!-- KPI row -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#ddd;border:1px solid #ddd;">
+    ${kpiBox('🏌️', 'Teams Registered', totalUsed + ' / ' + TEAM_CAP, spotsLeft === 0 ? '#b44' : spotsLeft <= 3 ? '#a86000' : '#2d7a4a')}
+    ${kpiBox('👤', 'Individuals', individuals.length + (individuals.length > 0 ? ' <span style="font-size:11px;color:#888;">('+indivSlots+' slot'+(indivSlots!==1?'s':'))'):'')+')', '#0d1f3c')}
+    ${kpiBox('🤝', 'Sponsors', sponsors.length + '', '#0d1f3c')}
+    ${kpiBox('💰', 'Total Revenue', fmtMoney(totalRev), '#2d7a4a')}
+  </div>
+
+  <!-- Capacity bar -->
+  <div style="background:#fff;border:1px solid #ddd;border-top:none;padding:16px 20px;">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:#555;margin-bottom:6px;">
+      <span>Capacity — Team Slots</span>
+      <span>${totalUsed} of ${TEAM_CAP} filled · <strong style="color:${spotsLeft===0?'#b44':'#2d7a4a'};">${spotsLeft} open</strong>${reservedOpen.length ? ' · '+reservedOpen.length+' reserved/anticipated' : ''}</span>
+    </div>
+    <div style="background:#e8e8e4;border-radius:4px;height:14px;overflow:hidden;">
+      <div style="width:${capPct}%;background:${capPct>=100?'#b44':capPct>=75?'#c9a84c':'#2d7a4a'};height:100%;border-radius:4px;transition:width .3s;"></div>
+    </div>
+    <div style="display:flex;gap:16px;margin-top:8px;font-size:11px;color:#888;">
+      <span>🟢 Public teams: ${publicTeams.length}</span>
+      <span>🟡 Sponsor teams: ${sponsorTeams.length}</span>
+      <span>🔵 Individual slots: ${indivSlots} (${individuals.length} players)</span>
+    </div>
+  </div>
+
+  <!-- Two-column section -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;">
+
+    <!-- Revenue breakdown -->
+    <div style="background:#fff;border:1px solid #ddd;border-radius:6px;overflow:hidden;">
+      <div style="background:#f5f5f0;padding:10px 14px;font-weight:700;font-size:13px;border-bottom:1px solid #ddd;">💰 Revenue Breakdown</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <tr style="border-bottom:1px solid #eee;"><td style="padding:7px 14px;">Registration Revenue</td><td style="padding:7px 14px;text-align:right;font-weight:600;">${fmtMoney(regRevenue)}</td></tr>
+        <tr style="border-bottom:1px solid #eee;"><td style="padding:7px 14px;">Sponsorship Revenue</td><td style="padding:7px 14px;text-align:right;font-weight:600;">${fmtMoney(spRevenue)}</td></tr>
+        <tr style="background:#f5f5f0;"><td style="padding:8px 14px;font-weight:700;">Total</td><td style="padding:8px 14px;text-align:right;font-weight:700;font-size:15px;color:#2d7a4a;">${fmtMoney(totalRev)}</td></tr>
+      </table>
+    </div>
+
+    <!-- Add-ons -->
+    <div style="background:#fff;border:1px solid #ddd;border-radius:6px;overflow:hidden;">
+      <div style="background:#f5f5f0;padding:10px 14px;font-weight:700;font-size:13px;border-bottom:1px solid #ddd;">⛳ Add-On Summary</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:#f9f9f6;border-bottom:1px solid #ddd;"><th style="padding:6px 10px;text-align:left;font-weight:600;color:#555;">Item</th><th style="padding:6px 10px;text-align:center;font-weight:600;color:#555;">Qty</th></tr></thead>
+        <tbody>${addonRows}</tbody>
+      </table>
+    </div>
+
+    <!-- Sponsors by level -->
+    <div style="background:#fff;border:1px solid #ddd;border-radius:6px;overflow:hidden;">
+      <div style="background:#f5f5f0;padding:10px 14px;font-weight:700;font-size:13px;border-bottom:1px solid #ddd;">🤝 Sponsors by Level</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:#f9f9f6;border-bottom:1px solid #ddd;"><th style="padding:6px 10px;text-align:left;font-weight:600;color:#555;">Level</th><th style="padding:6px 10px;text-align:center;font-weight:600;color:#555;">#</th><th style="padding:6px 10px;text-align:right;font-weight:600;color:#555;">Revenue</th></tr></thead>
+        <tbody>${spLevelRows || '<tr><td colspan="3" style="padding:8px 10px;color:#888;">No sponsors yet</td></tr>'}</tbody>
+      </table>
+    </div>
+
+    <!-- Reserved/Anticipated -->
+    <div style="background:#fff;border:1px solid #ddd;border-radius:6px;overflow:hidden;">
+      <div style="background:#f5f5f0;padding:10px 14px;font-weight:700;font-size:13px;border-bottom:1px solid #ddd;">📌 Reserved / Anticipated Teams (${reservedOpen.length})</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr style="background:#f9f9f6;border-bottom:1px solid #ddd;"><th style="padding:6px 10px;text-align:left;font-weight:600;color:#555;">Name / Contact</th><th style="padding:6px 10px;text-align:left;font-weight:600;color:#555;">Notes</th></tr></thead>
+        <tbody>${reservedRows}</tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Recent registrations -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;overflow:hidden;margin-top:18px;">
+    <div style="background:#f5f5f0;padding:10px 14px;font-weight:700;font-size:13px;border-bottom:1px solid #ddd;">🕐 5 Most Recent Registrations</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:#f9f9f6;border-bottom:1px solid #ddd;">
+        <th style="padding:6px 10px;text-align:left;font-weight:600;color:#555;">Name / Team</th>
+        <th style="padding:6px 10px;text-align:left;font-weight:600;color:#555;">Type</th>
+        <th style="padding:6px 10px;text-align:right;font-weight:600;color:#555;">Amount</th>
+        <th style="padding:6px 10px;text-align:left;font-weight:600;color:#555;">Date</th>
+      </tr></thead>
+      <tbody>${recentRows}</tbody>
+    </table>
+  </div>
+
+</div>`;
+  } catch(e) {
+    out.innerHTML = '<p style="color:#b44;padding:20px 0;">Error generating report: ' + escH(e.message) + '</p>';
+  }
+}
+
+function kpiBox(icon, label, value, color) {
+  return '<div style="background:#fff;padding:16px 20px;text-align:center;">' +
+    '<div style="font-size:22px;margin-bottom:4px;">'+icon+'</div>' +
+    '<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#888;margin-bottom:4px;">'+label+'</div>' +
+    '<div style="font-size:20px;font-weight:700;color:'+color+';">'+value+'</div>' +
+    '</div>';
+}
+
+function fmtMoney(n) {
+  return '$' + Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function printReport() {
+  var el = document.getElementById('report-printable');
+  if (!el) { toast('Generate the report first'); return; }
+  var win = window.open('', '_blank');
+  win.document.write('<html><head><title>Golf Tournament Status Report</title>' +
+    '<style>body{font-family:Georgia,serif;margin:20px;} @media print{body{margin:0;}}</style></head>' +
+    '<body>' + el.outerHTML + '<script>window.onload=function(){window.print();}<\/script></body></html>');
+  win.document.close();
+}
+
+
+
