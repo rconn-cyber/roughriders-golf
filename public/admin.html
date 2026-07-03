@@ -2581,7 +2581,9 @@ async function saveEditEntry() {
         logoUpdate.logoFileName = null;
       }
       // Collect active benefits
+      console.log('[save] _spBenefits at save time:', JSON.stringify(_spBenefits.map(function(b){return {text:b.text,on:b.on};})));
       var spBenList = _spBenefits.filter(function(b){ return b.on; }).map(function(b){ return b.text; });
+      console.log('[save] spBenList (what will be saved):', spBenList);
       Object.assign(updated, {
         firstName:    document.getElementById('em-sp-fn').value.trim(),
         lastName:     document.getElementById('em-sp-ln').value.trim(),
