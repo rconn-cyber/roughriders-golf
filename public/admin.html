@@ -4082,8 +4082,8 @@ async function generateReport() {
     var spotsLeft = Math.max(0, TEAM_CAP - totalUsed);
 
     // ── Revenue ─────────────────────────────────────────────────────────────
-    var regRevenue = regs.reduce(function(s,r){ return s + (parseFloat(r.amount)||0); }, 0);
-    var spRevenue  = sponsors.reduce(function(s,sp){ return s + (parseFloat(sp.totalAmount||sp.amount)||0); }, 0);
+    var regRevenue = regs.reduce(function(s,r){ var a = r.amount > 10000 ? r.amount/100 : (r.amount||0); return s + parseFloat(a); }, 0);
+    var spRevenue  = sponsors.reduce(function(s,sp){ var a = sp.total || (sp.amount > 10000 ? sp.amount/100 : sp.amount) || 0; return s + parseFloat(a); }, 0);
     var totalRev   = regRevenue + spRevenue;
 
     // ── Sponsor breakdown by level ──────────────────────────────────────────
@@ -4091,10 +4091,10 @@ async function generateReport() {
     levels.forEach(function(lv){ levelMap[lv.id] = lv; });
     var spByLevel = {};
     sponsors.forEach(function(sp) {
-      var lid = sp.levelId || sp.level || 'unknown';
+      var lid = sp.levelId || sp.level || (sp.packages && sp.packages[0]) || 'unknown';
       if (!spByLevel[lid]) spByLevel[lid] = { name: (levelMap[lid] ? levelMap[lid].name : lid), count: 0, rev: 0 };
       spByLevel[lid].count++;
-      spByLevel[lid].rev += parseFloat(sp.totalAmount || sp.amount || 0);
+      spByLevel[lid].rev += parseFloat(sp.total || (sp.amount > 10000 ? sp.amount/100 : sp.amount) || 0);
     });
     var spLevelRows = Object.keys(spByLevel).sort(function(a,b){ return spByLevel[b].rev - spByLevel[a].rev; }).map(function(k){
       var l = spByLevel[k];
@@ -4114,7 +4114,7 @@ async function generateReport() {
       var name = r.teamName || r.name || [r.firstName, r.lastName].filter(Boolean).join(' ') || '—';
       var dt   = r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
       var type = r.type === 'team' ? 'Team' : r.type === 'sponsor-team' ? 'Sponsor Team' : r.type === 'individual' ? 'Individual' : r.type || '—';
-      return '<tr><td style="padding:5px 10px;">'+escH(name)+'</td><td style="padding:5px 10px;color:#555;">'+escH(type)+'</td><td style="padding:5px 10px;color:#555;text-align:right;">'+fmtMoney(r.amount||0)+'</td><td style="padding:5px 10px;color:#888;font-size:12px;">'+dt+'</td></tr>';
+      return '<tr><td style="padding:5px 10px;">'+escH(name)+'</td><td style="padding:5px 10px;color:#555;">'+escH(type)+'</td><td style="padding:5px 10px;color:#555;text-align:right;">'+fmtMoney(r.amount > 10000 ? r.amount/100 : (r.amount||0))+'</td><td style="padding:5px 10px;color:#888;font-size:12px;">'+dt+'</td></tr>';
     }).join('') || '<tr><td colspan="4" style="padding:8px 10px;color:#888;">No registrations yet</td></tr>';
 
     // ── Reserved summary ────────────────────────────────────────────────────
