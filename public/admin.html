@@ -3756,11 +3756,9 @@ async function updateCapacityOnRegPage() {
 // MEMBER SYNC
 // ════════════════════════════════
 async function loadMemberSyncStatus() {
-  const key = sessionStorage.getItem('admin_key');
   try {
-    // Get member count from Supabase via admin-data
     const countRes = await fetch(`${NETLIFY_BASE}/.netlify/functions/sync-member-status`, {
-      headers: { 'x-admin-key': key }
+      headers: { 'Authorization': 'Bearer ' + _jwt }
     });
     if (countRes.ok) {
       const data = await countRes.json();
@@ -3809,7 +3807,6 @@ async function syncMembersNow() {
   const btn = document.getElementById('sync-now-btn');
   const progress = document.getElementById('sync-progress');
   const msg = document.getElementById('sync-progress-msg');
-  const key = sessionStorage.getItem('admin_key');
 
   btn.disabled = true;
   btn.textContent = '⟳ Syncing…';
@@ -3819,7 +3816,7 @@ async function syncMembersNow() {
   try {
     const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/sync-member-now`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-key': key }
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + _jwt }
     });
     const data = await res.json();
 

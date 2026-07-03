@@ -1,11 +1,28 @@
 // sync-member-status.js
 // Returns member count + last sync log entries from Supabase
 
+const crypto = require('crypto');
+
+function verifyToken(token, secret) {
+  try {
+    const [data, sig] = token.split('.');
+    const expected = crypto.createHmac('sha256', secret).update(data).digest('base64url');
+    if (sig !== expected) return null;
+    const payload = JSON.parse(Buffer.from(data, 'base64url').toString());
+    if (payload.exp < Date.now()) return null;
+    return payload;
+  } catch { return null; }
+}
+
+function auth(event) {
+  const h = event.headers.authorization || '';
+  return verifyToken(h.replace('Bearer ', ''), process.env.SESSION_SECRET || 'fallback');
+}
+
 exports.handler = async (event) => {
   const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
-  const key = event.headers['x-admin-key'];
-  if (!key || key !== process.env.ADMIN_KEY) {
+  if (!auth(event)) {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 

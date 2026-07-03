@@ -2,7 +2,23 @@
 // Manually triggers a WA → Supabase member sync (runs inline, not background)
 // Called from admin panel "Sync Members Now" button
 
+const crypto = require('crypto');
 const WA_BASE = 'https://api.wildapricot.org/v2.2';
+
+function verifyToken(token, secret) {
+  try {
+    const [data, sig] = token.split('.');
+    const expected = crypto.createHmac('sha256', secret).update(data).digest('base64url');
+    if (sig !== expected) return null;
+    const payload = JSON.parse(Buffer.from(data, 'base64url').toString());
+    if (payload.exp < Date.now()) return null;
+    return payload;
+  } catch { return null; }
+}
+function auth(event) {
+  const h = event.headers.authorization || '';
+  return verifyToken(h.replace('Bearer ', ''), process.env.SESSION_SECRET || 'fallback');
+}
 
 async function getWAToken(apiKey) {
   const creds = Buffer.from('APIKEY:' + apiKey).toString('base64');
@@ -60,8 +76,7 @@ exports.handler = async (event) => {
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
 
-  const key = event.headers['x-admin-key'];
-  if (!key || key !== process.env.ADMIN_KEY) {
+  if (!auth(event)) {
     return { statusCode: 401, headers, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
 
