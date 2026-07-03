@@ -4,8 +4,8 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 function getBlobStore() {
-  const siteID = process.env.NETLIFY_SITE_ID;
-  const token  = process.env.NETLIFY_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
+  const siteID  = process.env.NETLIFY_SITE_ID;
+  const token   = process.env.NETLIFY_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
   const apiBase = `https://api.netlify.com/api/v1/sites/${siteID}/blobs`;
   const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
 
@@ -46,11 +46,7 @@ exports.handler = async (event) => {
   let stripeEvent;
 
   try {
-    stripeEvent = stripe.webhooks.constructEvent(
-      event.body,
-      sig,
-      webhookSecret
-    );
+    stripeEvent = stripe.webhooks.constructEvent(event.body, sig, webhookSecret);
   } catch (err) {
     console.error('Webhook signature verification failed:', err.message);
     return { statusCode: 400, body: `Webhook Error: ${err.message}` };
@@ -85,37 +81,38 @@ exports.handler = async (event) => {
     return { firstName: s, lastName: '', email: '' };
   });
 
-  // --- FIX 1: Parse first/last name from primary_contact ---
-  // primary_contact is stored as "First Last" in metadata
+  // Parse first/last name from primary_contact ("First Last")
   const primaryContact = meta.primary_contact || '';
   const contactParts   = primaryContact.trim().split(/\s+/);
   const firstName      = contactParts[0] || '';
   const lastName       = contactParts.slice(1).join(' ') || '';
 
-  // --- FIX 2: amount_total is in cents — divide by 100 ---
+  // amount_total is in cents — divide by 100
   const amountDollars = (session.amount_total || 0) / 100;
 
-  // Build registration record matching admin-data.js POST format
+  // Build registration record
   const newId  = 'rr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
   const record = {
     id:                  newId,
     stripeSessionId:     session.id,
     stripePaymentIntent: session.payment_intent,
-    name:                primaryContact,          // full name for display
-    firstName,                                    // split for Edit modal
+    name:                primaryContact,
+    firstName,
     lastName,
     email:               meta.primary_email   || session.customer_email || '',
     phone:               meta.primary_phone   || '',
     players:             parseInt(meta.golfer_count || '1', 10),
     golfers,
-    amount:              amountDollars,            // ← fixed: dollars not cents
+    amount:              amountDollars,
     status:              'paid',
     paymentMethod:       'card',
     source:              'stripe',
+    confirmationEmailSent: false,   // will update after email attempt
     createdAt:           new Date().toISOString(),
     updatedAt:           new Date().toISOString(),
   };
 
+  // Save to Blobs
   try {
     const store = getBlobStore();
     const raw   = await store.get('registrations');
@@ -128,15 +125,54 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 
-  // Fire confirmation email (non-blocking)
+  // Fire confirmation email — pass shape the email function expects
+  let emailSent = false;
   try {
-    await fetch(`${process.env.URL}/.netlify/functions/send-registration-email`, {
+    const emailPayload = {
+      // email function expects golfers[], addons[], sponsorships[], total
+      golfers,
+      addons:       [],
+      sponsorships: [],
+      total:        amountDollars,
+    };
+
+    // Ensure primary golfer has all fields from metadata
+    if (emailPayload.golfers.length === 0) {
+      emailPayload.golfers = [{
+        firstName,
+        lastName,
+        email: record.email,
+        phone: record.phone,
+      }];
+    }
+
+    const emailRes = await fetch(`${process.env.URL}/.netlify/functions/send-registration-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(record),
+      body: JSON.stringify(emailPayload),
     });
+
+    emailSent = emailRes.ok;
+    console.log('Email result:', emailRes.status, emailSent ? 'sent' : 'failed');
   } catch (err) {
     console.warn('Email notification failed (non-fatal):', err.message);
+  }
+
+  // Update the record with email status
+  if (emailSent) {
+    try {
+      const store = getBlobStore();
+      const raw   = await store.get('registrations');
+      const arr   = raw ? JSON.parse(raw) : [];
+      const idx   = arr.findIndex(r => r.id === newId);
+      if (idx !== -1) {
+        arr[idx].confirmationEmailSent = true;
+        arr[idx].updatedAt = new Date().toISOString();
+        await store.set('registrations', JSON.stringify(arr));
+      }
+    } catch (err) {
+      console.warn('Could not update email status on record:', err.message);
+    }
   }
 
   return { statusCode: 200, body: JSON.stringify({ received: true }) };
