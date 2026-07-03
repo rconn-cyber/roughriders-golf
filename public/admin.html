@@ -351,7 +351,7 @@ tr:hover td { background: #f8faf8; }
           <div class="stat-card"><div class="stat-label">Teams</div><div class="stat-value" id="stat-teams">—</div><div class="stat-sub">confirmed</div></div>
           <div class="stat-card"><div class="stat-label">Individuals</div><div class="stat-value" id="stat-indiv">—</div><div class="stat-sub">not yet on a team</div></div>
           <div class="stat-card"><div class="stat-label">Team Slots Open</div><div class="stat-value" id="stat-slots-open">18</div><div class="stat-sub">of 18 total</div></div>
-          <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value" id="stat-reg-rev">—</div></div>
+          <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value" id="stat-reg-rev">—</div><div class="stat-sub">registrations + paid sponsors</div></div>
         </div>
         <div class="card">
           <div class="card-header"><h2>Golfer Registrations</h2></div>
@@ -1756,7 +1756,7 @@ function updateSponsorStats(sponsors){
     var st = s.status||s.paymentStatus||'paid';
     if(st==='paid') paid++; else if(st==='invoice'||st==='invoiced') inv++;
     // Only count paid sponsors in revenue
-    if(st==='paid' || st==='comped') rev += normSpAmt(s);
+    if(st==='paid') rev += normSpAmt(s);
   });
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   set('stat-sp-count',sponsors.length||'0');
@@ -1774,7 +1774,7 @@ function updateCombinedRevenue(){
   });
   (_loadedSponsors||[]).forEach(function(s){
     var st = s.status||s.paymentStatus||'paid';
-    if(st==='paid' || st==='comped') spRev += normSpAmt(s);
+    if(st==='paid') spRev += normSpAmt(s);
   });
   var el = document.getElementById('stat-reg-rev');
   if (el) el.textContent = fmtMoney(regRev + spRev);
