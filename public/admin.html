@@ -3970,7 +3970,8 @@ var SETTINGS = { adminEmails: [], notifyOnEntry: true, notifyOnSponsor: true };
 
 async function loadSettings() {
   try {
-    var res = await apiFetch('admin-data?resource=settings');
+    var authHdr = { 'Authorization': 'Bearer ' + _jwt };
+    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=settings', { headers: authHdr });
     if (res.ok) {
       var d = await res.json();
       SETTINGS = Object.assign({ adminEmails: [], notifyOnEntry: true, notifyOnSponsor: true }, d);
@@ -4022,7 +4023,8 @@ async function saveSettings() {
   var msg = document.getElementById('settings-save-msg');
   msg.textContent = 'Saving…';
   try {
-    var res = await apiFetch('admin-data?resource=settings', { method: 'PUT', body: JSON.stringify(SETTINGS) });
+    var authHdr2 = { 'Authorization': 'Bearer ' + _jwt };
+    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=settings', { method: 'PUT', headers: Object.assign({'Content-Type':'application/json'}, authHdr2), body: JSON.stringify(SETTINGS) });
     if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
     msg.textContent = '✓ Saved';
     toast('Settings saved ✓');
@@ -4051,9 +4053,9 @@ async function generateReport() {
 
   try {
     var [regsRes, spRes, resRes, cfgRes] = await Promise.all([
-      apiFetch('admin-data?resource=registrations'),
-      apiFetch('admin-data?resource=sponsors'),
-      apiFetch('admin-data?resource=reserved-teams'),
+      fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', { headers: { 'Authorization': 'Bearer ' + _jwt } }),
+      fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=sponsors', { headers: { 'Authorization': 'Bearer ' + _jwt } }),
+      fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=reserved-teams', { headers: { 'Authorization': 'Bearer ' + _jwt } }),
       fetch(NETLIFY_BASE + '/.netlify/functions/admin-config').then(function(r){ return r.ok ? r.json() : {}; }),
     ]);
 
