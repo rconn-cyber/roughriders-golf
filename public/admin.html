@@ -337,7 +337,6 @@ tr:hover td { background: #f8faf8; }
           </div>
           <div style="display:flex;gap:8px;">
             <button class="btn btn-outline" onclick="syncAllSponsorTeams()" title="Re-sync sponsor team slots into registrations">⟳ Sync Sponsor Teams</button>
-            <button class="btn btn-outline" onclick="debugSponsorSync()" style="border-color:#c9a84c;color:#7a5c00;">🔍 Debug Sync</button>
             <button class="btn btn-primary" onclick="openManualEntry('registration')">+ Add Entry</button>
             <button class="btn btn-outline" onclick="loadOrders()">↺ Refresh</button>
           </div>
@@ -3527,44 +3526,6 @@ async function deleteReserved(id) {
 // This keeps Registrations as the single source of truth for capacity.
 
 // Sync ALL active sponsors with team benefits into registrations
-
-async function debugSponsorSync() {
-  if (!_jwt) { toast('Not authenticated'); return; }
-  var authHdr = { 'Authorization': 'Bearer ' + _jwt };
-
-  // Fetch raw sponsor data
-  var sRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=sponsors', { headers: authHdr });
-  var sponsors = sRes.ok ? await sRes.json() : [];
-  if (!Array.isArray(sponsors)) sponsors = sponsors.items || [];
-
-  // Fetch raw registration data  
-  var rRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', { headers: authHdr });
-  var regs = rRes.ok ? await rRes.json() : [];
-  if (!Array.isArray(regs)) regs = regs.items || [];
-
-  console.log('=== DEBUG SPONSOR SYNC ===');
-  console.log('Total sponsors:', sponsors.length);
-  sponsors.forEach(function(s, i) {
-    var sps = s.sponsorships || (s.package ? [{name: s.package}] : []);
-    var fromPkg = getIncludedPlayers(sps);
-    var fromBens = 0;
-    (s.benefits || []).forEach(function(bt) {
-      var bl = (bt||'').toLowerCase();
-      var mt = bl.match(/(\d+)\s*teams?/), mg = bl.match(/(\d+)\s*(?:golfers?|players?)/);
-      if (mt) fromBens = Math.max(fromBens, parseInt(mt[1])*4);
-      else if (mg) fromBens = Math.max(fromBens, parseInt(mg[1]));
-    });
-    var used = s.benefits && s.benefits.length ? fromBens : fromPkg;
-    console.log('Sponsor', i, '|', (s.company||s.firstName), '| id:', s.id, '| benefits:', s.benefits, '| fromPkg:', fromPkg, '| fromBens:', fromBens, '| USING:', used, 'players =', Math.ceil(used/4), 'teams');
-  });
-
-  console.log('\nTotal sponsor-team regs:', regs.filter(function(r){return r&&r.type==='sponsor-team';}).length);
-  regs.filter(function(r){return r&&r.type==='sponsor-team';}).forEach(function(r) {
-    console.log('  Reg:', r.firstName, '| sponsorId:', r.sponsorId, '| playerCount:', r.playerCount, '| id:', r.id);
-  });
-
-  alert('Debug info logged to Console. Press F12 → Console to view.');
-}
 
 async function syncAllSponsorTeams() {
   if (!_jwt) { toast('Not authenticated'); return; }
