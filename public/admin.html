@@ -351,7 +351,7 @@ tr:hover td { background: #f8faf8; }
           <div class="stat-card"><div class="stat-label">Teams</div><div class="stat-value" id="stat-teams">—</div><div class="stat-sub">confirmed</div></div>
           <div class="stat-card"><div class="stat-label">Individuals</div><div class="stat-value" id="stat-indiv">—</div><div class="stat-sub">not yet on a team</div></div>
           <div class="stat-card"><div class="stat-label">Team Slots Open</div><div class="stat-value" id="stat-slots-open">18</div><div class="stat-sub">of 18 total</div></div>
-          <div class="stat-card"><div class="stat-label">Revenue</div><div class="stat-value" id="stat-reg-rev">—</div></div>
+          <div class="stat-card"><div class="stat-label">Total Revenue</div><div class="stat-value" id="stat-reg-rev">—</div></div>
         </div>
         <div class="card">
           <div class="card-header"><h2>Golfer Registrations</h2></div>
@@ -1688,7 +1688,8 @@ function updateRegStats(regs){
   s('stat-golfers',totalGolfers||'0');
   s('stat-teams',teams||'0');
   s('stat-indiv',indiv||'0');
-  s('stat-reg-rev',fmtMoney(rev));
+  // Revenue label now includes sponsors — updateCombinedRevenue handles it
+  updateCombinedRevenue();
   // Refresh reserved panel capacity counts when reg data changes
   if (typeof renderReserved === 'function') renderReserved();
 }
@@ -1743,20 +1744,40 @@ function renderSponsors(sponsors){
   document.getElementById('cnt-sponsors').textContent = sponsors.length;
 }
 
+function normSpAmt(s){
+  if (s.total) return Number(s.total);
+  if (!s.amount) return 0;
+  return s.amount > 10000 ? s.amount / 100 : s.amount;
+}
+
 function updateSponsorStats(sponsors){
   var paid=0, inv=0, rev=0;
   sponsors.forEach(function(s){
     var st = s.status||s.paymentStatus||'paid';
     if(st==='paid') paid++; else if(st==='invoice'||st==='invoiced') inv++;
-    // Handle both old (dollars) and new (cents) amount schemas
-    if (s.total) rev += s.total;
-    else if (s.amount) rev += s.amount > 10000 ? s.amount/100 : s.amount;
+    // Only count paid sponsors in revenue
+    if(st==='paid' || st==='comped') rev += normSpAmt(s);
   });
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   set('stat-sp-count',sponsors.length||'0');
   set('stat-sp-paid',paid);
   set('stat-sp-inv',inv);
   set('stat-sp-rev',fmtMoney(rev));
+  // Update combined revenue on registrations panel
+  updateCombinedRevenue();
+}
+
+function updateCombinedRevenue(){
+  var regRev = 0, spRev = 0;
+  (_loadedRegs||[]).forEach(function(r){
+    if ((r.type||'') !== 'sponsor-team') regRev += normAmt(r);
+  });
+  (_loadedSponsors||[]).forEach(function(s){
+    var st = s.status||s.paymentStatus||'paid';
+    if(st==='paid' || st==='comped') spRev += normSpAmt(s);
+  });
+  var el = document.getElementById('stat-reg-rev');
+  if (el) el.textContent = fmtMoney(regRev + spRev);
 }
 
 // ════════════════════════════════
