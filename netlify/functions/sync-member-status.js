@@ -34,13 +34,16 @@ exports.handler = async (event) => {
       fetch(`${SUPABASE_URL}/rest/v1/rr_members?select=id&limit=1`, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Prefer': 'count=exact' }
       }),
-      fetch(`${SUPABASE_URL}/rest/v1/sync_log?sync_type=eq.members&order=created_at.desc&limit=10`, {
+      fetch(`${SUPABASE_URL}/rest/v1/sync_log?sync_type=eq.members&order=id.desc&limit=10`, {
         headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
       })
     ]);
 
     const member_count = parseInt(countRes.headers.get('content-range')?.split('/')[1] || '0');
-    const log = logRes.ok ? await logRes.json() : [];
+    const logRaw = logRes.ok ? await logRes.text() : '[]';
+    console.log('sync_log raw:', logRaw.slice(0, 500));
+    let log = [];
+    try { log = JSON.parse(logRaw); } catch(e) { log = []; }
 
     const last = log.find(r => r.status === 'complete');
     const last_sync   = last?.finished_at || null;
