@@ -2303,36 +2303,33 @@ function getCurrentSpSponsorships() {
 // Benefits
 function initSpBenefits(record) {
   _spBenefits = [];
-  var existing = record.benefits || [];
+  var savedBenefits = record.benefits || []; // what was last explicitly saved
+  console.log('[initSpBenefits] record.id:', record.id, 'savedBenefits:', savedBenefits);
 
-  // Always rebuild from package first so benefits auto-populate
-  var sps = getCurrentSpSponsorships();
-  if (sps.length > 0) {
-    rebuildBenefitsFromPackage(sps);
-    // If record had saved benefits, overlay them: restore on/off states
-    if (existing.length > 0) {
-      var savedSet = {};
-      existing.forEach(function(b){ savedSet[b] = true; });
-      _spBenefits.forEach(function(b){
-        // If saved benefits list exists, match package benefits to it
-        b.on = savedSet[b.text] !== undefined ? savedSet[b.text] : b.on;
-      });
-      // Add any saved benefits not in the package as custom
-      existing.forEach(function(b){
-        if (!_spBenefits.find(function(x){ return x.text === b; })) {
-          _spBenefits.push({ text: b, custom: true, on: true });
-        }
-      });
-      renderSpBenefits();
-    }
-  } else if (existing.length > 0) {
-    // No package selected but record has saved benefits — show them
-    existing.forEach(function(b) {
-      _spBenefits.push({ text: b, custom: false, on: true });
+  if (savedBenefits.length > 0) {
+    // Record has saved benefits — these are the authoritative on/off truth.
+    // Start all pool benefits as OFF, then turn ON only what's in the saved list.
+    // This preserves explicit removals (like unchecking "2 teams — 8 golfers").
+    var savedSet = {};
+    savedBenefits.forEach(function(b){ savedSet[b] = true; });
+    _spBenefits = (STATE.benefits || []).map(function(b) {
+      return { text: b.text, custom: false, on: !!savedSet[b.text] };
+    });
+    // Add any saved benefits that aren't in the pool (custom ones)
+    savedBenefits.forEach(function(b) {
+      if (!_spBenefits.find(function(x){ return x.text === b; })) {
+        _spBenefits.push({ text: b, custom: true, on: true });
+      }
     });
     renderSpBenefits();
   } else {
-    renderSpBenefits();
+    // No saved benefits — new record or never saved. Auto-populate from package.
+    var sps = getCurrentSpSponsorships();
+    if (sps.length > 0) {
+      rebuildBenefitsFromPackage(sps);
+    } else {
+      renderSpBenefits();
+    }
   }
 }
 
@@ -2631,12 +2628,14 @@ async function saveEditEntry() {
       if (!found) all[_editIdx] = updated; // last resort: positional
     }
 
+    console.log('[save] PUT resource:', resource, 'record id:', updated.id, 'benefits:', updated.benefits);
     var putRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, {
       method: 'PUT',
       headers: Object.assign({'Content-Type':'application/json'}, authHdr),
       body: JSON.stringify(all),
     });
     if (!putRes.ok) throw new Error('HTTP ' + putRes.status);
+    console.log('[save] PUT response OK. Benefits saved:', updated.benefits);
 
     closeEditModal();
     // For sponsors: auto-sync sponsor-team registration records
