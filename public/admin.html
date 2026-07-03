@@ -2373,6 +2373,25 @@ function rebuildBenefitsFromPackage(sponsorships) {
 function renderSpBenefits() {
   var container = document.getElementById('em-sp-benefits');
   if (!container) return;
+
+  // Build a map of current on/off states from _spBenefits
+  var stateMap = {};
+  _spBenefits.forEach(function(b) { stateMap[b.text] = { on: b.on, custom: b.custom || false }; });
+
+  // Show ALL pool benefits first (from STATE.benefits master list)
+  var allBens = (STATE.benefits || []).map(function(b) { return b.text; });
+
+  // Add any custom ones in _spBenefits not in the pool
+  _spBenefits.forEach(function(b) {
+    if (b.custom && allBens.indexOf(b.text) === -1) allBens.push(b.text);
+  });
+
+  // Rebuild _spBenefits to match full pool + custom, preserving on/off states
+  _spBenefits = allBens.map(function(text) {
+    var s = stateMap[text];
+    return { text: text, custom: s ? s.custom : false, on: s ? s.on : false };
+  });
+
   container.innerHTML = _spBenefits.map(function(b, i) {
     return '<div class="sp-benefit-tog' + (b.custom?' custom':'') + (b.on?' on':'') + '" onclick="toggleSpBenefit(' + i + ',this)">' +
       escH(b.text) +
