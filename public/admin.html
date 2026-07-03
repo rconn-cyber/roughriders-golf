@@ -3321,11 +3321,18 @@ function getConfirmedTeamCount() {
     var t = r.registrationType || r.type || '';
     if (p >= 4 || t === 'team' || t === 'comped-team') count++;
   });
-  // Also count sponsor teams (from sponsors with golfers)
+  // Also count sponsor teams — use golfers if entered, otherwise infer from tier benefits
   (_loadedSponsors || []).forEach(function(s) {
     if (s.status === 'cancelled') return;
     if (s.golfers && s.golfers.length > 0) {
       count += Math.ceil(s.golfers.length / 4);
+    } else {
+      // No golfers entered yet — infer teams from sponsorship tier
+      var sps = s.sponsorships || (s.package ? [{name: s.package}] : (s.tier ? [{name: s.tier}] : []));
+      if (sps.length > 0) {
+        var players = getIncludedPlayers(sps);
+        if (players > 0) count += Math.ceil(players / 4);
+      }
     }
   });
   return count;
