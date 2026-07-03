@@ -1413,6 +1413,15 @@ function slugify(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/
 function sortBy(arr){ return arr.slice().sort(function(a,b){return (a.order||0)-(b.order||0);}); }
 function escH(s){ var d=document.createElement('div');d.textContent=String(s);return d.innerHTML; }
 function fmtMoney(n){ return '$'+Number(n).toLocaleString('en-US'); }
+// Normalize stored amount to dollars regardless of source:
+// Stripe webhook (post-fix) stores dollars. Manual entries store dollars via total.
+// Old Stripe records (pre-fix) may have stored cents (>10000 is a giveaway for >$100).
+function normAmt(r){
+  if (r.total) return Number(r.total);
+  if (!r.amount) return 0;
+  // If amount looks like cents (e.g. 66000 for $660), convert
+  return r.amount > 10000 ? r.amount / 100 : r.amount;
+}
 function benText(id){ var b=STATE.benefits.find(function(x){return x.id===id;}); return b?b.text:''; }
 
 // ════════════════════════════════
@@ -1633,7 +1642,7 @@ function renderRegistrations(orders){
     var name = (r.firstName||'') + ' ' + (r.lastName||'');
     var players = r.playerCount || (r.golfers && r.golfers.length) || 1;
     var addons = (r.addons||[]).map(function(a){return a.name||a;}).join(', ') || '—';
-    var amt = r.amount ? fmtMoney(r.amount/100) : (r.total ? fmtMoney(r.total) : '—');
+    var amt = normAmt(r) ? fmtMoney(normAmt(r)) : '—';
     var status = r.status || r.paymentStatus || 'paid';
     var date = r.created ? new Date(r.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.date ? new Date(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'));
     var isSponsorTeam = (r.type === 'sponsor-team');
@@ -1673,7 +1682,7 @@ function updateRegStats(regs){
     else if (p >= 4 || t === 'team' || t === 'comped-team') { teams++; }
     else { indiv += p; }
     // Don't double-count sponsor revenue (tracked in sponsors tab)
-    if (t !== 'sponsor-team') rev += r.amount ? r.amount/100 : (r.total||0);
+    if (t !== 'sponsor-team') rev += normAmt(r);
   });
   var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   s('stat-golfers',totalGolfers||'0');
@@ -2213,7 +2222,7 @@ function openEditEntry(type, idx) {
     document.getElementById('em-email').value   = r.email     || '';
     document.getElementById('em-phone').value   = r.phone     || '';
     document.getElementById('em-players').value = r.playerCount || (r.golfers && r.golfers.length) || 1;
-    document.getElementById('em-amount').value  = r.total || (r.amount ? r.amount/100 : '');
+    document.getElementById('em-amount').value  = normAmt(r) || '';
     // Pre-select add-on toggles
     var currentAddons = (r.addons||[]).map(function(a){return (a.name||a).toLowerCase().trim();});
     document.querySelectorAll('#em-addons-picker .benefit-toggle').forEach(function(t){
@@ -2233,7 +2242,7 @@ function openEditEntry(type, idx) {
     if (r.package) currentPkgs = currentPkgs.concat(r.package.split(',').map(function(s){return s.trim().toLowerCase();}));
     // Fallback: if still no package info, try to match by exact amount against levels
     if (currentPkgs.length === 0 && (r.total || r.amount)) {
-      var recordAmt = r.total || (r.amount > 10000 ? r.amount/100 : r.amount);
+      var recordAmt = normAmt(r);
       var amtMatches = STATE.levels.filter(function(lv){ return lv.price === recordAmt; });
       if (amtMatches.length === 1) {
         currentPkgs = [amtMatches[0].name.toLowerCase().trim()];
