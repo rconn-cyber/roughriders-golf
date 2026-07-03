@@ -125,11 +125,12 @@ exports.handler = async (event) => {
     // Upsert in batches of 50
     for (let i = 0; i < toUpsert.length; i += 50) {
       const batch = toUpsert.slice(i, i + 50);
-      const upsertRes = await fetch(`${SUPABASE_URL}/rest/v1/rr_members`, {
+      const upsertRes = await fetch(`${SUPABASE_URL}/rest/v1/rr_members?on_conflict=member_number`, {
         method: 'POST',
         headers: {
           'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates'
+          'Content-Type': 'application/json',
+          'Prefer': 'resolution=merge-duplicates,return=minimal'
         },
         body: JSON.stringify(batch)
       });
