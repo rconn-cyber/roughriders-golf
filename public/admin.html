@@ -4165,6 +4165,41 @@ async function generateReport() {
       return '<tr><td style="padding:5px 10px;">'+escH(name)+'</td><td style="padding:5px 10px;color:#888;font-size:12px;">'+(r.notes?escH(r.notes.slice(0,60)):'')+'</td></tr>';
     }).join('') || '<tr><td colspan="2" style="padding:8px 10px;color:#888;">None</td></tr>';
 
+    // ── Benefits fulfillment data ───────────────────────────────────────────
+    // Aggregate all promised benefits across all sponsors
+    var benFulfill = {}; // { benefitText: [ {company, name, level, status} ] }
+    sponsors.forEach(function(sp) {
+      var spName = sp.company || [sp.firstName, sp.lastName].filter(Boolean).join(' ') || '—';
+      var lvName = (levelMap[sp.levelId || sp.level] || {}).name || sp.package || '—';
+      var bens = Array.isArray(sp.benefits) ? sp.benefits : [];
+      // Also include sponsorship names as a fallback if no benefits recorded
+      if (bens.length === 0 && sp.sponsorships) {
+        sp.sponsorships.forEach(function(s){ if(s.name) bens.push(s.name); });
+      }
+      bens.forEach(function(b) {
+        var bt = b || ''; if (!bt) return;
+        if (!benFulfill[bt]) benFulfill[bt] = [];
+        benFulfill[bt].push({ company: spName, level: lvName, status: sp.status || '' });
+      });
+    });
+    var benKeys = Object.keys(benFulfill).sort();
+    var benRows = benKeys.map(function(bk) {
+      var sponsors_list = benFulfill[bk].map(function(e) {
+        var badge = e.status === 'paid' ? ' <span style="font-size:10px;color:#2d7a4a;font-weight:700;">PAID</span>' :
+                    e.status === 'pending' ? ' <span style="font-size:10px;color:#a86000;">PENDING</span>' : '';
+        return '<span style="display:inline-block;background:#f0f4ff;border:1px solid #c8d4f0;border-radius:3px;padding:1px 7px;font-size:12px;margin:2px;">' + escH(e.company) + badge + '</span>';
+      }).join(' ');
+      return '<tr style="border-bottom:1px solid #eee;">' +
+        '<td style="padding:7px 12px;vertical-align:top;">' +
+          '<label style="display:flex;align-items:flex-start;gap:8px;cursor:default;">' +
+            '<input type="checkbox" style="margin-top:2px;width:15px;height:15px;flex-shrink:0;">' +
+            '<span style="font-size:13px;">' + escH(bk) + '</span>' +
+          '</label>' +
+        '</td>' +
+        '<td style="padding:7px 12px;vertical-align:top;">' + sponsors_list + '</td>' +
+      '</tr>';
+    }).join('') || '<tr><td colspan="2" style="padding:10px 12px;color:#888;">No benefits recorded yet.</td></tr>';
+
     // ── Build HTML ──────────────────────────────────────────────────────────
     var now = new Date().toLocaleString('en-US',{dateStyle:'full',timeStyle:'short'});
     var capPct = Math.round((totalUsed / TEAM_CAP) * 100);
@@ -4263,6 +4298,24 @@ async function generateReport() {
       </tr></thead>
       <tbody>${recentRows}</tbody>
     </table>
+  </div>
+
+  <!-- Sponsor Benefits Fulfillment -->
+  <div style="background:#fff;border:1px solid #ddd;border-radius:6px;overflow:hidden;margin-top:18px;">
+    <div style="background:#0d1f3c;color:#fff;padding:10px 14px;font-weight:700;font-size:13px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;">
+      <span>✅ Sponsor Benefits Fulfillment</span>
+      <span style="font-size:11px;font-weight:400;color:#aab;">Check off as delivered · ${benKeys.length} benefit type${benKeys.length !== 1 ? 's' : ''} across ${sponsors.length} sponsor${sponsors.length !== 1 ? 's' : ''}</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:#f9f9f6;border-bottom:1px solid #ddd;">
+        <th style="padding:7px 12px;text-align:left;font-weight:600;color:#555;width:45%;">Benefit</th>
+        <th style="padding:7px 12px;text-align:left;font-weight:600;color:#555;">Sponsors Receiving</th>
+      </tr></thead>
+      <tbody>${benRows}</tbody>
+    </table>
+    <div style="padding:8px 14px;font-size:11px;color:#aaa;border-top:1px solid #eee;background:#fafafa;">
+      Checkboxes are for printing only — check off items as fulfilled. Not saved to the system.
+    </div>
   </div>
 
 </div>`;
