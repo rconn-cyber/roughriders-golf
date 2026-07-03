@@ -2603,51 +2603,45 @@ async function saveEditEntry() {
     }
 
     var resource = _editType === 'registration' ? 'registrations' : 'sponsors';
-
-    // admin-data PUT replaces the full resource array, so we need to fetch, splice, PUT
     var authHdr = { 'Authorization': 'Bearer ' + _jwt };
-    var fetchRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, { headers: authHdr });
-    var all = fetchRes.ok ? await fetchRes.json() : [];
-    if (!Array.isArray(all)) all = all.items || [];
-    all = all.filter(function(r){ return r && typeof r === 'object'; }); // strip nulls
 
-    // Find by id, fall back to index
-    var found = false;
-    for (var i = 0; i < all.length; i++) {
-      if (all[i] && all[i].id && updated.id && all[i].id === updated.id) {
-        all[i] = updated; found = true; break;
-      }
-    }
-    if (!found) {
-      // No ID match — replace by position in loaded array
+    if (updated.id) {
+      // Use PATCH for atomic single-record update — most reliable
+      var patchRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource+'&id='+encodeURIComponent(updated.id), {
+        method: 'PATCH',
+        headers: Object.assign({'Content-Type':'application/json'}, authHdr),
+        body: JSON.stringify(updated),
+      });
+      if (!patchRes.ok) throw new Error('HTTP ' + patchRes.status);
+    } else {
+      // No id — fall back to fetch→splice→PUT
+      var fetchRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, { headers: authHdr });
+      var all = fetchRes.ok ? await fetchRes.json() : [];
+      if (!Array.isArray(all)) all = all.items || [];
+      all = all.filter(function(r){ return r && typeof r === 'object'; });
+      var found = false;
       var loadedArr = _editType === 'registration' ? _loadedRegs : _loadedSponsors;
       var origRecord = loadedArr[_editIdx];
-      for (var j = 0; j < all.length; j++) {
-        if (all[j].createdAt && origRecord.createdAt && all[j].createdAt === origRecord.createdAt) {
-          all[j] = updated; found = true; break;
+      for (var i = 0; i < all.length; i++) {
+        if (all[i].createdAt && origRecord.createdAt && all[i].createdAt === origRecord.createdAt) {
+          all[i] = updated; found = true; break;
         }
       }
-      if (!found) all[_editIdx] = updated; // last resort: positional
+      if (!found) all[_editIdx] = updated;
+      var putRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, {
+        method: 'PUT',
+        headers: Object.assign({'Content-Type':'application/json'}, authHdr),
+        body: JSON.stringify(all),
+      });
+      if (!putRes.ok) throw new Error('HTTP ' + putRes.status);
     }
-
-    console.log('[save] PUT resource:', resource, 'record id:', updated.id, 'benefits:', updated.benefits);
-    var putRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, {
-      method: 'PUT',
-      headers: Object.assign({'Content-Type':'application/json'}, authHdr),
-      body: JSON.stringify(all),
-    });
-    if (!putRes.ok) throw new Error('HTTP ' + putRes.status);
-    console.log('[save] PUT response OK. Benefits saved:', updated.benefits);
 
     closeEditModal();
     // For sponsors: auto-sync sponsor-team registration records
     if (_editType === 'sponsor') {
       await syncSponsorTeamReg(updated);
     }
-    loadOrders().then(function(){
-    // Auto-sync sponsor teams into registrations on load
-    setTimeout(function(){ syncAllSponsorTeams(); }, 1500);
-  }); // loadOrders will scheduleSave which pushes publicSponsors
+    loadOrders(); // loadOrders will scheduleSave which pushes publicSponsors
     toast('Entry updated ✓');
   } catch(e) {
     toast('Save failed: ' + e.message);
@@ -3577,8 +3571,26 @@ async function syncSponsorTeamReg(sponsor) {
   var allRegs = res.ok ? await res.json() : [];
   if (!Array.isArray(allRegs)) allRegs = allRegs.items || [];
 
+  // Build a robust sponsorId — always prefer the server-assigned id
   var sponsorId = sponsor.id || sponsor.createdAt || sponsor.date;
-  var existing  = allRegs.filter(function(r){ return r && r.type === 'sponsor-team' && r.sponsorId === sponsorId; });
+  // Find existing records — match by sponsorId OR by company name as fallback
+  var companyMatch = (sponsor.company || ((sponsor.firstName||'')+' '+(sponsor.lastName||'')).trim() || '').toLowerCase();
+  var existing = allRegs.filter(function(r) {
+    if (!r || r.type !== 'sponsor-team') return false;
+    if (r.sponsorId === sponsorId) return true;
+    // Fallback: match by company name if sponsorId was previously set differently
+    if (companyMatch && r.firstName && r.firstName.toLowerCase() === companyMatch) return true;
+    return false;
+  });
+  // Deduplicate — keep only the first match, remove extras
+  if (existing.length > 1) {
+    var keep = existing[0];
+    allRegs = allRegs.filter(function(r) {
+      if (r && r.type === 'sponsor-team' && existing.indexOf(r) > 0) return false;
+      return true;
+    });
+    existing = [keep];
+  }
 
   var companyName = sponsor.company || ((sponsor.firstName||'')+' '+(sponsor.lastName||'')).trim() || 'Sponsor';
   var pkgText = sps.map(function(s){return s.name||s;}).join(', ');
