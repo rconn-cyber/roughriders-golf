@@ -1,8 +1,45 @@
 // netlify/functions/send-registration-email.js
 // Sends two emails when a golfer registers (or when admin manually resends):
 //   1. Confirmation to the registrant
-//   2. Notification to admin
+//   2. Notification to all admin recipients (env var + blob settings)
 // Uses Resend — RESEND_API_KEY must be set in Netlify env vars
+
+function getBlobStore() {
+  const siteID  = process.env.NETLIFY_SITE_ID;
+  const token   = process.env.NETLIFY_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
+  const apiBase = `https://api.netlify.com/api/v1/sites/${siteID}/blobs`;
+  const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+  return {
+    async get(key) {
+      const metaR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/' + key)}`, { headers });
+      if (metaR.status === 404) return null;
+      if (!metaR.ok) return null;
+      const meta = await metaR.json();
+      if (!meta.url) return null;
+      const dataR = await fetch(meta.url);
+      if (!dataR.ok) return null;
+      return dataR.text();
+    },
+  };
+}
+
+async function getAdminEmails() {
+  const envEmails = (process.env.ADMIN_EMAILS || 'r.conn@tamparoughriders.org')
+    .split(',').map(s => s.trim()).filter(Boolean);
+  try {
+    const store  = getBlobStore();
+    const raw    = await store.get('settings');
+    const settings = raw ? JSON.parse(raw) : {};
+    const blobEmails = (settings.adminEmails || []).filter(Boolean);
+    // Merge: env email first, then any blob additions not already in env list
+    const merged = [...envEmails];
+    blobEmails.forEach(e => { if (!merged.includes(e)) merged.push(e); });
+    return merged;
+  } catch (err) {
+    console.warn('Could not load settings blob, falling back to env emails:', err.message);
+    return envEmails;
+  }
+}
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -24,8 +61,11 @@ exports.handler = async (event) => {
   }
 
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
-  const ADMIN_EMAIL    = (process.env.ADMIN_EMAILS || 'r.conn@tamparoughriders.org').split(',')[0].trim();
-  const FROM_EMAIL     = process.env.FROM_EMAIL || 'golf@tamparoughriders.org';
+  const ADMIN_EMAILS_LIST = await getAdminEmails();
+  const FROM_EMAIL        = process.env.FROM_EMAIL || 'golf@tamparoughriders.org';
+
+  const fmt = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 });
+
 
   const fmt = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 });
 
@@ -192,7 +232,8 @@ exports.handler = async (event) => {
         headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           from: `Rough Riders Golf <${FROM_EMAIL}>`,
-          to:   [ADMIN_EMAIL],
+          to:   [ADMIN_EMAILS_LIST[0]],
+          bcc:  ADMIN_EMAILS_LIST.slice(1).length > 0 ? ADMIN_EMAILS_LIST.slice(1) : undefined,
           subject: adminSubject,
           html: adminHtml,
         }),
