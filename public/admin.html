@@ -4250,38 +4250,99 @@ async function generateReport() {
 
     // ── Benefits fulfillment data ───────────────────────────────────────────
     // Aggregate all promised benefits across all sponsors
-    var benFulfill = {}; // { benefitText: [ {company, name, level, status} ] }
+    // ── Benefits: aggregate by sponsor, skip golfer benefits, combine hole signs + tickets
+    // benFulfill: { canonicalBenefitKey: { label, sponsors: [{company, level, status, qty}] } }
+    var SKIP_BEN = /golfer|player|team/i; // redundant — already shown in team count
+    var HOLE_RE  = /(\d+)\s*hole\s*sponsor\s*sign/i;
+    var TICKET_RE= /(\d+)\s*super\s*ticket/i;
+
+    var benFulfill    = {};
+    var holeSigns     = {};  // companyKey -> { company, level, status, qty }
+    var superTickets  = {};  // companyKey -> { company, level, status, qty }
+
     sponsors.forEach(function(sp) {
       var spName = sp.company || [sp.firstName, sp.lastName].filter(Boolean).join(' ') || '—';
       var lvName = (levelMap[sp.levelId || sp.level] || {}).name || sp.package || '—';
-      var bens = Array.isArray(sp.benefits) ? sp.benefits : [];
-      // Also include sponsorship names as a fallback if no benefits recorded
+      var bens   = Array.isArray(sp.benefits) ? sp.benefits : [];
       if (bens.length === 0 && sp.sponsorships) {
         sp.sponsorships.forEach(function(s){ if(s.name) bens.push(s.name); });
       }
       bens.forEach(function(b) {
-        var bt = b || ''; if (!bt) return;
-        if (!benFulfill[bt]) benFulfill[bt] = [];
-        benFulfill[bt].push({ company: spName, level: lvName, status: sp.status || '' });
+        var bt = (b || '').trim(); if (!bt) return;
+
+        // Skip golfer/player/team lines — redundant with registration data
+        if (SKIP_BEN.test(bt)) return;
+
+        // Accumulate hole signs
+        var hm = bt.match(HOLE_RE);
+        if (hm) {
+          var qty = parseInt(hm[1], 10) || 1;
+          if (!holeSigns[spName]) holeSigns[spName] = { company: spName, level: lvName, status: sp.status || '', qty: 0 };
+          holeSigns[spName].qty += qty;
+          return;
+        }
+
+        // Accumulate super tickets
+        var tm = bt.match(TICKET_RE);
+        if (tm) {
+          var qty = parseInt(tm[1], 10) || 1;
+          if (!superTickets[spName]) superTickets[spName] = { company: spName, level: lvName, status: sp.status || '', qty: 0 };
+          superTickets[spName].qty += qty;
+          return;
+        }
+
+        // All other benefits — group by text
+        if (!benFulfill[bt]) benFulfill[bt] = { label: bt, sponsors: [] };
+        benFulfill[bt].sponsors.push({ company: spName, level: lvName, status: sp.status || '' });
       });
     });
-    var benKeys = Object.keys(benFulfill).sort();
-    var benRows = benKeys.map(function(bk) {
-      var sponsors_list = benFulfill[bk].map(function(e) {
-        var badge = e.status === 'paid' ? ' <span style="font-size:10px;color:#2d7a4a;font-weight:700;">PAID</span>' :
-                    e.status === 'pending' ? ' <span style="font-size:10px;color:#a86000;">PENDING</span>' : '';
-        return '<span style="display:inline-block;background:#f0f4ff;border:1px solid #c8d4f0;border-radius:3px;padding:1px 7px;font-size:12px;margin:2px;">' + escH(e.company) + badge + '</span>';
+
+    function sponsorChips(list) {
+      return list.map(function(e) {
+        var badge = e.status === 'paid'    ? ' <span style="font-size:10px;color:#2d7a4a;font-weight:700;">PAID</span>'
+                  : e.status === 'pending' ? ' <span style="font-size:10px;color:#a86000;">PENDING</span>' : '';
+        var qtyStr = e.qty ? ' <span style="font-size:10px;color:#555;background:#e8e8e4;border-radius:3px;padding:1px 5px;">×'+e.qty+'</span>' : '';
+        return '<span style="display:inline-block;background:#f0f4ff;border:1px solid #c8d4f0;border-radius:3px;padding:1px 7px;font-size:12px;margin:2px;">'
+          + escH(e.company) + qtyStr + badge + '</span>';
       }).join(' ');
-      return '<tr style="border-bottom:1px solid #eee;">' +
-        '<td style="padding:7px 12px;vertical-align:top;">' +
-          '<label style="display:flex;align-items:flex-start;gap:8px;cursor:default;">' +
-            '<input type="checkbox" style="margin-top:2px;width:15px;height:15px;flex-shrink:0;">' +
-            '<span style="font-size:13px;">' + escH(bk) + '</span>' +
-          '</label>' +
-        '</td>' +
-        '<td style="padding:7px 12px;vertical-align:top;">' + sponsors_list + '</td>' +
-      '</tr>';
-    }).join('') || '<tr><td colspan="2" style="padding:10px 12px;color:#888;">No benefits recorded yet.</td></tr>';
+    }
+
+    function benRow(label, list) {
+      return '<tr style="border-bottom:1px solid #eee;">'
+        + '<td style="padding:7px 12px;vertical-align:top;">'
+          + '<label style="display:flex;align-items:flex-start;gap:8px;cursor:default;">'
+            + '<input type="checkbox" style="margin-top:2px;width:15px;height:15px;flex-shrink:0;">'
+            + '<span style="font-size:13px;">' + escH(label) + '</span>'
+          + '</label>'
+        + '</td>'
+        + '<td style="padding:7px 12px;vertical-align:top;">' + sponsorChips(list) + '</td>'
+        + '</tr>';
+    }
+
+    var benRows = '';
+
+    // Hole signs row — combined with per-sponsor qty
+    var holeSponsorList = Object.values(holeSigns);
+    if (holeSponsorList.length) {
+      var totalSigns = holeSponsorList.reduce(function(s,e){return s+e.qty;},0);
+      benRows += benRow('Hole Sponsor Signs (' + totalSigns + ' total)', holeSponsorList);
+    }
+
+    // Super tickets row — combined with per-sponsor qty
+    var ticketSponsorList = Object.values(superTickets);
+    if (ticketSponsorList.length) {
+      var totalTickets = ticketSponsorList.reduce(function(s,e){return s+e.qty;},0);
+      benRows += benRow('Super Tickets (' + totalTickets + ' total)', ticketSponsorList);
+    }
+
+    // All other benefits — sorted
+    var benKeys = Object.keys(benFulfill).sort();
+    benRows += benKeys.map(function(bk) {
+      return benRow(bk, benFulfill[bk].sponsors);
+    }).join('');
+
+    if (!benRows) benRows = '<tr><td colspan="2" style="padding:10px 12px;color:#888;">No benefits recorded yet.</td></tr>';
+    var benKeyCount = (holeSponsorList.length?1:0) + (ticketSponsorList.length?1:0) + benKeys.length;
 
     // ── Build HTML ──────────────────────────────────────────────────────────
     var now = new Date().toLocaleString('en-US',{dateStyle:'full',timeStyle:'short'});
@@ -4387,7 +4448,7 @@ async function generateReport() {
   <div style="background:#fff;border:1px solid #ddd;border-radius:6px;overflow:hidden;margin-top:18px;">
     <div style="background:#0d1f3c;color:#fff;padding:10px 14px;font-weight:700;font-size:13px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:center;">
       <span>✅ Sponsor Benefits Fulfillment</span>
-      <span style="font-size:11px;font-weight:400;color:#aab;">Check off as delivered · ${benKeys.length} benefit type${benKeys.length !== 1 ? 's' : ''} across ${sponsors.length} sponsor${sponsors.length !== 1 ? 's' : ''}</span>
+      <span style="font-size:11px;font-weight:400;color:#aab;">Check off as delivered · ${benKeyCount} benefit type${benKeyCount !== 1 ? 's' : ''} across ${sponsors.length} sponsor${sponsors.length !== 1 ? 's' : ''}</span>
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
       <thead><tr style="background:#f9f9f6;border-bottom:1px solid #ddd;">
