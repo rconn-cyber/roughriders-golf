@@ -107,7 +107,12 @@ exports.handler = async (event) => {
     status:              'paid',
     paymentMethod:       'card',
     source:              'stripe',
-    confirmationEmailSent: false,   // will update after email attempt
+    regType:             meta.reg_type        || 'individual',
+    teamName:            meta.team_name        || '',
+    addons:              meta.addons           || '',
+    sponsorLevels:       meta.sponsor_levels   || '',
+    sponsorBenefits:     meta.sponsor_benefits || '',
+    confirmationEmailSent: false,
     createdAt:           new Date().toISOString(),
     updatedAt:           new Date().toISOString(),
   };

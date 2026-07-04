@@ -296,6 +296,9 @@ tr:hover td { background: #f8faf8; }
   <div class="app-body">
     <nav class="sidebar">
       <div class="sb-label">Tournament</div>
+      <div class="nav-item" id="nav-dashboard" onclick="showPanel('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
       <div class="nav-item active" id="nav-registrations" onclick="showPanel('registrations')">
         <span class="nav-icon">🏌️</span> Registrations
         <span class="nav-count orange" id="cnt-regs">0</span>
@@ -341,6 +344,85 @@ tr:hover td { background: #f8faf8; }
     <main class="main">
 
       <!-- REGISTRATIONS -->
+      <!-- DASHBOARD -->
+      <div class="panel" id="panel-dashboard">
+        <div class="page-hdr">
+          <div class="page-hdr-l">
+            <h1>Dashboard</h1>
+            <p id="dash-days-label">39th Annual Charity Golf Tournament · Sept 14, 2026</p>
+          </div>
+          <div>
+            <button class="btn btn-outline" onclick="loadDashboard()">↺ Refresh</button>
+          </div>
+        </div>
+
+        <!-- KPI cards -->
+        <div id="dash-kpi-row" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px;">
+          <div class="stat-card" style="flex:1;min-width:150px;">
+            <div class="stat-label">Teams Registered</div>
+            <div class="stat-value" id="dash-teams">—</div>
+            <div class="stat-sub" id="dash-teams-sub"></div>
+            <div id="dash-teams-bar" style="margin-top:8px;"></div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:150px;">
+            <div class="stat-label">Individual Golfers</div>
+            <div class="stat-value" id="dash-indiv">—</div>
+            <div class="stat-sub" id="dash-indiv-sub"></div>
+            <div id="dash-indiv-bar" style="margin-top:8px;"></div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:150px;">
+            <div class="stat-label">Total Players</div>
+            <div class="stat-value" id="dash-players">—</div>
+            <div class="stat-sub">on the course</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:150px;">
+            <div class="stat-label">Sponsor Revenue</div>
+            <div class="stat-value" id="dash-sponsor-rev">—</div>
+            <div class="stat-sub">confirmed sponsors</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:150px;">
+            <div class="stat-label">Total Revenue</div>
+            <div class="stat-value" id="dash-total-rev">—</div>
+            <div class="stat-sub">reg + sponsors + add-ons</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+          <!-- Revenue by type -->
+          <div class="card">
+            <div class="card-header"><h2>Revenue by Type</h2></div>
+            <div class="card-body" id="dash-rev-chart" style="display:flex;flex-direction:column;gap:10px;">
+              <div style="color:#aaa;font-size:13px;">Loading…</div>
+            </div>
+          </div>
+          <!-- Sponsor availability -->
+          <div class="card">
+            <div class="card-header"><h2>Sponsor Availability</h2></div>
+            <div class="card-body" id="dash-sponsor-avail" style="display:flex;flex-direction:column;gap:12px;">
+              <div style="color:#aaa;font-size:13px;">Loading…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent registrations -->
+        <div class="card">
+          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <h2>Recent Registrations</h2>
+            <button class="btn btn-outline" onclick="showPanel('registrations')" style="font-size:11px;padding:4px 12px;">View All</button>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <table class="data-table">
+              <thead><tr>
+                <th>Name</th><th>Type</th><th>Sponsor</th><th>Add-Ons</th><th>Players</th><th>Time</th><th style="text-align:right;">Amount</th>
+              </tr></thead>
+              <tbody id="dash-recent-tbody">
+                <tr><td colspan="7" class="empty-table"><div class="empty-icon">📊</div>Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <div class="panel active" id="panel-registrations">
         <div class="page-hdr">
           <div class="page-hdr-l">
@@ -1624,7 +1706,8 @@ async function loadConfig(){
 function showPanel(name){
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
   if (name === 'content') { loadEventContentOnce(); }
-  if (name === 'members') { loadMemberSyncStatus(); }
+  if (name === 'members')   { loadMemberSyncStatus(); }
+  if (name === 'dashboard') { loadDashboard(); }
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   document.getElementById('panel-'+name).classList.add('active');
   document.getElementById('nav-'+name) && document.getElementById('nav-'+name).classList.add('active');
@@ -4348,6 +4431,142 @@ function printReport() {
 
 
 
+
+// ════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════
+function fmtDollars(n) {
+  if (n >= 1000) return '$' + (n/1000).toFixed(n % 1000 === 0 ? 0 : 1) + 'k';
+  return '$' + n.toLocaleString();
+}
+function fmtTime(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const diffH = Math.floor((now - d) / 3600000);
+  if (diffH < 1)   return 'Just now';
+  if (diffH < 24)  return diffH + 'h ago';
+  if (diffH < 48)  return 'Yesterday';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function miniBar(value, max, color) {
+  const pct = max ? Math.min(100, Math.round(value / max * 100)) : 0;
+  const barColor = pct >= 90 ? '#c0392b' : pct >= 70 ? '#c9a84c' : color || '#1e4a2c';
+  return `<div style="background:#e8ede9;border-radius:99px;height:5px;overflow:hidden;">
+    <div style="width:${pct}%;height:100%;background:${barColor};border-radius:99px;transition:width .4s;"></div>
+  </div><div style="font-size:10px;color:#888;margin-top:3px;">${pct}% of ${max}</div>`;
+}
+
+async function loadDashboard() {
+  if (!_jwt) return;
+  const authHdr = { 'Authorization': 'Bearer ' + _jwt };
+
+  // Show loading state
+  document.getElementById('dash-teams').textContent = '…';
+  document.getElementById('dash-indiv').textContent = '…';
+  document.getElementById('dash-players').textContent = '…';
+  document.getElementById('dash-sponsor-rev').textContent = '…';
+  document.getElementById('dash-total-rev').textContent = '…';
+
+  try {
+    const res  = await fetch(NETLIFY_BASE + '/.netlify/functions/admin-dashboard', { headers: authHdr });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d    = await res.json();
+    const k    = d.kpi || {};
+
+    // Days to go
+    if (d.daysToGo != null) {
+      document.getElementById('dash-days-label').textContent =
+        `39th Annual · Sept 14, 2026 · ${d.daysToGo} day${d.daysToGo !== 1 ? 's' : ''} to go`;
+    }
+
+    // KPI cards
+    document.getElementById('dash-teams').textContent   = k.teams?.value ?? '—';
+    document.getElementById('dash-indiv').textContent   = k.individuals?.value ?? '—';
+    document.getElementById('dash-players').textContent = k.totalPlayers?.value ?? '—';
+    document.getElementById('dash-sponsor-rev').textContent = k.sponsorRevenue?.value != null ? fmtDollars(k.sponsorRevenue.value) : '—';
+    document.getElementById('dash-total-rev').textContent   = k.totalRevenue?.value   != null ? fmtDollars(k.totalRevenue.value)   : '—';
+
+    if (k.teams) {
+      document.getElementById('dash-teams-sub').textContent = `of ${k.teams.cap} team capacity`;
+      document.getElementById('dash-teams-bar').innerHTML   = miniBar(k.teams.value, k.teams.cap);
+    }
+    if (k.individuals) {
+      document.getElementById('dash-indiv-sub').textContent = `of ${k.individuals.cap} slots`;
+      document.getElementById('dash-indiv-bar').innerHTML   = miniBar(k.individuals.value, k.individuals.cap);
+    }
+
+    // Revenue by type — horizontal bar chart
+    const revEl  = document.getElementById('dash-rev-chart');
+    const revData = d.revenueByType || [];
+    const maxRev  = Math.max(...revData.map(r => r.amount), 1);
+    const COLORS  = { sponsor: '#c9a84c', reg: '#1e4a2c', addon: '#2d7a4a' };
+    if (revData.length) {
+      revEl.innerHTML = revData.map(r => `
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+            <span style="font-weight:600;color:#1a2e22;">${escH(r.name)}</span>
+            <span style="color:#555;">${fmtDollars(r.amount)}</span>
+          </div>
+          <div style="background:#e8ede9;border-radius:4px;height:8px;overflow:hidden;">
+            <div style="width:${Math.round(r.amount/maxRev*100)}%;height:100%;background:${COLORS[r.type]||'#1e4a2c'};border-radius:4px;transition:width .4s;"></div>
+          </div>
+        </div>`).join('');
+    } else {
+      revEl.innerHTML = '<div style="color:#aaa;font-size:13px;">No revenue data yet</div>';
+    }
+
+    // Sponsor availability
+    const saEl   = document.getElementById('dash-sponsor-avail');
+    const saData = (d.sponsorAvailability || []).filter(s => s.cap <= 10 || s.sold > 0);
+    if (saData.length) {
+      saEl.innerHTML = saData.map(s => {
+        const pct = Math.round(s.sold / s.cap * 100);
+        const barColor = s.remaining === 0 ? '#c0392b' : pct >= 75 ? '#c9a84c' : '#1e4a2c';
+        const tag = s.remaining === 0
+          ? `<span style="color:#c0392b;font-weight:700;font-size:10px;">SOLD OUT</span>`
+          : `<span style="color:#888;font-size:11px;">${s.remaining} of ${s.cap} open · $${s.price.toLocaleString()}</span>`;
+        return `<div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <span style="font-size:12px;font-weight:600;color:#1a2e22;">${escH(s.level)}</span>
+            ${tag}
+          </div>
+          <div style="background:#e8ede9;border-radius:99px;height:5px;overflow:hidden;">
+            <div style="width:${pct}%;height:100%;background:${barColor};border-radius:99px;transition:width .4s;"></div>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      saEl.innerHTML = '<div style="color:#aaa;font-size:13px;">No sponsors yet</div>';
+    }
+
+    // Recent registrations
+    const tbody  = document.getElementById('dash-recent-tbody');
+    const recent = d.recentRegistrations || [];
+    const TYPE_COLOR = { team: '#1e4a2c', individual: '#2d7a4a', 'sponsor-only': '#8b6f47' };
+    if (recent.length) {
+      tbody.innerHTML = recent.map(r => {
+        const typeLabel = r.regType === 'team' ? 'Team Reg' : r.regType === 'sponsor-only' ? 'Sponsor Only' : 'Individual';
+        const tc = TYPE_COLOR[r.regType] || '#888';
+        return `<tr>
+          <td style="font-weight:600;">${escH(r.name)}</td>
+          <td><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;background:${tc}22;color:${tc};">${typeLabel}</span></td>
+          <td style="font-size:12px;color:${r.sponsorLevel ? '#1a2e22' : '#aaa'};">${escH(r.sponsorLevel || '—')}</td>
+          <td style="font-size:12px;color:${r.addons ? '#1a2e22' : '#aaa'};">${escH(r.addons || '—')}</td>
+          <td style="font-size:12px;">${r.players}</td>
+          <td style="font-size:11px;color:#888;">${fmtTime(r.createdAt)}</td>
+          <td style="font-weight:700;text-align:right;">$${(r.amount||0).toLocaleString()}</td>
+        </tr>`;
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-table"><div class="empty-icon">🏌️</div>No registrations yet</td></tr>';
+    }
+
+  } catch(e) {
+    console.error('loadDashboard error:', e);
+    document.getElementById('dash-teams').textContent = '!';
+    toast('Dashboard load failed: ' + e.message);
+  }
+}
 
 </script>
 </body>
