@@ -851,7 +851,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
     <!-- Add-ons -->
     <div class="reg-section">
-      <div class="reg-section-title">Add-ons <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional · per-player items apply to your whole team</span></div>
+      <div class="reg-section-title">Round Extras <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional · per-player items apply to your whole team</span></div>
 
       <!-- Super Ticket — full width -->
       <div class="addon-item addon-super" onclick="toggleSuperTicket(this)" style="margin-bottom:10px;border-color:#c9a84c;background:linear-gradient(135deg,#fdf8ec,#fefaf0);display:flex;gap:14px;">
@@ -976,7 +976,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
   <!-- Add-ons (under $1,000) -->
   <div id="addons-section" style="display:none;">
     <div class="addons-section-header">
-      <span class="addons-section-title">Add-Ons</span>
+      <span class="addons-section-title">À La Carte Sponsorships</span>
       <span class="addons-section-sub">Individual sponsorship opportunities</span>
     </div>
     <div id="addons-container">
@@ -2443,6 +2443,9 @@ document.addEventListener('DOMContentLoaded', function() {
     showConfirmModal();
   }
 
+  // Check for add-on upsell link from email
+  initUpsellFlow();
+
   // Render fallback levels immediately — guarantees levels show even if fetch fails
   renderSponsorConfig({ levels: FALLBACK_LEVELS });
   // Load live config from admin-config (overrides fallback if data exists)
@@ -2806,6 +2809,108 @@ function updateTimestamp() {
     now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
 }
 
+
+// ════════════════════════════════════════════════════════
+// UPSELL FLOW  (?upsell=1&addon=...&price=...&email=...&regId=...)
+// ════════════════════════════════════════════════════════
+var _upsellParams = null;
+
+var UPSELL_ADDON_META = {
+  'Super Ticket':   { icon: '⭐', desc: 'Entry into all on-course prize contests — best value!' },
+  'Mulligan Pack':  { icon: '🔄', desc: 'Two extra shots — use them wisely!' },
+  'Closest to Pin': { icon: '🎯', desc: 'Contest entry — win a prize for the closest shot to the pin' },
+  'Longest Drive':  { icon: '💪', desc: 'Contest entry — win a prize for the longest drive off the tee' },
+  'Hole Sponsor':   { icon: '⛳', desc: 'Your name/company on a tee box sign on-course all day' },
+};
+
+function initUpsellFlow() {
+  var params = new URLSearchParams(window.location.search);
+  if (!params.get('upsell')) return;
+
+  var addonName = params.get('addon') || '';
+  var price     = parseFloat(params.get('price') || '0');
+  var email     = params.get('email') || '';
+  var regId     = params.get('regId') || '';
+
+  if (!addonName || !price) return;
+
+  _upsellParams = { addonName: addonName, price: price, email: email, regId: regId };
+
+  var meta = UPSELL_ADDON_META[addonName] || { icon: '⛳', desc: '' };
+
+  document.getElementById('upsell-addon-icon').textContent  = meta.icon;
+  document.getElementById('upsell-addon-name').textContent  = addonName;
+  document.getElementById('upsell-addon-desc').textContent  = meta.desc;
+  document.getElementById('upsell-addon-price').textContent = '$' + price.toFixed(2).replace(/\.00$/, '');
+
+  if (email) {
+    document.getElementById('upsell-subtitle').textContent = 'Adding for: ' + email;
+  }
+
+  var overlay = document.getElementById('upsell-overlay');
+  overlay.style.display = 'flex';
+
+  // Clean the URL so a refresh doesn't re-show the modal
+  var cleanUrl = window.location.pathname;
+  history.replaceState(null, '', cleanUrl);
+}
+
+function closeUpsellModal() {
+  document.getElementById('upsell-overlay').style.display = 'none';
+  _upsellParams = null;
+}
+
+async function handleUpsellCheckout() {
+  if (!_upsellParams) return;
+
+  var btn   = document.getElementById('upsell-pay-btn');
+  var errEl = document.getElementById('upsell-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Creating checkout…';
+
+  var golfer = {
+    firstName: _upsellParams.email.split('@')[0] || 'Golfer',
+    lastName:  '',
+    email:     _upsellParams.email,
+    phone:     '',
+  };
+
+  var sponsorships = [{
+    name:     _upsellParams.addonName,
+    price:    _upsellParams.price,
+    isSponsor: false,
+    upsell:   true,
+    regId:    _upsellParams.regId,
+  }];
+
+  try {
+    var res = await fetch(NETLIFY_BASE + '/.netlify/functions/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        golfers: [golfer],
+        sponsorships: sponsorships,
+        regType: 'addon-upsell',
+        teamName: '',
+      }),
+    });
+    var data = await res.json();
+    if (!res.ok || !data.url) throw new Error(data.error || 'Could not create checkout');
+    window.location.href = data.url;
+  } catch (err) {
+    errEl.textContent = 'Error: ' + err.message + '. Please try again or contact us.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '💳 Pay Securely →';
+  }
+}
+
+// Close on overlay click
+document.getElementById('upsell-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeUpsellModal();
+});
+
 </script>
 <div id="addon-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:10px;padding:36px 32px;max-width:420px;width:92%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.3);">
@@ -2824,7 +2929,7 @@ function updateTimestamp() {
         ← See all add-on choices
       </button>
       <button onclick="proceedWithoutAddons()" style="padding:10px 22px;background:none;border:none;color:#7a7a72;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;text-decoration:underline;">
-        No thanks, continue without add-ons
+        No thanks, continue without round extras
       </button>
     </div>
   </div>
@@ -2905,6 +3010,44 @@ function updateTimestamp() {
       </button>
     </div>
     <p style="font-size:11px;color:#7a7a72;text-align:center;margin-top:10px;">Invoice processed securely by Stripe · Net 30 payment terms</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     UPSELL MODAL  (shown when ?upsell=1 in URL)
+     ══════════════════════════════════════════════════════ -->
+<div id="upsell-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:12px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.2);overflow:hidden;max-height:90vh;display:flex;flex-direction:column;">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#0d2d5c,#1a4a8a);padding:24px 28px;">
+      <div style="font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.6);margin-bottom:4px;">39th Annual Rough Riders Golf Tournament</div>
+      <h2 style="font-family:Georgia,serif;font-size:22px;color:#fff;margin:0 0 2px;">Add to your round ⛳</h2>
+      <p style="color:rgba(255,255,255,0.75);font-size:13px;margin:0;" id="upsell-subtitle">Secure checkout · Proceeds benefit veterans</p>
+    </div>
+    <!-- Body -->
+    <div style="padding:24px 28px;overflow-y:auto;flex:1;">
+      <div id="upsell-addon-card" style="border:2px solid #0d2d5c;border-radius:10px;padding:18px 20px;margin-bottom:20px;background:#f8faff;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div>
+            <div id="upsell-addon-icon" style="font-size:24px;margin-bottom:4px;"></div>
+            <div id="upsell-addon-name" style="font-family:Georgia,serif;font-size:18px;font-weight:700;color:#0f2318;"></div>
+            <div id="upsell-addon-desc" style="font-size:13px;color:#555;margin-top:3px;"></div>
+          </div>
+          <div id="upsell-addon-price" style="font-family:Georgia,serif;font-size:28px;font-weight:900;color:#b8940e;white-space:nowrap;"></div>
+        </div>
+      </div>
+      <p id="upsell-error" style="display:none;color:#c0392b;font-size:13px;background:#fdf3f3;border:1px solid #f5c6cb;padding:10px 14px;border-radius:6px;margin-bottom:16px;"></p>
+      <button id="upsell-pay-btn" onclick="handleUpsellCheckout()" style="width:100%;background:#0d2d5c;color:#f5d840;font-family:Georgia,serif;font-size:17px;font-weight:700;padding:14px 20px;border:none;border-radius:8px;cursor:pointer;letter-spacing:0.03em;">
+        💳 Pay Securely →
+      </button>
+      <button onclick="closeUpsellModal()" style="width:100%;margin-top:10px;background:none;border:1px solid #ccc;color:#555;font-size:14px;padding:10px;border-radius:8px;cursor:pointer;">
+        No thanks
+      </button>
+    </div>
+    <div style="background:#f4f6f4;padding:10px 28px;text-align:center;border-top:1px solid #e8e8e4;">
+      <span style="font-size:11px;color:#888;">🔒 Secured by Stripe · Proceeds benefit veterans &amp; local charities</span>
+    </div>
   </div>
 </div>
 
