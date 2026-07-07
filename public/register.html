@@ -851,54 +851,79 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
     <!-- Add-ons -->
     <div class="reg-section">
-      <div class="reg-section-title">Round Extras <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional · per-player items apply to your whole team</span></div>
+      <div class="reg-section-title">Round Extras <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text-light)">— optional · select quantity per player needed</span></div>
+      <div style="background:#f0faf4;border:1px solid #b6dfc4;border-radius:7px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">⏱️</span>
+        <span style="font-size:13px;color:#1a3320;line-height:1.4;"><strong>Save time at check-in!</strong> Buy your round extras now and they'll be in your packet at pickup — no waiting in line at the check-in table.</span>
+      </div
+</div>
 
       <!-- Super Ticket — full width -->
-      <div class="addon-item addon-super" onclick="toggleSuperTicket(this)" style="margin-bottom:10px;border-color:#c9a84c;background:linear-gradient(135deg,#fdf8ec,#fefaf0);display:flex;gap:14px;">
-        <div class="addon-left">
+      <div class="addon-item addon-super" style="margin-bottom:10px;border-color:#c9a84c;background:linear-gradient(135deg,#fdf8ec,#fefaf0);display:flex;gap:14px;cursor:default;">
+        <div class="addon-left" onclick="toggleSuperTicket(this.closest('.addon-super'))" style="cursor:pointer;flex:1;">
           <div class="addon-name" style="color:#1a3320;font-size:14px;">⭐ Super Ticket — Best Value</div>
-          <div class="addon-desc">Includes for your whole team: Mulligan pack · Closest to pin · Longest drive</div>
+          <div class="addon-desc" id="super-ticket-desc">Includes: Mulligan pack · Closest to pin · Longest drive · $50 per player</div>
         </div>
-        <div class="addon-right">
+        <div class="addon-right" style="flex-direction:column;align-items:flex-end;gap:6px;">
           <div style="text-align:right;">
-            <div class="addon-price" style="font-size:18px;">$50</div>
-            <div style="font-size:10px;color:var(--text-light);text-decoration:line-through;">$60 separately</div>
+            <div class="addon-price" id="super-ticket-price" style="font-size:18px;">$50</div>
+            <div style="font-size:10px;color:var(--text-light);text-decoration:line-through;">$60 separately per player</div>
           </div>
-          <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div id="super-ticket-qty-row" style="display:none;align-items:center;gap:6px;">
+            <button onclick="changeAddonQty('Super Ticket',-1,event)" style="width:24px;height:24px;border-radius:50%;border:1px solid #c9a84c;background:#fff;font-size:14px;cursor:pointer;line-height:1;">−</button>
+            <span id="super-ticket-qty-display" style="font-size:13px;font-weight:700;min-width:16px;text-align:center;">1</span>
+            <button onclick="changeAddonQty('Super Ticket',1,event)" style="width:24px;height:24px;border-radius:50%;border:1px solid #c9a84c;background:#fff;font-size:14px;cursor:pointer;line-height:1;">+</button>
+          </div>
+          <div class="addon-check" onclick="toggleSuperTicket(this.closest('.addon-super'))" style="cursor:pointer;"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         </div>
       </div>
 
       <div class="addons-grid" id="addons-grid">
-        <div class="addon-item" onclick="toggleAddon(this, 20, 'Mulligan Pack')">
-          <div class="addon-left">
-            <div class="addon-name">Mulligan pack</div>
-            <div class="addon-desc">1 mulligan per player</div>
+        <div class="addon-item" id="addon-item-mulligan-pack" style="cursor:default;">
+          <div class="addon-left" onclick="toggleAddonQty('Mulligan Pack', 20, this.closest('.addon-item'))" style="cursor:pointer;flex:1;">
+            <div class="addon-name">Mulligan Pack</div>
+            <div class="addon-desc" id="addon-desc-mulligan-pack">$20 each · 1 mulligan per player</div>
           </div>
-          <div class="addon-right">
-            <div class="addon-price">$20</div>
-            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          </div>
-        </div>
-
-        <div class="addon-item" onclick="toggleAddon(this, 20, 'Closest to Pin')">
-          <div class="addon-left">
-            <div class="addon-name">Closest to pin</div>
-            <div class="addon-desc">Entry per team member</div>
-          </div>
-          <div class="addon-right">
-            <div class="addon-price">$20</div>
-            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="addon-right" style="flex-direction:column;align-items:flex-end;gap:6px;">
+            <div class="addon-price" id="addon-price-mulligan-pack">$20</div>
+            <div id="addon-qty-row-mulligan-pack" style="display:none;align-items:center;gap:6px;">
+              <button onclick="changeAddonQty('Mulligan Pack',-1,event)" style="width:24px;height:24px;border-radius:50%;border:1px solid #2d7a4a;background:#fff;font-size:14px;cursor:pointer;line-height:1;">−</button>
+              <span id="addon-qty-mulligan-pack" style="font-size:13px;font-weight:700;min-width:16px;text-align:center;">1</span>
+              <button onclick="changeAddonQty('Mulligan Pack',1,event)" style="width:24px;height:24px;border-radius:50%;border:1px solid #2d7a4a;background:#fff;font-size:14px;cursor:pointer;line-height:1;">+</button>
+            </div>
+            <div class="addon-check" onclick="toggleAddonQty('Mulligan Pack', 20, this.closest('.addon-item'))" style="cursor:pointer;"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
         </div>
 
-        <div class="addon-item" onclick="toggleAddon(this, 20, 'Longest Drive')">
-          <div class="addon-left">
-            <div class="addon-name">Longest drive</div>
-            <div class="addon-desc">Entry per team member</div>
+        <div class="addon-item" id="addon-item-closest-to-pin" style="cursor:default;">
+          <div class="addon-left" onclick="toggleAddonQty('Closest to Pin', 20, this.closest('.addon-item'))" style="cursor:pointer;flex:1;">
+            <div class="addon-name">Closest to Pin</div>
+            <div class="addon-desc" id="addon-desc-closest-to-pin">$20 each · contest entry per player</div>
           </div>
-          <div class="addon-right">
-            <div class="addon-price">$20</div>
-            <div class="addon-check"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="addon-right" style="flex-direction:column;align-items:flex-end;gap:6px;">
+            <div class="addon-price" id="addon-price-closest-to-pin">$20</div>
+            <div id="addon-qty-row-closest-to-pin" style="display:none;align-items:center;gap:6px;">
+              <button onclick="changeAddonQty('Closest to Pin',-1,event)" style="width:24px;height:24px;border-radius:50%;border:1px solid #2d7a4a;background:#fff;font-size:14px;cursor:pointer;line-height:1;">−</button>
+              <span id="addon-qty-closest-to-pin" style="font-size:13px;font-weight:700;min-width:16px;text-align:center;">1</span>
+              <button onclick="changeAddonQty('Closest to Pin',1,event)" style="width:24px;height:24px;border-radius:50%;border:1px solid #2d7a4a;background:#fff;font-size:14px;cursor:pointer;line-height:1;">+</button>
+            </div>
+            <div class="addon-check" onclick="toggleAddonQty('Closest to Pin', 20, this.closest('.addon-item'))" style="cursor:pointer;"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+
+        <div class="addon-item" id="addon-item-longest-drive" style="cursor:default;">
+          <div class="addon-left" onclick="toggleAddonQty('Longest Drive', 20, this.closest('.addon-item'))" style="cursor:pointer;flex:1;">
+            <div class="addon-name">Longest Drive</div>
+            <div class="addon-desc" id="addon-desc-longest-drive">$20 each · contest entry per player</div>
+          </div>
+          <div class="addon-right" style="flex-direction:column;align-items:flex-end;gap:6px;">
+            <div class="addon-price" id="addon-price-longest-drive">$20</div>
+            <div id="addon-qty-row-longest-drive" style="display:none;align-items:center;gap:6px;">
+              <button onclick="changeAddonQty('Longest Drive',-1,event)" style="width:24px;height:24px;border-radius:50%;border:1px solid #2d7a4a;background:#fff;font-size:14px;cursor:pointer;line-height:1;">−</button>
+              <span id="addon-qty-longest-drive" style="font-size:13px;font-weight:700;min-width:16px;text-align:center;">1</span>
+              <button onclick="changeAddonQty('Longest Drive',1,event)" style="width:24px;height:24px;border-radius:50%;border:1px solid #2d7a4a;background:#fff;font-size:14px;cursor:pointer;line-height:1;">+</button>
+            </div>
+            <div class="addon-check" onclick="toggleAddonQty('Longest Drive', 20, this.closest('.addon-item'))" style="cursor:pointer;"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
         </div>
 
@@ -1514,97 +1539,161 @@ var ADDON_BASE_PRICES = {
   'Super Ticket': 50
 };
 
+// Track per-addon quantities (1-4)
+var addonQty = {};
+var ADDON_MAX_QTY = 4;
+var ADDON_QTY_NAMES = ['Mulligan Pack','Closest to Pin','Longest Drive','Super Ticket'];
+
+function addonSlug(name) {
+  return name.toLowerCase().replace(/ /g, '-');
+}
+
 function addonEffectivePrice(name) {
   var base = ADDON_BASE_PRICES[name];
   if (!base) return 0;
-  // All add-ons are per player
-  return base * Math.max(1, playerCount);
+  var qty = addonQty[name] || 1;
+  return base * qty;
 }
 
-function toggleAddon(el, basePrice, name) {
+// Toggle + show qty row for per-player addons
+function toggleAddonQty(name, basePrice, el) {
+  // Deselect Super Ticket if active
   var superEl = document.querySelector('.addon-super');
   if (superEl && superEl.classList.contains('checked')) {
     superEl.classList.remove('checked');
     delete addons['Super Ticket'];
+    delete addonQty['Super Ticket'];
+    var sqr = document.getElementById('super-ticket-qty-row');
+    if (sqr) sqr.style.display = 'none';
+    // Show individual addons
+    document.querySelectorAll('#addons-grid .addon-item').forEach(function(a) { a.style.display = ''; });
   }
-  el.classList.toggle('checked');
+  var slug = addonSlug(name);
+  var qtyRow = document.getElementById('addon-qty-row-' + slug);
   if (el.classList.contains('checked')) {
-    addons[name] = addonEffectivePrice(name);
-  } else {
+    // Deselect
+    el.classList.remove('checked');
     delete addons[name];
+    delete addonQty[name];
+    if (qtyRow) qtyRow.style.display = 'none';
+    var descEl = document.getElementById('addon-desc-' + slug);
+    var priceEl = document.getElementById('addon-price-' + slug);
+    if (descEl) descEl.textContent = '$20 each · ' + (name === 'Mulligan Pack' ? '1 mulligan per player' : 'contest entry per player');
+    if (priceEl) priceEl.textContent = '$20';
+  } else {
+    // Select with qty 1
+    el.classList.add('checked');
+    addonQty[name] = addonQty[name] || 1;
+    addons[name] = addonEffectivePrice(name);
+    if (qtyRow) qtyRow.style.display = 'flex';
+    updateAddonQtyDisplay(name);
   }
-  updateAddonPrices();
   updateRegTotal();
   updatePayButton();
+}
+
+function changeAddonQty(name, delta, event) {
+  event.stopPropagation();
+  var slug = addonSlug(name);
+  if (name === 'Super Ticket') {
+    var current = addonQty[name] || 1;
+    var next = Math.min(ADDON_MAX_QTY, Math.max(1, current + delta));
+    addonQty[name] = next;
+    var superEl = document.querySelector('.addon-super');
+    if (superEl && superEl.classList.contains('checked')) {
+      addons[name] = addonEffectivePrice(name);
+    }
+    updateAddonQtyDisplay(name);
+    updateRegTotal();
+    return;
+  }
+  var el = document.getElementById('addon-item-' + slug);
+  if (!el || !el.classList.contains('checked')) return;
+  var current = addonQty[name] || 1;
+  var next = Math.min(ADDON_MAX_QTY, Math.max(1, current + delta));
+  addonQty[name] = next;
+  addons[name] = addonEffectivePrice(name);
+  updateAddonQtyDisplay(name);
+  updateRegTotal();
+}
+
+function updateAddonQtyDisplay(name) {
+  var slug = addonSlug(name);
+  var qty = addonQty[name] || 1;
+  var base = ADDON_BASE_PRICES[name] || 0;
+  var total = base * qty;
+
+  if (name === 'Super Ticket') {
+    var qtyEl = document.getElementById('super-ticket-qty-display');
+    var priceEl = document.getElementById('super-ticket-price');
+    var descEl = document.getElementById('super-ticket-desc');
+    if (qtyEl) qtyEl.textContent = qty;
+    if (priceEl) priceEl.textContent = '$' + total;
+    if (descEl) descEl.textContent = qty > 1
+      ? 'Includes everything · $50 × ' + qty + ' players'
+      : 'Includes: Mulligan pack · Closest to pin · Longest drive · $50 per player';
+    return;
+  }
+  var qtyEl  = document.getElementById('addon-qty-' + slug);
+  var priceEl = document.getElementById('addon-price-' + slug);
+  var descEl  = document.getElementById('addon-desc-' + slug);
+  if (qtyEl) qtyEl.textContent = qty;
+  if (priceEl) priceEl.textContent = '$' + total;
+  if (descEl) {
+    var baseDesc = name === 'Mulligan Pack' ? '1 mulligan per player' : 'contest entry per player';
+    descEl.textContent = qty > 1 ? '$20 × ' + qty + ' players' : '$20 each · ' + baseDesc;
+  }
 }
 
 function toggleSuperTicket(el) {
   var SUPER_NAMES = ['Mulligan Pack','Closest to Pin','Longest Drive'];
-  var grid = document.getElementById('addons-grid');
   if (el.classList.contains('checked')) {
     el.classList.remove('checked');
     delete addons['Super Ticket'];
-    // Show all individual addons including hole sponsor
+    delete addonQty['Super Ticket'];
+    var sqr = document.getElementById('super-ticket-qty-row');
+    if (sqr) sqr.style.display = 'none';
+    // Show individual addons
     document.querySelectorAll('#addons-grid .addon-item').forEach(function(a) { a.style.display = ''; });
   } else {
-    // Deselect individual addons (but not hole sponsor)
-    document.querySelectorAll('.addon-item:not(.addon-super)').forEach(function(a) {
-      var onclick = a.getAttribute('onclick') || '';
-      if (onclick.indexOf('Hole Sponsor') === -1) a.classList.remove('checked');
+    // Deselect individual addons (not hole sponsor)
+    SUPER_NAMES.forEach(function(n) {
+      var slug = addonSlug(n);
+      var item = document.getElementById('addon-item-' + slug);
+      if (item) item.classList.remove('checked');
+      delete addons[n];
+      delete addonQty[n];
+      var qr = document.getElementById('addon-qty-row-' + slug);
+      if (qr) qr.style.display = 'none';
     });
-    SUPER_NAMES.forEach(function(n) { delete addons[n]; });
     el.classList.add('checked');
+    addonQty['Super Ticket'] = addonQty['Super Ticket'] || 1;
     addons['Super Ticket'] = addonEffectivePrice('Super Ticket');
-    // Hide individual addons but keep hole sponsor visible
+    var sqr = document.getElementById('super-ticket-qty-row');
+    if (sqr) sqr.style.display = 'flex';
+    updateAddonQtyDisplay('Super Ticket');
+    // Hide individual addons, keep hole sponsor
     document.querySelectorAll('#addons-grid .addon-item').forEach(function(a) {
-      var onclick = a.getAttribute('onclick') || '';
-      if (onclick.indexOf('Hole Sponsor') === -1) a.style.display = 'none';
+      if (!a.id || a.id !== 'hole-addon-item') a.style.display = 'none';
     });
   }
-  updateAddonPrices();
   updateRegTotal();
   updatePayButton();
 }
 
+// Legacy — kept for hole sponsor and any other flat callers
+function toggleAddon(el, basePrice, name) {
+  toggleAddonQty(name, basePrice, el);
+}
+
 function updateAddonPrices() {
-  var origDescs = {
-    'Mulligan Pack': '1 mulligan per player',
-    'Closest to Pin': 'Contest entry per player',
-    'Longest Drive': 'Contest entry per player'
-  };
-  // Update all individual add-ons
-  document.querySelectorAll('.addon-item:not(.addon-super)').forEach(function(el) {
-    var onclick = el.getAttribute('onclick') || '';
-    var nameMatch = onclick.match(/'([^']+)'\s*\)$/);
-    if (!nameMatch) return;
-    var name = nameMatch[1];
-    var base = ADDON_BASE_PRICES[name];
-    if (!base) return;
-    var priceEl = el.querySelector('.addon-price');
-    var descEl  = el.querySelector('.addon-desc');
-    var effective = base * Math.max(1, playerCount);
-    if (priceEl) priceEl.textContent = '$' + effective;
-    if (descEl) {
-      descEl.textContent = playerCount > 1
-        ? '$' + base + ' \u00d7 ' + playerCount + ' players'
-        : (origDescs[name] || '');
+  // Qty system handles pricing — just refresh checked addon totals
+  ADDON_QTY_NAMES.forEach(function(name) {
+    if (addons[name] !== undefined) {
+      addons[name] = addonEffectivePrice(name);
+      updateAddonQtyDisplay(name);
     }
-    if (el.classList.contains('checked')) addons[name] = effective;
   });
-  // Update Super Ticket card price too
-  var superEl = document.querySelector('.addon-super');
-  if (superEl) {
-    var superPrice = ADDON_BASE_PRICES['Super Ticket'] * Math.max(1, playerCount);
-    var superPriceEl = superEl.querySelector('.addon-price');
-    if (superPriceEl) superPriceEl.textContent = '$' + superPrice;
-    var superDescEl = superEl.querySelector('.addon-desc');
-    if (superDescEl) {
-      superDescEl.textContent = playerCount > 1
-        ? 'Everything for your team — $75 \u00d7 ' + playerCount + ' players'
-        : 'Includes everything for your whole team: Mulligan pack \u00b7 Closest to pin \u00b7 Longest drive \u00b7 Raffle tickets (5) \u00b7 Awards dinner guest';
-    }
-    if (superEl.classList.contains('checked')) addons['Super Ticket'] = superPrice;
-  }
 }
 
 // Flat-rate addon (not per-player) — for Hole Sponsor
@@ -2896,7 +2985,7 @@ async function handleUpsellCheckout() {
       }),
     });
     var data = await res.json();
-    if (!res.ok || !data.url) throw new Error(data.error || 'Could not create checkout');
+    if (!res.ok || !data.url) throw new Error((data.error || 'Could not create checkout') + (data.detail ? ' — ' + data.detail : ''));
     window.location.href = data.url;
   } catch (err) {
     errEl.textContent = 'Error: ' + err.message + '. Please try again or contact us.';
