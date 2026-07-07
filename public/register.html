@@ -1726,7 +1726,8 @@ function updateRegTotal() {
     Object.entries(addons).forEach(function(e){
       var n = e[0], p = e[1];
       var qty = addonQty[n] || 1;
-      var label = (qty > 1) ? n + ' \u00d7 ' + qty + ' players' : n;
+      var playerLabel = qty === 1 ? '1 player' : qty + ' players';
+      var label = (n !== 'Hole Sponsor') ? n + ' \u2014 ' + playerLabel : n;
       lines.push({ name: label, price: p });
     });
     if (lines.length) {
