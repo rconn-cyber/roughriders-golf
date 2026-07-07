@@ -25,7 +25,7 @@ exports.handler = async (event) => {
     };
   }
 
-  const EVENT_LINE = '39th Annual Charity Golf Tournament · Hunter's Green Country Club, Tampa FL · Sept 14, 2026';
+  const EVENT_LINE = `39th Annual Charity Golf Tournament · Hunter's Green Country Club, Tampa FL · Sept 14, 2026`;
 
   // Categorise line items for richer descriptions
   const regItems      = sponsorships.filter(s => s.name.startsWith('Golf Registration'));
