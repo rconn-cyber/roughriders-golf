@@ -713,7 +713,7 @@ tr:hover td { background: #f8faf8; }
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Add-ons <span>— click to toggle</span></label>
+          <label class="form-label">Round Extras <span>— click to toggle</span></label>
           <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:2px;" id="em-addons-picker"><!-- built by buildAddonPicker() --></div>
         </div>
       </div>
@@ -2655,13 +2655,19 @@ function showEditLogoHint(msg, isError) {
 // containerId: 'em-addons-picker' or 'em-sp-addons-picker'
 // recalcFn:    'recalcEditRegAmount()' or 'recalcEditSpAmount()'
 // currentAddons: array of {name, price} or strings already selected
+var ROUND_EXTRAS = [
+  {name:'Super Ticket',   price:50,  icon:'⭐'},
+  {name:'Mulligan Pack',  price:20,  icon:''},
+  {name:'Closest to Pin', price:20,  icon:'⛳'},
+  {name:'Longest Drive',  price:20,  icon:''},
+  {name:'Hole Sponsor',   price:250, icon:''}
+];
+
 function buildAddonPicker(containerId, recalcFn, currentAddons) {
   var el = document.getElementById(containerId);
   if (!el) return;
-  var isSp = containerId === 'em-sp-addons-picker';
-  var addonLevels = sortBy(STATE.levels).filter(function(lv){ return lv.price < 1000; });
   var currentNames = (currentAddons||[]).map(function(a){ return (a.name||a||'').toLowerCase().trim(); });
-  var html = addonLevels.map(function(lv) {
+  var html = ROUND_EXTRAS.map(function(lv) {
     var on = currentNames.some(function(n){ return n === lv.name.toLowerCase().trim(); });
     var icon = lv.icon ? lv.icon + ' ' : '';
     return '<div class="benefit-toggle' + (on ? ' on' : '') + '"' +
@@ -2670,7 +2676,7 @@ function buildAddonPicker(containerId, recalcFn, currentAddons) {
       ' onclick="this.classList.toggle(\'on\');' + recalcFn + '">' +
       icon + escH(lv.name) + ' — ' + fmtMoney(lv.price) + '</div>';
   }).join('');
-  el.innerHTML = html || '<span style="font-size:13px;color:#aaa;">No add-ons configured in Sponsor Levels.</span>';
+  el.innerHTML = html;
 }
 
 function recalcEditRegAmount() {
