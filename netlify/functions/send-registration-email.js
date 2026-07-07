@@ -66,6 +66,8 @@ exports.handler = async (event) => {
 
   const fmt = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 });
 
+
+
   // Build golfer rows — skip email/phone cells if blank (don't show "undefined")
   const golferRows = golfers.map((g, i) => {
     const name    = [g.firstName, g.lastName].filter(Boolean).join(' ') || '—';
@@ -195,7 +197,7 @@ exports.handler = async (event) => {
       </table>` : ''}
 
       ${addons.length ? `
-      <h4 style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#0f2318;margin:0 0 8px;">Add-ons</h4>
+      <h4 style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:#0f2318;margin:0 0 8px;">Round Extras</h4>
       <table style="width:100%;font-size:13px;border-collapse:collapse;margin-bottom:16px;">${addonRows}</table>` : ''}
 
       ${sponsorships.length ? `
