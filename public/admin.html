@@ -1718,7 +1718,7 @@ function renderRegistrations(orders){
     var playersDisplay = isSponsorTeam ? (teamsCount + ' team' + (teamsCount!==1?'s':'') + ' (' + (r.playerCount||4) + ' golfers)') : players;
     var editBtn = isSponsorTeam
       ? '<button class="btn btn-outline btn-sm" onclick="alert(\'Edit this entry via the Sponsors tab.\')">🔗 Sponsor</button>'
-      : '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'registration\',' + idx + ')">✏ Edit</button> <button class="btn btn-outline btn-sm" onclick="resendConfirmation(\'' + escH(r.id||'') + '\',this)" title="Resend confirmation email">✉</button> <button class="btn btn-danger btn-sm" onclick="deleteEntry(\'registrations\',\'' + escH(r.id||'') + '\',' + idx + ')">✕</button>';
+      : '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'registration\',' + idx + ')">✏ Edit</button> <button class="btn btn-outline btn-sm" onclick="resendConfirmation(\'' + escH(r.id||'') + '\',this)" title="Resend confirmation email">✉</button> <button class="btn btn-outline btn-sm" onclick="sendUpsellEmail(\'' + escH(r.id||'') + '\',this)" title="Send add-on upsell email">📩</button> <button class="btn btn-danger btn-sm" onclick="deleteEntry(\'registrations\',\'' + escH(r.id||'') + '\',' + idx + ')">✕</button>';
     return '<tr'+(isSponsorTeam?' style="background:rgba(232,244,234,0.35);"':'')+'>'+
       '<td><strong>'+escH(displayName)+'</strong>'+srcBadge+'</td>'+
       '<td style="font-size:12px;color:var(--tl);">'+escH(teamName||'—')+'</td>'+
@@ -2853,6 +2853,36 @@ async function resendConfirmation(id, btn) {
     btn.textContent = orig;
     btn.disabled = false;
     toast('Email failed: ' + err.message, 'error');
+  }
+}
+
+async function sendUpsellEmail(id, btn) {
+  if (!id) { toast('No registration ID'); return; }
+  if (!_jwt) { toast('Not authenticated'); return; }
+  var orig = btn.textContent;
+  btn.textContent = '…';
+  btn.disabled = true;
+  try {
+    var res = await fetch(NETLIFY_BASE + '/.netlify/functions/send-upsell-email', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + _jwt, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: id }),
+    });
+    var data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+    if (data.message) {
+      btn.textContent = '✅';
+      toast(data.message);
+    } else {
+      btn.textContent = '✅';
+      var offered = (data.addonsOffered || []).join(', ');
+      toast('Upsell email sent to ' + (data.sentTo || 'registrant') + (offered ? ' · Offered: ' + offered : ''));
+    }
+    setTimeout(loadAllData, 800);
+  } catch (err) {
+    btn.textContent = orig;
+    btn.disabled = false;
+    toast('Upsell email failed: ' + err.message, 'error');
   }
 }
 
