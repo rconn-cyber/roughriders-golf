@@ -1439,6 +1439,7 @@ function changePlayerCount(delta) {
   var mitn = document.getElementById('multi-indiv-team-name-row');
   if (mitn) mitn.style.display = playerCount >= 2 ? '' : 'none';
   renderAdditionalPlayers();
+  clampAddonQtysToPlayerCount();
   updateAddonPrices();
   updateRegTotal();
   updatePayButton();
@@ -1542,6 +1543,21 @@ var ADDON_BASE_PRICES = {
 // Track per-addon quantities (1-4)
 var addonQty = {};
 var ADDON_MAX_QTY = 4;
+
+function effectivePlayerCount() {
+  return regType === 'team' ? 4 : playerCount;
+}
+
+function clampAddonQtysToPlayerCount() {
+  var max = effectivePlayerCount();
+  ADDON_QTY_NAMES.forEach(function(name) {
+    if (addonQty[name] && addonQty[name] > max) {
+      addonQty[name] = max;
+      if (addons[name] !== undefined) addons[name] = addonEffectivePrice(name);
+      updateAddonQtyDisplay(name);
+    }
+  });
+}
 var ADDON_QTY_NAMES = ['Mulligan Pack','Closest to Pin','Longest Drive','Super Ticket'];
 
 function addonSlug(name) {
@@ -1597,7 +1613,7 @@ function changeAddonQty(name, delta, event) {
   var slug = addonSlug(name);
   if (name === 'Super Ticket') {
     var current = addonQty[name] || 1;
-    var next = Math.min(ADDON_MAX_QTY, Math.max(1, current + delta));
+    var next = Math.min(effectivePlayerCount(), Math.max(1, current + delta));
     addonQty[name] = next;
     var superEl = document.querySelector('.addon-super');
     if (superEl && superEl.classList.contains('checked')) {
@@ -1610,7 +1626,7 @@ function changeAddonQty(name, delta, event) {
   var el = document.getElementById('addon-item-' + slug);
   if (!el || !el.classList.contains('checked')) return;
   var current = addonQty[name] || 1;
-  var next = Math.min(ADDON_MAX_QTY, Math.max(1, current + delta));
+  var next = Math.min(effectivePlayerCount(), Math.max(1, current + delta));
   addonQty[name] = next;
   addons[name] = addonEffectivePrice(name);
   updateAddonQtyDisplay(name);
