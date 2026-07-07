@@ -1623,15 +1623,14 @@ function updateAddonQtyDisplay(name) {
   var base = ADDON_BASE_PRICES[name] || 0;
   var total = base * qty;
 
+  var playerLabel = qty === 1 ? 'for 1 player' : 'for ' + qty + ' players';
   if (name === 'Super Ticket') {
     var qtyEl = document.getElementById('super-ticket-qty-display');
     var priceEl = document.getElementById('super-ticket-price');
     var descEl = document.getElementById('super-ticket-desc');
     if (qtyEl) qtyEl.textContent = qty;
     if (priceEl) priceEl.textContent = '$' + total;
-    if (descEl) descEl.textContent = qty > 1
-      ? 'Includes everything · $50 × ' + qty + ' players'
-      : 'Includes: Mulligan pack · Closest to pin · Longest drive · $50 per player';
+    if (descEl) descEl.textContent = 'Includes: Mulligan pack · Closest to pin · Longest drive · ' + playerLabel;
     return;
   }
   var qtyEl  = document.getElementById('addon-qty-' + slug);
@@ -1641,7 +1640,7 @@ function updateAddonQtyDisplay(name) {
   if (priceEl) priceEl.textContent = '$' + total;
   if (descEl) {
     var baseDesc = name === 'Mulligan Pack' ? '1 mulligan per player' : 'contest entry per player';
-    descEl.textContent = qty > 1 ? '$20 × ' + qty + ' players' : '$20 each · ' + baseDesc;
+    descEl.textContent = '$20 each · ' + baseDesc + ' · ' + playerLabel;
   }
 }
 
@@ -1724,7 +1723,12 @@ function updateRegTotal() {
   if (summary) {
     var lines = [];
     if (playerCount > 0) lines.push({ name: regType === 'team' ? 'Golf Registration — Team of 4' : 'Golf Registration — ' + playerCount + ' Player' + (playerCount>1?'s':''), price: regSubtotal });
-    Object.entries(addons).forEach(function(e){ lines.push({ name: e[0], price: e[1] }); });
+    Object.entries(addons).forEach(function(e){
+      var n = e[0], p = e[1];
+      var qty = addonQty[n] || 1;
+      var label = (qty > 1) ? n + ' \u00d7 ' + qty + ' players' : n;
+      lines.push({ name: label, price: p });
+    });
     if (lines.length) {
       var html = '<div style="font-weight:700;color:#0f2318;margin-bottom:8px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;">Order Summary</div>';
       lines.forEach(function(l){
