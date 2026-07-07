@@ -85,7 +85,7 @@ exports.handler = async (event) => {
   const available   = ADDONS.filter(a => !alreadyHave.has(a.name.toLowerCase()));
 
   if (available.length === 0) {
-    return { statusCode: 200, body: JSON.stringify({ success: true, message: 'Golfer already has all add-ons — no upsell sent' }) };
+    return { statusCode: 200, body: JSON.stringify({ success: true, message: 'Golfer already has all round extras — no upsell sent' }) };
   }
 
   const SITE_URL = process.env.URL || 'https://rr-golf.netlify.app';
@@ -151,14 +151,14 @@ exports.handler = async (event) => {
       </p>
       ${alreadyNote}
 
-      <h3 style="font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#0f2318;margin:0 0 14px;">Available Add-Ons</h3>
+      <h3 style="font-size:11px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#0f2318;margin:0 0 14px;">Available Round Extras</h3>
       <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
         ${addonCards}
       </table>
 
       <div style="background:#f8f9f5;border-radius:8px;padding:16px 20px;margin-bottom:24px;border-left:4px solid #f5d840;">
         <p style="font-size:13px;color:#555;margin:0;">
-          ⏰ <strong>Add-ons close September 7, 2026</strong> — one week before the tournament.
+          ⏰ <strong>Round extras close September 7, 2026</strong> — one week before the tournament.
           All payments are processed securely via Stripe.
         </p>
       </div>
