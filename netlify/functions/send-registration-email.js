@@ -66,9 +66,6 @@ exports.handler = async (event) => {
 
   const fmt = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 });
 
-
-  const fmt = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2 });
-
   // Build golfer rows — skip email/phone cells if blank (don't show "undefined")
   const golferRows = golfers.map((g, i) => {
     const name    = [g.firstName, g.lastName].filter(Boolean).join(' ') || '—';
