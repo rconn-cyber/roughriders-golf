@@ -2,6 +2,7 @@
 // GET  — public
 //   ?key=sponsor-config  → returns sponsor config (levels, benefits, alacarte)
 //   ?key=event-content   → returns { html: "..." } for the home page highlights block
+//   ?key=team-capacity   → COMPUTED LIVE from registrations + reserved-teams blobs
 // POST — requires x-admin-key header
 //   body must include { _key: "sponsor-config"|"event-content", ...data }
 
@@ -16,6 +17,8 @@ const DEFAULT_VALS = {
   'event-content':  JSON.stringify({ html: '' }),
   'team-capacity':  JSON.stringify({ totalTeams: 18, confirmedTeams: 0, reservedTeams: 0, usedSlots: 0, openSlots: 18, individuals: 0 }),
 };
+
+const MAX_TEAMS = 18;
 
 const CORS = {
   'Access-Control-Allow-Origin':  '*',
@@ -67,6 +70,42 @@ async function blobSet(key, value) {
   if (!upR.ok) throw new Error(`Blob upload failed (${upR.status})`);
 }
 
+// Mirror the exact logic from admin.html getConfirmedTeamCount / getIndividualCount
+function computeTeamCapacity(regs, reserved) {
+  let confirmedTeams    = 0;
+  let individualPlayers = 0;
+
+  for (const r of regs) {
+    if (r.status === 'cancelled') continue;
+    const p = r.playerCount || (r.golfers && r.golfers.length) || 1;
+    const t = r.registrationType || r.type || '';
+
+    if (p >= 4 || t === 'team' || t === 'comped-team' || t === 'sponsor-team') {
+      // sponsor-team entries may represent multiple teams (e.g. Gold = 2 teams)
+      confirmedTeams += (t === 'sponsor-team' ? (Math.ceil(p / 4) || 1) : 1);
+    } else {
+      individualPlayers += p;
+    }
+  }
+
+  const reservedCount = reserved.filter(r => r.status !== 'cancelled').length;
+  const indivSlots    = Math.floor(individualPlayers / 4);
+  const indivPartial  = individualPlayers % 4;
+  const used          = confirmedTeams + reservedCount + indivSlots;
+  const open          = Math.max(0, MAX_TEAMS - used);
+
+  return {
+    totalTeams:     MAX_TEAMS,
+    confirmedTeams,
+    reservedTeams:  reservedCount,
+    usedSlots:      used,
+    openSlots:      open,
+    individuals:    individualPlayers,
+    indivSlots,
+    indivPartial,
+  };
+}
+
 exports.handler = async function(event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
 
@@ -76,7 +115,23 @@ exports.handler = async function(event) {
     const key = qs.key || 'sponsor-config';
     const blobKey = BLOB_KEYS[key];
     if (!blobKey) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'Unknown key' }) };
+
     try {
+      // team-capacity is always computed live from registrations + reserved-teams
+      if (key === 'team-capacity') {
+        const [regsRaw, reservedRaw] = await Promise.all([
+          blobGet('golf-admin/registrations'),
+          blobGet('golf-admin/reserved-teams'),
+        ]);
+        const regs     = regsRaw     ? JSON.parse(regsRaw)     : [];
+        const reserved = reservedRaw ? JSON.parse(reservedRaw) : [];
+        const capacity = computeTeamCapacity(
+          Array.isArray(regs)     ? regs     : (regs.items     || []),
+          Array.isArray(reserved) ? reserved : (reserved.items || [])
+        );
+        return { statusCode: 200, headers: CORS, body: JSON.stringify(capacity) };
+      }
+
       const raw = await blobGet(blobKey);
       return {
         statusCode: 200,
