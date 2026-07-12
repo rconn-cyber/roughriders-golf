@@ -56,6 +56,27 @@ function supa() {
 }
 
 exports.handler = async (event) => {
+  // Diagnostic: GET reports what this function sees (no secrets revealed)
+  if (event.httpMethod === 'GET') {
+    const url = process.env.SUPABASE_URL || '(not set)';
+    const key = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+    let tableCheck = 'not tested';
+    if (url !== '(not set)' && key) {
+      try {
+        const r = await fetch(url + '/rest/v1/golf_registrations?select=id&limit=1', {
+          headers: { 'apikey': key, 'Authorization': 'Bearer ' + key },
+        });
+        tableCheck = r.ok ? 'golf_registrations reachable' : `status ${r.status}: ${(await r.text()).slice(0, 200)}`;
+      } catch (e) { tableCheck = 'fetch error: ' + e.message; }
+    }
+    return { statusCode: 200, body: JSON.stringify({
+      supabaseUrl: url,
+      serviceKeySet: !!key,
+      serviceKeyPrefix: key ? key.slice(0, 12) + '…' : null,
+      tableCheck,
+    }, null, 2) };
+  }
+
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
 
   const adminKey = (event.headers || {})['x-admin-key'] || '';
