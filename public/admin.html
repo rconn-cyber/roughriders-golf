@@ -3776,9 +3776,86 @@ async function syncAllSponsorTeams() {
   if (!active.length) { toast('No active sponsors to sync'); return; }
   toast('Syncing sponsor teams…');
   try {
+    var authHdr = { 'Authorization': 'Bearer ' + _jwt };
+    // Fetch registrations ONCE
+    var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', { headers: authHdr });
+    var allRegs = res.ok ? await res.json() : [];
+    if (!Array.isArray(allRegs)) allRegs = allRegs.items || [];
+
+    // Update all sponsor-team records in memory
     for (var i = 0; i < active.length; i++) {
-      await syncSponsorTeamReg(active[i]);
+      var sponsor = active[i];
+      var includedPlayers = 0;
+      if (sponsor.benefits && sponsor.benefits.length) {
+        sponsor.benefits.forEach(function(bt) {
+          var bl = (bt || '').toLowerCase();
+          var mTeams   = bl.match(/(\d+)\s*teams?/);
+          var mGolfers = bl.match(/(\d+)\s*(?:golfers?|players?)/);
+          if (mTeams)        includedPlayers = Math.max(includedPlayers, parseInt(mTeams[1]) * 4);
+          else if (mGolfers) includedPlayers = Math.max(includedPlayers, parseInt(mGolfers[1]));
+        });
+      } else {
+        var sps = sponsor.sponsorships || (sponsor.package ? [{name: sponsor.package}] : (sponsor.tier ? [{name: sponsor.tier}] : []));
+        includedPlayers = getIncludedPlayers(sps);
+      }
+      var companyName = sponsor.company || ((sponsor.firstName||'')+' '+(sponsor.lastName||'')).trim() || 'Sponsor';
+      var allSps = sponsor.sponsorships || (sponsor.package ? [{name: sponsor.package}] : (sponsor.tier ? [{name: sponsor.tier}] : []));
+      var pkgText = allSps.map(function(s){return s.name||s;}).join(', ');
+      var sponsorId = sponsor.id || sponsor.createdAt || sponsor.date;
+
+      // Remove extra duplicates
+      var existing = allRegs.filter(function(r){ return r && r.type === 'sponsor-team' && r.sponsorId === sponsorId; });
+      if (existing.length > 1) {
+        var toRemove = existing.slice(1).map(function(r){ return r.id; });
+        allRegs = allRegs.filter(function(r){ return !r || toRemove.indexOf(r.id) === -1; });
+        existing = [existing[0]];
+      }
+
+      if (includedPlayers === 0 || sponsor.status === 'cancelled') {
+        allRegs = allRegs.filter(function(r){ return !(r && r.type === 'sponsor-team' && r.sponsorId === sponsorId); });
+        continue;
+      }
+
+      var record = {
+        id:          (existing[0] && existing[0].id) || ('sp-team-' + (sponsorId||Date.now())),
+        sponsorId:   sponsorId,
+        type:        'sponsor-team',
+        source:      'sponsor',
+        firstName:   companyName,
+        lastName:    '',
+        email:       sponsor.email || '',
+        teamName:    pkgText,
+        playerCount: includedPlayers,
+        golfers:     (sponsor.golfers || []),
+        total:       sponsor.total || 0,
+        status:      sponsor.status || 'paid',
+        notes:       'Auto-linked from sponsor record: ' + companyName,
+        date:        sponsor.date || sponsor.createdAt || new Date().toISOString(),
+        createdAt:   sponsor.createdAt || sponsor.date || new Date().toISOString(),
+        updatedAt:   new Date().toISOString(),
+      };
+
+      if (existing.length > 0) {
+        for (var j = 0; j < allRegs.length; j++) {
+          if (allRegs[j] && allRegs[j].type === 'sponsor-team' && allRegs[j].sponsorId === sponsorId) {
+            allRegs[j] = Object.assign({}, allRegs[j], record);
+            break;
+          }
+        }
+      } else {
+        allRegs.push(record);
+      }
+      console.log('[syncAllSponsorTeams] Updated', companyName, '→', Math.ceil(includedPlayers/4), 'team(s),', includedPlayers, 'players');
     }
+
+    // Write ONCE
+    var writeRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', {
+      method: 'PUT',
+      headers: Object.assign({'Content-Type':'application/json'}, authHdr),
+      body: JSON.stringify(allRegs),
+    });
+    if (!writeRes.ok) throw new Error('Write failed: ' + writeRes.status);
+
     await loadOrders();
     await updateCapacityOnRegPage();
     toast('Sponsor teams synced ✓');
