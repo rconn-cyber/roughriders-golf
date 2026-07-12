@@ -13,7 +13,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 // set(key, value) -> void (throws on failure).
 function getStore() {
   const base = process.env.SUPABASE_URL + '/rest/v1';
-  const key  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key  = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   const headers = { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' };
   const TABLES = { registrations: 'golf_registrations', sponsors: 'golf_sponsors' };
 
@@ -51,7 +51,7 @@ function getStore() {
 }
 
 async function saveSponsorRecord(sponsorData) {
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  if (!process.env.SUPABASE_URL || !(process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)) {
     console.log('WARN: Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY — sponsor not saved');
     return;
   }
