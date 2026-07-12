@@ -44,17 +44,19 @@ function getBlobStore() {
     },
     async set(key, value) {
       const body = typeof value === 'string' ? value : JSON.stringify(value);
-      // Get presigned upload URL
+      // Get presigned upload URL — send body length so Netlify can size the presign correctly
       const metaR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/' + key)}`, {
         method: 'PUT',
-        headers: { ...headers, 'Content-Length': Buffer.byteLength(body).toString() },
+        headers: { ...headers, 'content-length': Buffer.byteLength(body).toString() },
+        body,
       });
       if (!metaR.ok) throw new Error('Blob set presign failed: ' + metaR.status + ' ' + await metaR.text());
       const meta = await metaR.json();
-      if (!meta.url) throw new Error('No presigned URL returned');
-      // Upload to presigned URL
-      const uploadR = await fetch(meta.url, { method: 'PUT', body, headers: { 'Content-Type': 'application/json' } });
-      if (!uploadR.ok) throw new Error('Blob upload failed: ' + uploadR.status);
+      // If Netlify returned a presigned S3 URL, upload there; otherwise the data was already stored
+      if (meta.url) {
+        const uploadR = await fetch(meta.url, { method: 'PUT', body, headers: { 'Content-Type': 'application/json' } });
+        if (!uploadR.ok) throw new Error('Blob upload failed: ' + uploadR.status);
+      }
     },
   };
 }
