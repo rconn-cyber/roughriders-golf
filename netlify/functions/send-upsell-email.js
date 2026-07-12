@@ -11,33 +11,47 @@ const ADDONS = [
   { name: 'Hole Sponsor',   price: 250, icon: '⛳', desc: 'Your name/company on a tee box sign' },
 ];
 
-function getBlobStore() {
-  const siteID  = process.env.NETLIFY_SITE_ID;
-  const token   = process.env.NETLIFY_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
-  const apiBase = `https://api.netlify.com/api/v1/sites/${siteID}/blobs`;
-  const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+// Supabase-backed store (migrated from Netlify Blobs).
+// 'registrations' and 'sponsors' live in their own tables (golf_registrations,
+// golf_sponsors, one row per record). Everything else (settings, sponsor-config,
+// event-content, reserved-teams, logo_*) lives in the golf_config KV table.
+// Interface is identical to the old blob store: get(key) -> JSON string | null,
+// set(key, value) -> void (throws on failure).
+function getStore() {
+  const base = process.env.SUPABASE_URL + '/rest/v1';
+  const key  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const headers = { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' };
+  const TABLES = { registrations: 'golf_registrations', sponsors: 'golf_sponsors' };
+
   return {
-    async get(key) {
-      const metaR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/' + key)}`, { headers });
-      if (metaR.status === 404) return null;
-      if (!metaR.ok) return null;
-      const meta = await metaR.json();
-      if (!meta.url) return null;
-      const dataR = await fetch(meta.url);
-      if (!dataR.ok) return null;
-      return dataR.text();
+    async get(k) {
+      if (TABLES[k]) {
+        const r = await fetch(`${base}/${TABLES[k]}?select=data&order=created_at.asc,id.asc`, { headers });
+        if (!r.ok) { console.error('Supabase get failed:', k, r.status, await r.text()); return null; }
+        const rows = await r.json();
+        return JSON.stringify(rows.map(x => x.data));
+      }
+      const r = await fetch(`${base}/golf_config?key=eq.${encodeURIComponent(k)}&select=value`, { headers });
+      if (!r.ok) { console.error('Supabase config get failed:', k, r.status); return null; }
+      const rows = await r.json();
+      return rows.length ? JSON.stringify(rows[0].value) : null;
     },
-    async set(key, value) {
-      const body = typeof value === 'string' ? value : JSON.stringify(value);
-      const metaR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/' + key)}`, {
-        method: 'PUT',
-        headers: { ...headers, 'Content-Length': Buffer.byteLength(body).toString() },
+    async set(k, value) {
+      const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+      if (TABLES[k]) {
+        const r = await fetch(`${base}/rpc/golf_replace_all`, {
+          method: 'POST', headers,
+          body: JSON.stringify({ p_table: TABLES[k], p_records: parsed }),
+        });
+        if (!r.ok) throw new Error(`Supabase replace ${k} failed: ${r.status} ${await r.text()}`);
+        return;
+      }
+      const r = await fetch(`${base}/golf_config?on_conflict=key`, {
+        method: 'POST',
+        headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: k, value: parsed, updated_at: new Date().toISOString() }),
       });
-      if (!metaR.ok) throw new Error('Blob set presign failed: ' + metaR.status);
-      const meta = await metaR.json();
-      if (!meta.url) throw new Error('No presigned URL returned');
-      const uploadR = await fetch(meta.url, { method: 'PUT', body, headers: { 'Content-Type': 'application/json' } });
-      if (!uploadR.ok) throw new Error('Blob upload failed: ' + uploadR.status);
+      if (!r.ok) throw new Error(`Supabase config set ${k} failed: ${r.status} ${await r.text()}`);
     },
   };
 }
@@ -65,7 +79,7 @@ exports.handler = async (event) => {
   // Load registration
   let reg;
   try {
-    const store = getBlobStore();
+    const store = getStore();
     const raw   = await store.get('registrations');
     const arr   = raw ? JSON.parse(raw) : [];
     reg = arr.find(r => r.id === id);
@@ -199,7 +213,7 @@ exports.handler = async (event) => {
 
     // Mark upsellEmailSent on the record
     try {
-      const store = getBlobStore();
+      const store = getStore();
       const raw   = await store.get('registrations');
       const arr   = raw ? JSON.parse(raw) : [];
       const idx   = arr.findIndex(r => r.id === id);
