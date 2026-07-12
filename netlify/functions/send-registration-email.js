@@ -4,21 +4,47 @@
 //   2. Notification to all admin recipients (env var + blob settings)
 // Uses Resend — RESEND_API_KEY must be set in Netlify env vars
 
-function getBlobStore() {
-  const siteID  = process.env.NETLIFY_SITE_ID;
-  const token   = process.env.NETLIFY_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
-  const apiBase = `https://api.netlify.com/api/v1/sites/${siteID}/blobs`;
-  const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+// Supabase-backed store (migrated from Netlify Blobs).
+// 'registrations' and 'sponsors' live in their own tables (golf_registrations,
+// golf_sponsors, one row per record). Everything else (settings, sponsor-config,
+// event-content, reserved-teams, logo_*) lives in the golf_config KV table.
+// Interface is identical to the old blob store: get(key) -> JSON string | null,
+// set(key, value) -> void (throws on failure).
+function getStore() {
+  const base = process.env.SUPABASE_URL + '/rest/v1';
+  const key  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const headers = { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' };
+  const TABLES = { registrations: 'golf_registrations', sponsors: 'golf_sponsors' };
+
   return {
-    async get(key) {
-      const metaR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/' + key)}`, { headers });
-      if (metaR.status === 404) return null;
-      if (!metaR.ok) return null;
-      const meta = await metaR.json();
-      if (!meta.url) return null;
-      const dataR = await fetch(meta.url);
-      if (!dataR.ok) return null;
-      return dataR.text();
+    async get(k) {
+      if (TABLES[k]) {
+        const r = await fetch(`${base}/${TABLES[k]}?select=data&order=created_at.asc,id.asc`, { headers });
+        if (!r.ok) { console.error('Supabase get failed:', k, r.status, await r.text()); return null; }
+        const rows = await r.json();
+        return JSON.stringify(rows.map(x => x.data));
+      }
+      const r = await fetch(`${base}/golf_config?key=eq.${encodeURIComponent(k)}&select=value`, { headers });
+      if (!r.ok) { console.error('Supabase config get failed:', k, r.status); return null; }
+      const rows = await r.json();
+      return rows.length ? JSON.stringify(rows[0].value) : null;
+    },
+    async set(k, value) {
+      const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+      if (TABLES[k]) {
+        const r = await fetch(`${base}/rpc/golf_replace_all`, {
+          method: 'POST', headers,
+          body: JSON.stringify({ p_table: TABLES[k], p_records: parsed }),
+        });
+        if (!r.ok) throw new Error(`Supabase replace ${k} failed: ${r.status} ${await r.text()}`);
+        return;
+      }
+      const r = await fetch(`${base}/golf_config?on_conflict=key`, {
+        method: 'POST',
+        headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: k, value: parsed, updated_at: new Date().toISOString() }),
+      });
+      if (!r.ok) throw new Error(`Supabase config set ${k} failed: ${r.status} ${await r.text()}`);
     },
   };
 }
@@ -27,7 +53,7 @@ async function getAdminEmails() {
   const envEmails = (process.env.ADMIN_EMAILS || 'r.conn@tamparoughriders.org')
     .split(',').map(s => s.trim()).filter(Boolean);
   try {
-    const store  = getBlobStore();
+    const store  = getStore();
     const raw    = await store.get('settings');
     const settings = raw ? JSON.parse(raw) : {};
     const blobEmails = (settings.adminEmails || []).filter(Boolean);
