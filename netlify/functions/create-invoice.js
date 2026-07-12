@@ -1,89 +1,89 @@
 // netlify/functions/create-invoice.js
 // Creates a Stripe Customer + Invoice with all sponsorship line items.
 // Stripe emails the invoice directly to the sponsor with a Pay Now link.
-// Also saves the sponsor to admin Blobs with status 'invoice' for check tracking.
+// Also saves the sponsor to Supabase with status 'invoice' for check tracking.
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
+// Supabase-backed store (migrated from Netlify Blobs).
+// 'registrations' and 'sponsors' live in their own tables (golf_registrations,
+// golf_sponsors, one row per record). Everything else (settings, sponsor-config,
+// event-content, reserved-teams, logo_*) lives in the golf_config KV table.
+// Interface is identical to the old blob store: get(key) -> JSON string | null,
+// set(key, value) -> void (throws on failure).
+function getStore() {
+  const base = process.env.SUPABASE_URL + '/rest/v1';
+  const key  = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const headers = { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' };
+  const TABLES = { registrations: 'golf_registrations', sponsors: 'golf_sponsors' };
+
+  return {
+    async get(k) {
+      if (TABLES[k]) {
+        const r = await fetch(`${base}/${TABLES[k]}?select=data&order=created_at.asc,id.asc`, { headers });
+        if (!r.ok) { console.error('Supabase get failed:', k, r.status, await r.text()); return null; }
+        const rows = await r.json();
+        return JSON.stringify(rows.map(x => x.data));
+      }
+      const r = await fetch(`${base}/golf_config?key=eq.${encodeURIComponent(k)}&select=value`, { headers });
+      if (!r.ok) { console.error('Supabase config get failed:', k, r.status); return null; }
+      const rows = await r.json();
+      return rows.length ? JSON.stringify(rows[0].value) : null;
+    },
+    async set(k, value) {
+      const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+      if (TABLES[k]) {
+        const r = await fetch(`${base}/rpc/golf_replace_all`, {
+          method: 'POST', headers,
+          body: JSON.stringify({ p_table: TABLES[k], p_records: parsed }),
+        });
+        if (!r.ok) throw new Error(`Supabase replace ${k} failed: ${r.status} ${await r.text()}`);
+        return;
+      }
+      const r = await fetch(`${base}/golf_config?on_conflict=key`, {
+        method: 'POST',
+        headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: k, value: parsed, updated_at: new Date().toISOString() }),
+      });
+      if (!r.ok) throw new Error(`Supabase config set ${k} failed: ${r.status} ${await r.text()}`);
+    },
+  };
+}
+
 async function saveSponsorRecord(sponsorData) {
-  const siteID = process.env.NETLIFY_SITE_ID;
-  const token  = process.env.NETLIFY_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
-  if (!siteID || !token) {
-    console.log('WARN: Missing NETLIFY_SITE_ID or NETLIFY_TOKEN — sponsor not saved');
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.log('WARN: Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY — sponsor not saved');
     return;
   }
+  const store = getStore();
 
-  const apiBase = `https://api.netlify.com/api/v1/sites/${siteID}/blobs`;
-  const authHeaders = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
-
-  // Strip logoData from the main record to keep blob small — save logo separately
+  // Strip logoData from the main record to keep it small — save logo separately
   const logoData = sponsorData.logoData;
   const recordWithoutLogo = Object.assign({}, sponsorData, { logoData: logoData ? '[stored]' : null });
 
-  // Get existing sponsors
-  let sponsors = [];
-  try {
-    const metaR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/sponsors')}`, { headers: authHeaders });
-    if (metaR.ok) {
-      const meta = await metaR.json();
-      if (meta.url) {
-        const dataR = await fetch(meta.url);
-        if (dataR.ok) {
-          sponsors = JSON.parse(await dataR.text());
-          if (!Array.isArray(sponsors)) sponsors = [];
-        }
-      }
-    }
-  } catch(e) { console.log('Could not read sponsors:', e.message); }
-
-  // Save logo separately if provided
+  // Save logo separately if provided (golf_config key: logo_<sponsorId>)
   if (logoData && logoData.length > 10) {
     try {
-      const logoBody = JSON.stringify({ logoData });
-      const logoKey  = encodeURIComponent('golf-admin/logo_' + sponsorData.id);
-      const lputR = await fetch(`${apiBase}/${logoKey}`, {
-        method: 'PUT', headers: { ...authHeaders, 'Content-Length': Buffer.byteLength(logoBody).toString() },
-      });
-      if (lputR.ok) {
-        const lmeta = await lputR.json();
-        if (lmeta.url) {
-          await fetch(lmeta.url, { method: 'PUT', body: logoBody, headers: { 'Content-Type': 'application/json' } });
-          recordWithoutLogo.logoData = logoData; // restore after separate save succeeds
-          console.log('Logo saved separately for', sponsorData.id);
-        }
-      }
-    } catch(e) { console.log('Logo save failed (non-fatal):', e.message); }
+      await store.set('logo_' + sponsorData.id, JSON.stringify({ logoData }));
+      recordWithoutLogo.logoData = logoData; // restore after separate save succeeds
+      console.log('Logo saved separately for', sponsorData.id);
+    } catch (e) {
+      console.log('Logo save failed (non-fatal):', e.message);
+      recordWithoutLogo.logoData = logoData ? '[stored]' : null;
+    }
   }
 
-  // Append new sponsor
-  sponsors.push(recordWithoutLogo);
-
-  // Save sponsors list
-  const body = JSON.stringify(sponsors);
-  console.log('Saving sponsors, count:', sponsors.length, 'body size:', body.length);
-
-  const putR = await fetch(`${apiBase}/${encodeURIComponent('golf-admin/sponsors')}`, {
-    method: 'PUT',
-    headers: { ...authHeaders, 'Content-Length': Buffer.byteLength(body).toString() },
-  });
-
-  if (!putR.ok) {
-    const errText = await putR.text();
-    console.error('Blob PUT presign failed:', putR.status, errText);
-    return;
-  }
-
-  const putMeta = await putR.json();
-  if (!putMeta.url) { console.error('No presigned URL returned'); return; }
-
-  const uploadR = await fetch(putMeta.url, {
-    method: 'PUT', body, headers: { 'Content-Type': 'application/json' },
-  });
-
-  if (!uploadR.ok) {
-    console.error('Blob upload failed:', uploadR.status);
-  } else {
+  // Get existing sponsors, append, save
+  try {
+    const raw = await store.get('sponsors');
+    let sponsors = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(sponsors)) sponsors = [];
+    sponsors.push(recordWithoutLogo);
+    console.log('Saving sponsors, count:', sponsors.length);
+    await store.set('sponsors', JSON.stringify(sponsors));
     console.log('Sponsor saved successfully:', sponsorData.company || sponsorData.email);
+  } catch (e) {
+    console.error('Sponsor save failed:', e.message);
   }
 }
 
