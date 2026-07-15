@@ -1704,7 +1704,7 @@ function renderRegistrations(orders){
   tbody.innerHTML = _loadedRegs.map(function(r, idx){
     var name = (r.firstName||'') + ' ' + (r.lastName||'');
     var players = r.playerCount || (r.golfers && r.golfers.length) || 1;
-    var addons = (r.addons||[]).map(function(a){return a.name||a;}).join(', ') || '—';
+    var addons = (Array.isArray(r.addons) ? r.addons : (typeof r.addons === 'string' && r.addons && r.addons !== 'none' ? r.addons.split(',') : [])).map(function(a){return a.name||a;}).join(', ') || '—';
     var amt = normAmt(r) ? fmtMoney(normAmt(r)) : '—';
     var status = r.status || r.paymentStatus || 'paid';
     var date = r.created ? new Date(r.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.date ? new Date(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'));
@@ -4257,8 +4257,8 @@ async function generateReport() {
 
     // ── Add-on summary ──────────────────────────────────────────────────────
     var addonCount = {};
-    regs.forEach(function(r){ (r.addons||[]).forEach(function(a){ var nm=a.name||a; addonCount[nm]=(addonCount[nm]||0)+1; }); });
-    sponsors.forEach(function(s){ (s.addons||[]).forEach(function(a){ var nm=a.name||a; addonCount[nm]=(addonCount[nm]||0)+1; }); });
+    regs.forEach(function(r){ (Array.isArray(r.addons) ? r.addons : []).forEach(function(a){ var nm=a.name||a; addonCount[nm]=(addonCount[nm]||0)+1; }); });
+    sponsors.forEach(function(s){ (Array.isArray(s.addons) ? s.addons : []).forEach(function(a){ var nm=a.name||a; addonCount[nm]=(addonCount[nm]||0)+1; }); });
     var addonRows = Object.keys(addonCount).map(function(k){
       return '<tr><td style="padding:5px 10px;">'+escH(k)+'</td><td style="padding:5px 10px;text-align:center;">'+addonCount[k]+'</td></tr>';
     }).join('') || '<tr><td colspan="2" style="padding:8px 10px;color:#888;">None recorded</td></tr>';
