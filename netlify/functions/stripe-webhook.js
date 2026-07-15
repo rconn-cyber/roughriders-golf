@@ -122,7 +122,9 @@ exports.handler = async (event) => {
     source:              'stripe',
     regType:             meta.reg_type        || 'individual',
     teamName:            meta.team_name        || '',
-    addons:              meta.addons           || '',
+    addons:              (meta.addons && meta.addons !== 'none')
+                           ? meta.addons.split(',').map(s => ({ name: s.trim(), price: 0 })).filter(a => a.name)
+                           : [],
     sponsorLevels:       meta.sponsor_levels   || '',
     sponsorBenefits:     meta.sponsor_benefits || '',
     confirmationEmailSent: false,
