@@ -1,5 +1,5 @@
 // netlify/functions/stripe-webhook.js
-// Listens for Stripe checkout.session.completed and saves the registration to Blobs.
+// Listens for Stripe checkout.session.completed and saves the registration to Supabase.
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -103,45 +103,51 @@ exports.handler = async (event) => {
   // amount_total is in cents — divide by 100
   const amountDollars = (session.amount_total || 0) / 100;
 
-  // Build registration record
-  const newId  = 'rr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+  // Determine registration type: 'team' if reg_type=team or golfer_count>1, else 'individual'
+  const golferCount = parseInt(meta.golfer_count || '1', 10);
+  const regType     = (meta.reg_type === 'team' || golferCount > 1) ? 'team' : 'individual';
+
+  // Build registration record using canonical schema
+  const now   = new Date().toISOString();
+  const newId = 'rr_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
   const record = {
-    id:                  newId,
-    stripeSessionId:     session.id,
-    stripePaymentIntent: session.payment_intent,
-    name:                primaryContact,
-    firstName,
-    lastName,
-    email:               meta.primary_email   || session.customer_email || '',
-    phone:               meta.primary_phone   || '',
-    players:             parseInt(meta.golfer_count || '1', 10),
+    id:                    newId,
+    date:                  now,
+    type:                  regType,
+    email:                 meta.primary_email  || session.customer_email || '',
+    notes:                 '',
+    phone:                 meta.primary_phone  || '',
+    total:                 amountDollars,
+    addons:                Array.isArray(meta.addons)
+                             ? meta.addons
+                             : (meta.addons && meta.addons !== 'none')
+                               ? meta.addons.split(',').map(s => s.trim()).filter(Boolean)
+                               : [],
+    source:                'stripe',
+    status:                'paid',
     golfers,
-    amount:              amountDollars,
-    status:              'paid',
-    paymentMethod:       'card',
-    source:              'stripe',
-    regType:             meta.reg_type        || 'individual',
-    teamName:            meta.team_name        || '',
-    addons:              (meta.addons && meta.addons !== 'none')
-                           ? meta.addons.split(',').map(s => ({ name: s.trim(), price: 0 })).filter(a => a.name)
-                           : [],
-    sponsorLevels:       meta.sponsor_levels   || '',
-    sponsorBenefits:     meta.sponsor_benefits || '',
+    lastName,
+    teamName:              meta.team_name       || '',
+    createdAt:             now,
+    firstName,
+    updatedAt:             now,
+    playerCount:           golferCount,
+    paymentMethod:         'card',
+    stripeSessionId:       session.id,
+    stripePaymentIntent:   session.payment_intent,
     confirmationEmailSent: false,
-    createdAt:           new Date().toISOString(),
-    updatedAt:           new Date().toISOString(),
   };
 
-  // Save to Blobs
+  // Save to Supabase
   try {
     const store = getStore();
     const raw   = await store.get('registrations');
     const arr   = raw ? JSON.parse(raw) : [];
     arr.push(record);
     await store.set('registrations', JSON.stringify(arr));
-    console.log('Registration saved:', record.id, record.name, record.amount);
+    console.log('Registration saved:', record.id, record.firstName, record.lastName, record.total);
   } catch (err) {
-    console.error('Failed to save registration to Blobs:', err);
+    console.error('Failed to save registration:', err);
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 
