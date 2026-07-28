@@ -729,7 +729,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
 
 <nav class="steps-nav" id="steps-nav">
   <button class="step-tab active" data-page="0" onclick="goPage(0)" style="font-size:16px;font-weight:700;padding:16px 12px;">Register to Golf</button>
-  <button class="step-tab"        data-page="1" onclick="goPage(1)" style="font-size:16px;font-weight:700;padding:16px 12px;">Become a Sponsor</button>
+  <button class="step-tab"        data-page="1" onclick="showSponsorGate()" style="font-size:16px;font-weight:700;padding:16px 12px;">Become a Sponsor</button>
   <button class="step-tab"        data-page="3" onclick="goPage(3)" style="font-size:14px;font-weight:600;padding:16px 12px;">About the Rough Riders</button>
 </nav>
 
@@ -3160,6 +3160,34 @@ document.getElementById('upsell-overlay').addEventListener('click', function(e) 
     </div>
   </div>
 </div>
+
+
+<!-- ══════════ SPONSOR GATE MODAL ══════════ -->
+<div id="sponsor-gate-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;padding:36px 32px;max-width:420px;width:90%;text-align:center;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.22);">
+    <button onclick="document.getElementById('sponsor-gate-modal').style.display='none';" style="position:absolute;top:14px;right:18px;background:none;border:none;font-size:22px;cursor:pointer;color:#999;line-height:1;">&#x2715;</button>
+    <div style="font-size:52px;margin-bottom:14px;">🏢</div>
+    <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:#1a3320;margin-bottom:10px;">Business Sponsorship</h2>
+    <p style="font-size:14px;color:#555;line-height:1.7;margin-bottom:8px;">This section is for <strong>businesses and organizations</strong> that want to sponsor the tournament.</p>
+    <p style="font-size:14px;color:#555;line-height:1.7;margin-bottom:24px;">If you just want to <strong>play golf</strong>, you're already in the right place — use the <em>Register to Golf</em> tab instead.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button onclick="document.getElementById('sponsor-gate-modal').style.display='none';goPage(1);"
+        style="background:#1a3320;color:#c9a84c;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;padding:14px 20px;border:none;border-radius:8px;cursor:pointer;letter-spacing:0.03em;">
+        Yes, I want to become a sponsor →
+      </button>
+      <button onclick="document.getElementById('sponsor-gate-modal').style.display='none';goPage(0);"
+        style="background:#f4f6f4;color:#1a3320;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:12px 20px;border:1.5px solid rgba(0,0,0,0.14);border-radius:8px;cursor:pointer;">
+        ← Back to Golf Registration
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showSponsorGate() {
+  document.getElementById('sponsor-gate-modal').style.display = 'flex';
+}
+</script>
 
 </body>
 </html>
