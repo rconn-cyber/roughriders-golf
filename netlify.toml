@@ -1,3 +1,22 @@
+# Add this [[headers]] block to your existing netlify.toml
+# (or create netlify.toml at the repo root if it doesn't exist yet)
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
+    Content-Security-Policy = """
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net;
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: blob: https://*.supabase.co;
+      connect-src 'self' https://*.supabase.co https://api.stripe.com https://js.stripe.com;
+      frame-src https://js.stripe.com https://hooks.stripe.com;
+      font-src 'self' data:;
+    """
 [build]
   publish = "public"
   functions = "netlify/functions"
