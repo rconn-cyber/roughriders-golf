@@ -56,6 +56,11 @@ function getStore() {
     async set(k, value) {
       const parsed = typeof value === 'string' ? JSON.parse(value) : value;
       if (TABLES[k]) {
+        // Safety guard: never wipe a table with an empty array
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+          console.warn(`Refusing to replace ${k} with empty array — operation skipped.`);
+          return;
+        }
         const r = await fetch(`${base}/rpc/golf_replace_all`, {
           method: 'POST', headers,
           body: JSON.stringify({ p_table: TABLES[k], p_records: parsed }),
