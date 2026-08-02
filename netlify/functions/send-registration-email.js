@@ -79,7 +79,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) };
   }
 
-  const { golfers = [], addons = [], sponsorships = [], total = 0, isResend = false } = body;
+  const { golfers = [], addons = [], sponsorships = [], total = 0, isResend = false, regType, paymentMethod, stripeInvoiceNumber, stripeSessionId } = body;
   const primary = golfers[0];
 
   if (!primary || !primary.email) {
@@ -212,7 +212,9 @@ exports.handler = async (event) => {
         <tr><td style="padding:6px 0;color:#555;width:130px;">Primary Contact</td><td style="padding:6px 0;font-weight:700;color:#0f2318;">${[primary.firstName, primary.lastName].filter(Boolean).join(' ') || '—'}${primary.company ? ` — ${primary.company}` : ''}</td></tr>
         <tr><td style="padding:6px 0;color:#555;">Email</td><td style="padding:6px 0;"><a href="mailto:${primary.email}" style="color:#2d7a4a;">${primary.email}</a></td></tr>
         <tr><td style="padding:6px 0;color:#555;">Phone</td><td style="padding:6px 0;">${primary.phone || '—'}</td></tr>
+        <tr><td style="padding:6px 0;color:#555;">Reg Type</td><td style="padding:6px 0;font-weight:700;text-transform:capitalize;">${body.regType || (golfers.length > 1 ? 'team' : 'individual')}</td></tr>
         <tr><td style="padding:6px 0;color:#555;">Players</td><td style="padding:6px 0;font-weight:700;">${golfers.length}</td></tr>
+        <tr><td style="padding:6px 0;color:#555;">Payment</td><td style="padding:6px 0;text-transform:capitalize;">${body.paymentMethod || '—'}${body.stripeInvoiceNumber ? ` &nbsp;·&nbsp; Invoice #${body.stripeInvoiceNumber}` : ''}${body.stripeSessionId ? `<br><span style="font-size:11px;color:#999;">${body.stripeSessionId}</span>` : ''}</td></tr>
         <tr><td style="padding:6px 0;color:#555;">Total</td><td style="padding:6px 0;font-weight:900;font-size:18px;color:#b8940e;">${fmt(total)}</td></tr>
       </table>
 
