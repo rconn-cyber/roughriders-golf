@@ -643,7 +643,7 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
       <!-- Big registered count -->
       <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:10px;">
         <span id="cap-registered-num" style="font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:#0f2318;line-height:1;">0</span>
-        <span style="font-size:13px;font-weight:600;color:#555;">of 18 team spots taken</span>
+        <span style="font-size:13px;font-weight:600;color:#555;">of <span id="total-team-spots">36</span> team spots taken</span>
         <span id="cap-indiv-inline" style="font-size:11px;color:#7a5c00;font-weight:600;display:none;margin-left:8px;"></span>
       </div>
       <!-- Progress bar -->
@@ -660,7 +660,9 @@ main { max-width: 680px; margin: 0 auto; padding: 0 0 100px; }
         .then(function(r){ return r.ok ? r.json() : null; })
         .then(function(d){
           // Show block with defaults even if blob has no data yet
-          var total = (d && d.totalTeams) ? d.totalTeams : 18;
+          var total = (d && d.totalTeams) ? d.totalTeams : 36;
+          var totalSpan = document.getElementById('total-team-spots');
+          if (totalSpan) totalSpan.textContent = total;
           var confirmed    = d.confirmedTeams || 0;
           var reserved     = d.reservedTeams  || 0;
           var indiv        = d.individuals || 0;
