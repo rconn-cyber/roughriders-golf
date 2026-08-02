@@ -28,3 +28,6 @@
   from = "/"
   to = "/register.html"
   status = 301
+
+[functions.nightly-backup]
+  schedule = "0 6 * * *"
