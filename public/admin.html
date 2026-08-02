@@ -1552,6 +1552,7 @@ async function doSave(){
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
       body: JSON.stringify(Object.assign({
+        _key: 'sponsor-config',
         benefits: STATE.benefits,
         levels: STATE.levels,
         alacarte: STATE.alacarte,
@@ -1695,7 +1696,7 @@ var _loadedRegs = [];
 var _loadedSponsors = [];
 
 function renderRegistrations(orders){
-  _loadedRegs = (orders || []).filter(function(o){ return o && (o.type === 'registration' || o.golfers); });
+  _loadedRegs = (orders || []).filter(function(o){ return o && (o.type === 'registration' || o.type === 'team' || o.type === 'individual' || o.type === 'sponsor-team' || o.type === 'comped-team' || o.golfers); });
   var tbody = document.getElementById('reg-tbody');
   if (!_loadedRegs.length) {
     tbody.innerHTML = '<tr><td colspan="9" class="empty-table"><div class="empty-icon">🏌️</div>No registrations yet</td></tr>';
