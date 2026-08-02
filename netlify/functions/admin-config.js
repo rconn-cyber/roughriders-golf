@@ -15,10 +15,10 @@ const BLOB_KEYS  = {
 const DEFAULT_VALS = {
   'sponsor-config': JSON.stringify({ benefits: [], levels: [], alacarte: [] }),
   'event-content':  JSON.stringify({ html: '' }),
-  'team-capacity':  JSON.stringify({ totalTeams: 18, confirmedTeams: 0, reservedTeams: 0, usedSlots: 0, openSlots: 18, individuals: 0 }),
+  'team-capacity':  JSON.stringify({ totalTeams: 36, confirmedTeams: 0, reservedTeams: 0, usedSlots: 0, openSlots: 36, individuals: 0 }),
 };
 
-const MAX_TEAMS = 18;
+const MAX_TEAMS = 36;
 
 const CORS = {
   'Access-Control-Allow-Origin':  '*',
