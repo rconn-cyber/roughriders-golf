@@ -887,6 +887,7 @@ tr:hover td { background: #f8faf8; }
             <select class="form-input" id="me-reg-type" onchange="updateManualRegType()">
               <option value="team">Team of 4 — $650</option>
               <option value="3player">3 Players — $495</option>
+              <option value="2player">2 Players — $330</option>
               <option value="individual">Individual — $165</option>
               <option value="comped-team">Comped Team (4 players, $0)</option>
               <option value="comped-individual">Comped Individual ($0)</option>
@@ -3044,14 +3045,15 @@ function updateManualPaymentNote() {
 function updateManualRegType() {
   var type = document.getElementById('me-reg-type').value;
   var amtEl = document.getElementById('me-reg-amount');
-  var prices = { 'team': 650, '3player': 495, 'individual': 165, 'comped-team': 0, 'comped-individual': 0 };
+  var prices = { 'team': 650, '3player': 495, '2player': 330, 'individual': 165, 'comped-team': 0, 'comped-individual': 0 };
   if (amtEl && !amtEl.dataset.dirty) amtEl.value = prices[type] !== undefined ? prices[type] : '';
   // Build extra player fields
   var isTeam = (type === 'team' || type === 'comped-team');
   var is3Player = (type === '3player');
+  var is2Player = (type === '2player');
   var extra = document.getElementById('me-extra-players');
   extra.innerHTML = '';
-  var playerCount = isTeam ? 4 : is3Player ? 3 : 1;
+  var playerCount = isTeam ? 4 : is3Player ? 3 : is2Player ? 2 : 1;
   for (var i = 2; i <= playerCount; i++) {
     var div = document.createElement('div');
     div.innerHTML =
@@ -3168,6 +3170,7 @@ async function saveManualRegistration(paymentType, notes) {
   var teamName = (document.getElementById('me-team-name') || {}).value || '';
   var isTeam   = (regType === 'team' || regType === 'comped-team');
   var is3Player = (regType === '3player');
+  var is2Player = (regType === '2player');
   var amount   = parseFloat(document.getElementById('me-reg-amount').value) || 0;
   var fn       = document.getElementById('me-p1-fn').value.trim();
   var ln       = document.getElementById('me-p1-ln').value.trim();
@@ -3193,6 +3196,13 @@ async function saveManualRegistration(paymentType, notes) {
       if (pfn && pln && (pfn.value.trim() || pln.value.trim())) {
         golfers.push({ firstName: pfn.value.trim(), lastName: pln.value.trim() });
       }
+    }
+  }
+  if (is2Player) {
+    var pfn = document.getElementById('me-p2-fn');
+    var pln = document.getElementById('me-p2-ln');
+    if (pfn && pln && (pfn.value.trim() || pln.value.trim())) {
+      golfers.push({ firstName: pfn.value.trim(), lastName: pln.value.trim() });
     }
   }
 
