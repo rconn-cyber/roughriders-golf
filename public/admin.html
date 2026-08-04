@@ -2659,27 +2659,95 @@ function showEditLogoHint(msg, isError) {
 // recalcFn:    'recalcEditRegAmount()' or 'recalcEditSpAmount()'
 // currentAddons: array of {name, price} or strings already selected
 var ROUND_EXTRAS = [
-  {name:'Super Ticket',   price:50,  icon:'⭐'},
-  {name:'Mulligan Pack',  price:20,  icon:''},
-  {name:'Closest to Pin', price:20,  icon:'⛳'},
-  {name:'Longest Drive',  price:20,  icon:''},
-  {name:'Hole Sponsor',   price:250, icon:''}
+  {name:'Super Ticket',   price:50,  icon:'⭐', hasQty:true},
+  {name:'Mulligan Pack',  price:20,  icon:'',   hasQty:true},
+  {name:'Closest to Pin', price:20,  icon:'⛳', hasQty:true},
+  {name:'Longest Drive',  price:20,  icon:'',   hasQty:true},
+  {name:'Hole Sponsor',   price:250, icon:'',   hasQty:false}
 ];
+
+// Track qtys for edit modal addons
+var emAddonQty = {};
 
 function buildAddonPicker(containerId, recalcFn, currentAddons) {
   var el = document.getElementById(containerId);
   if (!el) return;
-  var currentNames = (currentAddons||[]).map(function(a){ return (a.name||a||'').toLowerCase().trim(); });
+  emAddonQty = {};
+  var normalizedAddons = (currentAddons||[]).map(function(a){ return typeof a === 'string' ? {name:a, price:0} : a; });
+
   var html = ROUND_EXTRAS.map(function(lv) {
-    var on = currentNames.some(function(n){ return n === lv.name.toLowerCase().trim(); });
+    // Count how many times this addon appears (qty support)
+    var qty = normalizedAddons.filter(function(a){ return (a.name||'').toLowerCase().trim() === lv.name.toLowerCase().trim(); }).length;
+    if (qty < 1) qty = 0;
+    var on = qty > 0;
+    emAddonQty[lv.name] = qty || 1; // default qty 1 for when toggled on
+
     var icon = lv.icon ? lv.icon + ' ' : '';
-    return '<div class="benefit-toggle' + (on ? ' on' : '') + '"' +
-      ' data-addon="' + escH(lv.name) + '"' +
-      ' data-price="' + lv.price + '"' +
-      ' onclick="this.classList.toggle(\'on\');' + recalcFn + '">' +
-      icon + escH(lv.name) + ' — ' + fmtMoney(lv.price) + '</div>';
+    var slug = lv.name.toLowerCase().replace(/ /g,'-');
+
+    if (lv.hasQty) {
+      return '<div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;">' +
+        '<div class="benefit-toggle' + (on ? ' on' : '') + '"' +
+        ' id="em-addon-toggle-' + slug + '"' +
+        ' data-addon="' + escH(lv.name) + '"' +
+        ' data-price="' + lv.price + '"' +
+        ' data-qty="' + (on ? qty : 1) + '"' +
+        ' onclick="toggleEmAddon(this,\'' + escH(lv.name) + '\',' + lv.price + ',\'' + recalcFn + '\')">' +
+        icon + escH(lv.name) + ' — ' + fmtMoney(lv.price) + '</div>' +
+        (on ? '<div style="display:flex;align-items:center;gap:2px;" id="em-addon-qty-row-' + slug + '">' +
+          '<button type="button" onclick="changeEmAddonQty(event,\'' + escH(lv.name) + '\',' + lv.price + ',-1,\'' + recalcFn + '\')" style="width:22px;height:22px;border:1px solid #ccc;border-radius:4px;background:#f4f4f2;cursor:pointer;font-size:14px;line-height:1;">−</button>' +
+          '<span id="em-addon-qty-' + slug + '" style="min-width:20px;text-align:center;font-size:13px;font-weight:700;">' + qty + '</span>' +
+          '<button type="button" onclick="changeEmAddonQty(event,\'' + escH(lv.name) + '\',' + lv.price + ',1,\'' + recalcFn + '\')" style="width:22px;height:22px;border:1px solid #ccc;border-radius:4px;background:#f4f4f2;cursor:pointer;font-size:14px;line-height:1;">+</button>' +
+        '</div>' : '<div style="display:none;" id="em-addon-qty-row-' + slug + '"></div>') +
+      '</div>';
+    } else {
+      return '<div class="benefit-toggle' + (on ? ' on' : '') + '"' +
+        ' data-addon="' + escH(lv.name) + '"' +
+        ' data-price="' + lv.price + '"' +
+        ' data-qty="1"' +
+        ' onclick="this.classList.toggle(\'on\');this.dataset.qty=this.classList.contains(\'on\')?1:0;' + recalcFn + '">' +
+        icon + escH(lv.name) + ' — ' + fmtMoney(lv.price) + '</div>';
+    }
   }).join('');
   el.innerHTML = html;
+}
+
+function toggleEmAddon(el, name, price, recalcFn) {
+  var slug = name.toLowerCase().replace(/ /g,'-');
+  var qtyRow = document.getElementById('em-addon-qty-row-' + slug);
+  var qtyEl  = document.getElementById('em-addon-qty-' + slug);
+  if (el.classList.contains('on')) {
+    el.classList.remove('on');
+    el.dataset.qty = 0;
+    if (qtyRow) qtyRow.style.display = 'none';
+  } else {
+    el.classList.add('on');
+    var qty = emAddonQty[name] || 1;
+    el.dataset.qty = qty;
+    if (qtyRow) {
+      qtyRow.style.display = 'flex';
+      qtyRow.style.alignItems = 'center';
+      qtyRow.style.gap = '2px';
+      qtyRow.innerHTML =
+        '<button type="button" onclick="changeEmAddonQty(event,\'' + name + '\',' + price + ',-1,\'' + recalcFn + '\')" style="width:22px;height:22px;border:1px solid #ccc;border-radius:4px;background:#f4f4f2;cursor:pointer;font-size:14px;line-height:1;">−</button>' +
+        '<span id="em-addon-qty-' + slug + '" style="min-width:20px;text-align:center;font-size:13px;font-weight:700;">' + qty + '</span>' +
+        '<button type="button" onclick="changeEmAddonQty(event,\'' + name + '\',' + price + ',1,\'' + recalcFn + '\')" style="width:22px;height:22px;border:1px solid #ccc;border-radius:4px;background:#f4f4f2;cursor:pointer;font-size:14px;line-height:1;">+</button>';
+    }
+  }
+  eval(recalcFn);
+}
+
+function changeEmAddonQty(event, name, price, delta, recalcFn) {
+  event.stopPropagation();
+  var slug = name.toLowerCase().replace(/ /g,'-');
+  var toggle = document.getElementById('em-addon-toggle-' + slug);
+  var qtyEl  = document.getElementById('em-addon-qty-' + slug);
+  var current = emAddonQty[name] || 1;
+  var next = Math.max(1, current + delta);
+  emAddonQty[name] = next;
+  if (toggle) toggle.dataset.qty = next;
+  if (qtyEl) qtyEl.textContent = next;
+  eval(recalcFn);
 }
 
 function recalcEditRegAmount() {
@@ -2687,7 +2755,8 @@ function recalcEditRegAmount() {
   var regPrice = base === 4 ? 650 : base * 165;
   var addonsTotal = 0;
   document.querySelectorAll('#em-addons-picker .benefit-toggle.on').forEach(function(t){
-    addonsTotal += parseInt(t.dataset.price)||0;
+    var qty = parseInt(t.dataset.qty) || 1;
+    addonsTotal += (parseInt(t.dataset.price)||0) * qty;
   });
   document.getElementById('em-amount').value = regPrice + addonsTotal;
 }
@@ -2723,7 +2792,10 @@ async function saveEditEntry() {
       var amount = parseFloat(document.getElementById('em-amount').value) || 0;
       var addons = [];
       document.querySelectorAll('#em-addons-picker .benefit-toggle.on').forEach(function(t){
-        addons.push({ name: t.dataset.addon, price: parseInt(t.dataset.price)||0 });
+        var qty = parseInt(t.dataset.qty) || 1;
+        for (var q = 0; q < qty; q++) {
+          addons.push({ name: t.dataset.addon, price: parseInt(t.dataset.price)||0 });
+        }
       });
       var players = parseInt(document.getElementById('em-players').value)||1;
       Object.assign(updated, {
