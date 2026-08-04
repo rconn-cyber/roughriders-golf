@@ -25,11 +25,12 @@ function auth(event) {
 // event-content, reserved-teams, logo_*) lives in the golf_config KV table.
 // Interface is identical to the old blob store: get(key) -> JSON string | null,
 // set(key, value) -> void (throws on failure).
+const TABLES = { registrations: 'golf_registrations', sponsors: 'golf_sponsors' };
+
 function getStore() {
   const base = process.env.SUPABASE_URL + '/rest/v1';
   const key  = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
   const headers = { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' };
-  const TABLES = { registrations: 'golf_registrations', sponsors: 'golf_sponsors' };
 
   return {
     async get(k) {
