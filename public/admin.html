@@ -349,6 +349,7 @@ tr:hover td { background: #f8faf8; }
           </div>
           <div style="display:flex;gap:8px;">
             <button class="btn btn-outline" onclick="syncAllSponsorTeams()" title="Re-sync sponsor team slots into registrations">⟳ Sync Sponsor Teams</button>
+            <button class="btn btn-outline" onclick="exportRegistrationsCSV()" title="Download all registrations as CSV">⬇ Export CSV</button>
             <button class="btn btn-primary" onclick="openManualEntry('registration')">+ Add Entry</button>
             <button class="btn btn-outline" onclick="loadOrders()">↺ Refresh</button>
           </div>
@@ -1656,6 +1657,49 @@ function updateCounts(){
 // ════════════════════════════════
 // REGISTRATIONS + SPONSORS (admin-data)
 // ════════════════════════════════
+function exportRegistrationsCSV() {
+  var regs = (_loadedRegs || []).filter(function(r){ return r && r.type !== 'sponsor'; });
+  var rows = [['Name','Team Name','Email','Phone','Players','Round Extras','Amount','Status','Payment Method','Notes','Date']];
+  regs.forEach(function(r) {
+    var name = [r.firstName, r.lastName].filter(Boolean).join(' ') || '—';
+    var extras = [];
+    if (Array.isArray(r.addons)) {
+      var counts = {};
+      r.addons.forEach(function(a) {
+        var n = (a.name || a || '').trim();
+        if (n) counts[n] = (counts[n] || 0) + 1;
+      });
+      Object.keys(counts).forEach(function(n) {
+        extras.push(counts[n] > 1 ? n + ' x' + counts[n] : n);
+      });
+    }
+    rows.push([
+      name,
+      r.teamName || '',
+      r.email || '',
+      r.phone || '',
+      r.playerCount || r.players || '',
+      extras.join(' | '),
+      r.total || r.amount || '',
+      r.status || '',
+      r.paymentMethod || r.source || '',
+      r.notes || '',
+      r.createdAt ? r.createdAt.slice(0,10) : (r.date ? r.date.slice(0,10) : '')
+    ]);
+  });
+  var csv = rows.map(function(row) {
+    return row.map(function(v) {
+      var s = String(v == null ? '' : v).replace(/"/g, '""');
+      return /[,"\n\r]/.test(s) ? '"' + s + '"' : s;
+    }).join(',');
+  }).join('\r\n');
+  var blob = new Blob([csv], {type:'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'rr-golf-registrations-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
 async function loadOrders(){
   if (!_jwt) return;
   var authHdr = { 'Authorization': 'Bearer ' + _jwt };
