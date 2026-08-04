@@ -126,6 +126,32 @@ exports.handler = async (event) => {
     if (event.httpMethod === 'PATCH') {
       if (!id) return { statusCode: 400, headers: CORS, body: JSON.stringify({ error: 'id required for PATCH' }) };
       const body = JSON.parse(event.body);
+      const sKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const sBase = process.env.SUPABASE_URL + '/rest/v1';
+      const sHdrs = { 'apikey': sKey, 'Authorization': 'Bearer ' + sKey, 'Content-Type': 'application/json' };
+
+      if (TABLES[resource]) {
+        // Fetch the single row by data->>'id'
+        const getRes = await fetch(`${sBase}/${TABLES[resource]}?select=id,data&data->>id=eq.${encodeURIComponent(id)}`, { headers: sHdrs });
+        if (!getRes.ok) throw new Error(`Supabase fetch: ${getRes.status} ${await getRes.text()}`);
+        const rows = await getRes.json();
+        if (!rows.length) return { statusCode: 404, headers: CORS, body: JSON.stringify({ error: 'Record not found' }) };
+        const rowId = rows[0].id;
+        const merged = { ...rows[0].data, ...body, id, updatedAt: new Date().toISOString() };
+        // Sanitize addons
+        if (Array.isArray(merged.addons)) {
+          merged.addons = merged.addons.map(a => typeof a === 'string' ? { name: a, price: 0 } : a);
+        }
+        const updRes = await fetch(`${sBase}/${TABLES[resource]}?id=eq.${rowId}`, {
+          method: 'PATCH',
+          headers: { ...sHdrs, 'Prefer': 'return=representation' },
+          body: JSON.stringify({ data: merged, updated_at: new Date().toISOString() })
+        });
+        if (!updRes.ok) throw new Error(`Supabase update: ${updRes.status} ${await updRes.text()}`);
+        return { statusCode: 200, headers: CORS, body: JSON.stringify(merged) };
+      }
+
+      // Config / non-table resources — read/modify/write
       const raw  = await store.get(resource);
       const data = raw ? JSON.parse(raw) : [];
       const arr  = Array.isArray(data) ? data : (data.items || []);
