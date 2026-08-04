@@ -52,9 +52,18 @@ function getStore() {
           console.warn(`Refusing to replace ${k} with empty array — operation skipped.`);
           return;
         }
+        // Sanitize: ensure addons is always an array of objects
+        const sanitized = parsed.map(r => {
+          if (r.addons && !Array.isArray(r.addons)) {
+            r = { ...r, addons: [] };
+          } else if (Array.isArray(r.addons)) {
+            r = { ...r, addons: r.addons.map(a => typeof a === 'string' ? { name: a, price: 0 } : a) };
+          }
+          return r;
+        });
         const r = await fetch(`${base}/rpc/golf_replace_all`, {
           method: 'POST', headers,
-          body: JSON.stringify({ p_table: TABLES[k], p_records: parsed }),
+          body: JSON.stringify({ p_table: TABLES[k], p_records: sanitized }),
         });
         if (!r.ok) throw new Error(`Supabase replace ${k} failed: ${r.status} ${await r.text()}`);
         return;
