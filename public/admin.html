@@ -2873,7 +2873,11 @@ async function saveEditEntry() {
         headers: Object.assign({'Content-Type':'application/json'}, authHdr),
         body: JSON.stringify(updated),
       });
-      if (!patchRes.ok) throw new Error('HTTP ' + patchRes.status);
+      if (!patchRes.ok) {
+        var errBody = {};
+        try { errBody = await patchRes.json(); } catch(e) {}
+        throw new Error('HTTP ' + patchRes.status + (errBody.error ? ': ' + errBody.error : ''));
+      }
     } else {
       // No id — fall back to fetch→splice→PUT
       var fetchRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource='+resource, { headers: authHdr });
