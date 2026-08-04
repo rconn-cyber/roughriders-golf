@@ -2778,7 +2778,8 @@ function toggleEmAddon(el, name, price, recalcFn) {
         '<button type="button" onclick="changeEmAddonQty(event,\'' + name + '\',' + price + ',1,\'' + recalcFn + '\')" style="width:22px;height:22px;border:1px solid #ccc;border-radius:4px;background:#f4f4f2;cursor:pointer;font-size:14px;line-height:1;">+</button>';
     }
   }
-  eval(recalcFn);
+  if (recalcFn === 'recalcEditRegAmount()') recalcEditRegAmount();
+  else if (recalcFn === 'recalcEditSpAmount()') recalcEditSpAmount();
 }
 
 function changeEmAddonQty(event, name, price, delta, recalcFn) {
@@ -2791,7 +2792,8 @@ function changeEmAddonQty(event, name, price, delta, recalcFn) {
   emAddonQty[name] = next;
   if (toggle) toggle.dataset.qty = next;
   if (qtyEl) qtyEl.textContent = next;
-  eval(recalcFn);
+  if (recalcFn === 'recalcEditRegAmount()') recalcEditRegAmount();
+  else if (recalcFn === 'recalcEditSpAmount()') recalcEditSpAmount();
 }
 
 function recalcEditRegAmount() {
