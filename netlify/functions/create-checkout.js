@@ -16,7 +16,7 @@ exports.handler = async (event) => {
     return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON' }) };
   }
 
-  const { golfers = [], sponsorships = [], teamName = '', regType = 'individual' } = body;
+  const { golfers = [], sponsorships = [], teamName = '', regType = 'individual', logoUrl = '' } = body;
 
   if (sponsorships.length === 0) {
     return {
@@ -119,6 +119,7 @@ exports.handler = async (event) => {
         addons:           addonItems.map(a => a.name).join(', ').slice(0, 200) || 'none',
         sponsor_levels:   sponsorItems.map(s => s.name).join(', ').slice(0, 200) || 'none',
         sponsor_benefits: sponsorItems.flatMap(s => s.benefits || []).join(', ').slice(0, 500) || '',
+        logo_url:         (logoUrl || '').slice(0, 500),
       },
 
       // Payment description shown in Stripe transaction list — rich detail

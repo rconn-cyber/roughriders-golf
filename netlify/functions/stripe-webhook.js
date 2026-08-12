@@ -171,6 +171,7 @@ exports.handler = async (event) => {
         golfers:               [],
         addons:                [],
         hideFromPublic:        false,
+        logoUrl:               meta.logo_url || '',
         stripeSessionId:       session.id,
         stripePaymentIntent:   session.payment_intent,
         createdAt:             now,
