@@ -3992,18 +3992,29 @@ async function syncAllSponsorTeams() {
       console.log('[syncAllSponsorTeams] Updated', companyName, '→', Math.ceil(includedPlayers/4), 'team(s),', includedPlayers, 'players');
     }
 
+    // Safety: strip any records missing an id (would cause Supabase PK error)
+    var badIds = allRegs.filter(function(r){ return !r || !r.id; });
+    if (badIds.length) { console.warn('[syncAllSponsorTeams] Dropping', badIds.length, 'records with no id:', badIds); }
+    allRegs = allRegs.filter(function(r){ return r && r.id; });
+    console.log('[syncAllSponsorTeams] Writing', allRegs.length, 'records');
+
     // Write ONCE
     var writeRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations', {
       method: 'PUT',
       headers: Object.assign({'Content-Type':'application/json'}, authHdr),
       body: JSON.stringify(allRegs),
     });
-    if (!writeRes.ok) throw new Error('Write failed: ' + writeRes.status);
+    if (!writeRes.ok) {
+      var errBody = '';
+      try { var errJson = await writeRes.json(); errBody = errJson.error || JSON.stringify(errJson); } catch(x) { try { errBody = await writeRes.text(); } catch(x2) {} }
+      throw new Error('Write failed: ' + writeRes.status + (errBody ? ' — ' + errBody.slice(0, 200) : ''));
+    }
 
     await loadOrders();
     await updateCapacityOnRegPage();
     toast('Sponsor teams synced ✓');
   } catch(e) {
+    console.error('[syncAllSponsorTeams] Error:', e);
     toast('Sync error: ' + e.message);
   }
 }

@@ -138,17 +138,65 @@ exports.handler = async (event) => {
     confirmationEmailSent: false,
   };
 
+  // Determine if this is a sponsor-only purchase (has sponsor levels, no golfers)
+  const sponsorLevels   = (meta.sponsor_levels || '').trim();
+  const hasSponsorItems = sponsorLevels && sponsorLevels !== 'none';
+  const isSponsorOnly   = hasSponsorItems && golferCount === 0;
+
   // Save to Supabase
   try {
     const store = getStore();
-    const raw   = await store.get('registrations');
-    const arr   = raw ? JSON.parse(raw) : [];
-    arr.push(record);
-    await store.set('registrations', JSON.stringify(arr));
-    console.log('Registration saved:', record.id, record.firstName, record.lastName, record.total);
+
+    if (isSponsorOnly) {
+      // Save as a sponsor record
+      const sponsorships = sponsorLevels.split(',').map(s => ({ name: s.trim(), price: 0 }));
+      const benefits     = (meta.sponsor_benefits || '').split(',').map(s => s.trim()).filter(Boolean);
+      const sponsorRecord = {
+        id:                    newId,
+        date:                  now,
+        type:                  'sponsor',
+        email:                 record.email,
+        company:               record.email ? '' : `${firstName} ${lastName}`.trim(),
+        firstName,
+        lastName,
+        notes:                 `Stripe ${session.payment_intent} — auto-imported`,
+        total:                 amountDollars,
+        amount:                (session.amount_total || 0),
+        source:                'stripe',
+        status:                'paid',
+        paymentMethod:         'card',
+        website:               '',
+        sponsorships,
+        benefits,
+        golfers:               [],
+        addons:                [],
+        hideFromPublic:        false,
+        stripeSessionId:       session.id,
+        stripePaymentIntent:   session.payment_intent,
+        createdAt:             now,
+        updatedAt:             now,
+      };
+      const raw = await store.get('sponsors');
+      const arr = raw ? JSON.parse(raw) : [];
+      arr.push(sponsorRecord);
+      await store.set('sponsors', JSON.stringify(arr));
+      console.log('Sponsor saved:', sponsorRecord.id, sponsorLevels, amountDollars);
+    } else {
+      // Save as a registration record
+      const raw = await store.get('registrations');
+      const arr = raw ? JSON.parse(raw) : [];
+      arr.push(record);
+      await store.set('registrations', JSON.stringify(arr));
+      console.log('Registration saved:', record.id, record.firstName, record.lastName, record.total);
+    }
   } catch (err) {
-    console.error('Failed to save registration:', err);
+    console.error('Failed to save record:', err);
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+  }
+
+  // Skip confirmation email for sponsor-only purchases (no golfer to email)
+  if (isSponsorOnly) {
+    return { statusCode: 200, body: JSON.stringify({ received: true }) };
   }
 
   // Fire confirmation email — pass shape the email function expects
