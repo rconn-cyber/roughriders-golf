@@ -1760,7 +1760,7 @@ function sortRegs(key) {
 }
 
 function updateSortIcons() {
-  ['lastName','firstName','date'].forEach(function(k) {
+   ['lastName','firstName','company','teamName','date'].forEach(function(k) {
     var el = document.getElementById('sort-icon-' + k);
     if (!el) return;
     el.textContent = _regSortKey === k ? (_regSortDir === 1 ? ' ↑' : ' ↓') : '';
@@ -1783,6 +1783,12 @@ function renderRegistrations(orders){
     } else if (_regSortKey === 'firstName') {
       aVal = (a.firstName || '').toLowerCase();
       bVal = (b.firstName || '').toLowerCase();
+       } else if (_regSortKey === 'company') {
+      aVal = (a.company || a.firstName || '').toLowerCase();
+      bVal = (b.company || b.firstName || '').toLowerCase();
+    } else if (_regSortKey === 'teamName') {
+      aVal = (a.teamName || '').toLowerCase();
+      bVal = (b.teamName || '').toLowerCase();
     } else {
       aVal = a.created ? String(a.created) : (a.createdAt || a.date || '');
       bVal = b.created ? String(b.created) : (b.createdAt || b.date || '');
