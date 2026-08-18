@@ -369,7 +369,7 @@ tr:hover td { background: #f8faf8; }
                <thead><tr>
   <th onclick="sortRegs('lastName')"  style="cursor:pointer;user-select:none;">Last Name <span id="sort-icon-lastName"></span></th>
   <th onclick="sortRegs('firstName')" style="cursor:pointer;user-select:none;">First Name <span id="sort-icon-firstName"></span></th>
-  <th>Team Name</th><th>Email</th><th>Players</th><th>Round Extras</th><th>Amount</th>
+  <th>Company</th><th>Team Name</th><th>Email</th><th>Players</th><th>Round Extras</th><th>Amount</th>
   <th onclick="sortRegs('date')" style="cursor:pointer;user-select:none;">Date <span id="sort-icon-date">↓</span></th>
   <th>Status</th><th></th>
 </tr></thead>
@@ -1803,7 +1803,9 @@ function renderRegistrations(orders){
       : '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'registration\',' + idx + ')">✏ Edit</button> <button class="btn btn-outline btn-sm" onclick="resendConfirmation(\'' + escH(r.id||'') + '\',this)" title="Resend confirmation email">✉</button> <button class="btn btn-outline btn-sm" onclick="sendUpsellEmail(\'' + escH(r.id||'') + '\',this)" title="Send add-on upsell email">📩</button> <button class="btn btn-danger btn-sm" onclick="deleteEntry(\'registrations\',\'' + escH(r.id||'') + '\',' + idx + ')">✕</button>';
     return '<tr'+(isSponsorTeam?' style="background:rgba(232,244,234,0.35);"':'')+'>'+
       '<td><strong>'+escH(displayName)+'</strong>'+srcBadge+'</td>'+
-      '<td style="font-size:12px;color:var(--tl);">'+escH(teamName||'—')+'</td>'+
+            + '<td style="font-size:12px;color:var(--tl);">' + escH(r.company||'—') + '</td>'
+      + '<td style="font-size:12px;color:var(--tl);">' + escH(teamName||'—') + '</td>'
+      + '<td>' + escH(r.email||'—') + '</td>'+
       '<td>'+escH(r.email||'—')+'</td>'+
       '<td>'+playersDisplay+'</td>'+
       '<td style="font-size:11px;color:var(--tl)">'+escH(addons)+'</td>'+
