@@ -1777,7 +1777,11 @@ function renderRegistrations(orders){
        var firstName = r.firstName || '';
     var lastName  = r.lastName  || '';
     // If only one name field, try to split it
-    if (firstName && !lastName) {
+      if (isSponsorTeam) {
+      // Company name stored in firstName — don't try to split it
+      firstName = '—';
+      lastName  = '—';
+    } else if (firstName && !lastName) {
       var parts = firstName.trim().split(/\s+/);
       if (parts.length > 1) { firstName = parts[0]; lastName = parts.slice(1).join(' '); }
     } else if (lastName && !firstName) {
