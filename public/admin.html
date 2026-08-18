@@ -1767,59 +1767,108 @@ function updateSortIcons() {
   });
 }
 function renderRegistrations(orders){
-  _loadedRegs = (orders || []).filter(function(o){ return o && (o.type === 'registration' || o.type === 'team' || o.type === 'individual' || o.type === 'sponsor-team' || o.type === 'comped-team' || o.golfers); });
+  if (orders !== _loadedRegs) {
+    _loadedRegs = (orders || []).filter(function(o){
+      return o && (o.type === 'registration' || o.type === 'team' || o.type === 'individual' ||
+                   o.type === 'sponsor-team' || o.type === 'comped-team' || o.golfers);
+    });
+  }
+
+  // Sort
+  var sorted = _loadedRegs.slice().sort(function(a, b) {
+    var aVal, bVal;
+    if (_regSortKey === 'lastName') {
+      aVal = (a.lastName || '').toLowerCase();
+      bVal = (b.lastName || '').toLowerCase();
+    } else if (_regSortKey === 'firstName') {
+      aVal = (a.firstName || '').toLowerCase();
+      bVal = (b.firstName || '').toLowerCase();
+    } else {
+      aVal = a.created ? String(a.created) : (a.createdAt || a.date || '');
+      bVal = b.created ? String(b.created) : (b.createdAt || b.date || '');
+    }
+    if (aVal < bVal) return -1 * _regSortDir;
+    if (aVal > bVal) return  1 * _regSortDir;
+    return 0;
+  });
+
   var tbody = document.getElementById('reg-tbody');
   if (!_loadedRegs.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty-table"><div class="empty-icon">🏌️</div>No registrations yet</td></tr>';
-    updateRegStats(_loadedRegs); return;
+    tbody.innerHTML = '<tr><td colspan="11" class="empty-table"><div class="empty-icon">🏌️</div>No registrations yet</td></tr>';
+    updateRegStats(_loadedRegs); updateSortIcons(); return;
   }
-  tbody.innerHTML = _loadedRegs.map(function(r, idx){
-       var firstName = r.firstName || '';
-    var lastName  = r.lastName  || '';
-    // If only one name field, try to split it
-      if (isSponsorTeam) {
-      // Company name stored in firstName — don't try to split it
-      firstName = '—';
-      lastName  = '—';
-    } else if (firstName && !lastName) {
-      var parts = firstName.trim().split(/\s+/);
-      if (parts.length > 1) { firstName = parts[0]; lastName = parts.slice(1).join(' '); }
-    } else if (lastName && !firstName) {
-      var parts = lastName.trim().split(/\s+/);
-      if (parts.length > 1) { lastName = parts[parts.length-1]; firstName = parts.slice(0,-1).join(' '); }
-    }
-    firstName = firstName || '—';
-    var players = r.playerCount || (r.golfers && r.golfers.length) || 1;
-    var addons = (Array.isArray(r.addons) ? r.addons : (typeof r.addons === 'string' && r.addons && r.addons !== 'none' ? r.addons.split(',') : [])).map(function(a){return a.name||a;}).join(', ') || '—';
-    var amt = normAmt(r) ? fmtMoney(normAmt(r)) : '—';
-    var status = r.status || r.paymentStatus || 'paid';
-    var date = r.created ? new Date(r.created*1000).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.date ? new Date(r.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : (r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—'));
+
+  tbody.innerHTML = sorted.map(function(r){
+    var origIdx = _loadedRegs.indexOf(r);
     var isSponsorTeam = (r.type === 'sponsor-team');
+
     var srcBadge = isSponsorTeam
       ? ' <span style="font-size:9px;background:#e8f4ea;color:#1b5e20;padding:1px 5px;border-radius:3px;vertical-align:middle;border:1px solid #a5d6a7;">sponsor</span>'
       : (r.source === 'manual' ? ' <span style="font-size:9px;background:#f0f2ef;color:var(--tl);padding:1px 5px;border-radius:3px;vertical-align:middle;">manual</span>' : '');
-    var teamName = r.teamName || '';
-    var displayName = isSponsorTeam ? (name.trim() || r.firstName || '—') : (name.trim() || '—');
+
+    // Name columns — sponsors show blank first/last, company name in Company col
+    var lastName  = '';
+    var firstName = '';
+    var company   = '';
+    if (isSponsorTeam) {
+      company = r.firstName || r.company || '—';
+    } else {
+      firstName = r.firstName || '';
+      lastName  = r.lastName  || '';
+      company   = r.company   || '—';
+      // Try to split if only one field populated
+      if (firstName && !lastName) {
+        var parts = firstName.trim().split(/\s+/);
+        if (parts.length > 1) { firstName = parts[0]; lastName = parts.slice(1).join(' '); }
+      } else if (lastName && !firstName) {
+        var parts = lastName.trim().split(/\s+/);
+        if (parts.length > 1) { lastName = parts[parts.length-1]; firstName = parts.slice(0,-1).join(' '); }
+      }
+      firstName = firstName || '—';
+      lastName  = lastName  || '—';
+    }
+
+    var players = r.playerCount || (r.golfers && r.golfers.length) || 1;
+    var addons  = (Array.isArray(r.addons) ? r.addons : (typeof r.addons === 'string' && r.addons && r.addons !== 'none' ? r.addons.split(',') : [])).map(function(a){return a.name||a;}).join(', ') || '—';
+    var amt     = normAmt(r) ? fmtMoney(normAmt(r)) : '—';
+    var status  = r.status || r.paymentStatus || 'paid';
+    var teamName = r.teamName || '—';
+
+    var rawDate = r.created ? new Date(r.created * 1000)
+                : r.createdAt ? new Date(r.createdAt)
+                : r.date ? new Date(r.date)
+                : null;
+    var date = (rawDate && !isNaN(rawDate)) ? rawDate.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+
     var teamsCount = isSponsorTeam ? Math.ceil((r.playerCount||4)/4) : '';
-    var playersDisplay = isSponsorTeam ? (teamsCount + ' team' + (teamsCount!==1?'s':'') + ' (' + (r.playerCount||4) + ' golfers)') : players;
+    var playersDisplay = isSponsorTeam
+      ? (teamsCount + ' team' + (teamsCount!==1?'s':'') + ' (' + (r.playerCount||4) + ' golfers)')
+      : players;
+
     var editBtn = isSponsorTeam
       ? '<button class="btn btn-outline btn-sm" onclick="alert(\'Edit this entry via the Sponsors tab.\')">🔗 Sponsor</button>'
-      : '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'registration\',' + idx + ')">✏ Edit</button> <button class="btn btn-outline btn-sm" onclick="resendConfirmation(\'' + escH(r.id||'') + '\',this)" title="Resend confirmation email">✉</button> <button class="btn btn-outline btn-sm" onclick="sendUpsellEmail(\'' + escH(r.id||'') + '\',this)" title="Send add-on upsell email">📩</button> <button class="btn btn-danger btn-sm" onclick="deleteEntry(\'registrations\',\'' + escH(r.id||'') + '\',' + idx + ')">✕</button>';
-    return '<tr'+(isSponsorTeam?' style="background:rgba(232,244,234,0.35);"':'')+'>'+
-      '<td><strong>'+escH(displayName)+'</strong>'+srcBadge+'</td>'+
-            + '<td style="font-size:12px;color:var(--tl);">' + escH(r.company||'—') + '</td>'
-      + '<td style="font-size:12px;color:var(--tl);">' + escH(teamName||'—') + '</td>'
-      + '<td>' + escH(r.email||'—') + '</td>'+
-      '<td>'+escH(r.email||'—')+'</td>'+
-      '<td>'+playersDisplay+'</td>'+
-      '<td style="font-size:11px;color:var(--tl)">'+escH(addons)+'</td>'+
-      '<td>'+amt+'</td>'+
-      '<td><span class="status-pill status-'+escH(status)+'">'+escH(status)+'</span></td>'+
-      '<td>'+escH(date)+'</td>'+
-      '<td style="white-space:nowrap;">'+editBtn+'</td>'+
-    '</tr>';
+      : '<button class="btn btn-outline btn-sm" onclick="openEditEntry(\'registration\',' + origIdx + ')">✏ Edit</button>'
+        + ' <button class="btn btn-outline btn-sm" onclick="resendConfirmation(\'' + escH(r.id||'') + '\',this)" title="Resend confirmation email">✉</button>'
+        + ' <button class="btn btn-outline btn-sm" onclick="sendUpsellEmail(\'' + escH(r.id||'') + '\',this)" title="Send add-on upsell email">📩</button>'
+        + ' <button class="btn btn-danger btn-sm" onclick="deleteEntry(\'registrations\',\'' + escH(r.id||'') + '\',' + origIdx + ')">✕</button>';
+
+    return '<tr' + (isSponsorTeam ? ' style="background:rgba(232,244,234,0.35);"' : '') + '>'
+      + '<td><strong>' + escH(lastName)  + '</strong>' + (isSponsorTeam ? srcBadge : '') + '</td>'
+      + '<td>' + escH(firstName) + (!isSponsorTeam ? srcBadge : '') + '</td>'
+      + '<td style="font-size:12px;color:var(--tl);">' + escH(company) + '</td>'
+      + '<td style="font-size:12px;color:var(--tl);">' + escH(teamName) + '</td>'
+      + '<td>' + escH(r.email||'—') + '</td>'
+      + '<td>' + playersDisplay + '</td>'
+      + '<td style="font-size:11px;color:var(--tl)">' + escH(addons) + '</td>'
+      + '<td>' + amt + '</td>'
+      + '<td>' + date + '</td>'
+      + '<td><span class="status-pill status-' + escH(status) + '">' + escH(status) + '</span></td>'
+      + '<td style="white-space:nowrap;">' + editBtn + '</td>'
+      + '</tr>';
   }).join('');
+
   updateRegStats(_loadedRegs);
+  updateSortIcons();
   document.getElementById('cnt-regs').textContent = _loadedRegs.length;
 }
 
