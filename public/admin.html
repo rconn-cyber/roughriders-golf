@@ -1747,7 +1747,25 @@ async function loadOrders(){
 
 var _loadedRegs = [];
 var _loadedSponsors = [];
+// ════════════════════════════════
+// REG TABLE SORT
+// ════════════════════════════════
+var _regSortKey = 'date';
+var _regSortDir = -1; // -1 = desc, 1 = asc
 
+function sortRegs(key) {
+  if (_regSortKey === key) { _regSortDir *= -1; }
+  else { _regSortKey = key; _regSortDir = key === 'date' ? -1 : 1; }
+  renderRegistrations(_loadedRegs);
+}
+
+function updateSortIcons() {
+  ['lastName','firstName','date'].forEach(function(k) {
+    var el = document.getElementById('sort-icon-' + k);
+    if (!el) return;
+    el.textContent = _regSortKey === k ? (_regSortDir === 1 ? ' ↑' : ' ↓') : '';
+  });
+}
 function renderRegistrations(orders){
   _loadedRegs = (orders || []).filter(function(o){ return o && (o.type === 'registration' || o.type === 'team' || o.type === 'individual' || o.type === 'sponsor-team' || o.type === 'comped-team' || o.golfers); });
   var tbody = document.getElementById('reg-tbody');
