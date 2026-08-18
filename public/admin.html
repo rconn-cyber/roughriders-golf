@@ -1774,7 +1774,17 @@ function renderRegistrations(orders){
     updateRegStats(_loadedRegs); return;
   }
   tbody.innerHTML = _loadedRegs.map(function(r, idx){
-    var name = (r.firstName||'') + ' ' + (r.lastName||'');
+       var firstName = r.firstName || '';
+    var lastName  = r.lastName  || '';
+    // If only one name field, try to split it
+    if (firstName && !lastName) {
+      var parts = firstName.trim().split(/\s+/);
+      if (parts.length > 1) { firstName = parts[0]; lastName = parts.slice(1).join(' '); }
+    } else if (lastName && !firstName) {
+      var parts = lastName.trim().split(/\s+/);
+      if (parts.length > 1) { lastName = parts[parts.length-1]; firstName = parts.slice(0,-1).join(' '); }
+    }
+    firstName = firstName || '—';
     var players = r.playerCount || (r.golfers && r.golfers.length) || 1;
     var addons = (Array.isArray(r.addons) ? r.addons : (typeof r.addons === 'string' && r.addons && r.addons !== 'none' ? r.addons.split(',') : [])).map(function(a){return a.name||a;}).join(', ') || '—';
     var amt = normAmt(r) ? fmtMoney(normAmt(r)) : '—';
