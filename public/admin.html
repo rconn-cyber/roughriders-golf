@@ -340,6 +340,10 @@ tr:hover td { background: #f8faf8; }
         <span class="nav-icon">⛳</span> Team Manager
         <span class="nav-count" id="cnt-teams" style="background:#1a7f4b;color:#fff;">0</span>
       </div>
+      <div class="nav-item" id="nav-teams" onclick="showPanel('teams')">
+        <span class="nav-icon">⛳</span> Team Manager
+        <span class="nav-count" id="cnt-teams" style="background:#1a7f4b;color:#fff;">0</span>
+      </div>
     </nav>
 
     <main class="main">
@@ -724,6 +728,40 @@ tr:hover td { background: #f8faf8; }
         </div>
 
         <!-- Teams grid -->
+        <div id="tm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;"></div>
+      </div>
+
+
+      <!-- TEAM MANAGER PANEL -->
+      <div class="panel" id="panel-teams">
+        <div class="page-hdr">
+          <div class="page-hdr-l">
+            <h1>Team Manager</h1>
+            <p class="page-sub">Assign individuals · drag to move · double-click to rename · Sept 14 · Hunters Green CC</p>
+          </div>
+          <div class="page-hdr-r">
+            <button class="btn btn-outline" onclick="tmLoadData()" style="margin-right:8px;">&#x27F3; Refresh</button>
+            <button class="btn btn-primary" onclick="tmSave()">&#x1F4BE; Save Assignments</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1.2rem;">
+          <div style="background:#f6f8f6;border:1px solid #dde8dd;border-radius:6px;padding:6px 14px;font-size:13px;color:#555;">Teams: <strong id="tm-cnt-teams">0</strong> / 36</div>
+          <div style="background:#f6f8f6;border:1px solid #dde8dd;border-radius:6px;padding:6px 14px;font-size:13px;color:#555;">Unassigned: <strong id="tm-cnt-unassigned">0</strong></div>
+          <div style="background:#f6f8f6;border:1px solid #dde8dd;border-radius:6px;padding:6px 14px;font-size:13px;color:#555;">Total golfers: <strong id="tm-cnt-golfers">0</strong></div>
+          <div id="tm-save-status" style="background:#fff8e8;border:1px solid #f0d080;border-radius:6px;padding:6px 14px;font-size:12px;color:#7a5c00;">No unsaved changes</div>
+        </div>
+        <div id="tm-pool-wrap" style="background:#f0faf4;border:1.5px dashed #5aab78;border-radius:10px;padding:14px;margin-bottom:1.2rem;">
+          <div style="font-size:13px;font-weight:700;color:#1a7f4b;margin-bottom:10px;">
+            Unassigned individuals &mdash; drag to a team below
+            <span id="tm-pool-count" style="background:#1a7f4b;color:#fff;border-radius:10px;padding:1px 8px;font-size:11px;margin-left:6px;">0</span>
+          </div>
+          <div id="tm-pool" style="display:flex;flex-wrap:wrap;gap:8px;min-height:36px;"></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:1.2rem;flex-wrap:wrap;">
+          <input type="text" id="tm-new-team-name" placeholder="New team name (optional)" style="flex:1;min-width:200px;padding:8px 12px;border:1px solid #ccc;border-radius:6px;font-size:13px;" />
+          <button class="btn btn-outline" onclick="tmAddTeam()">+ Add Team</button>
+          <span id="tm-capacity-msg" style="font-size:12px;color:#888;"></span>
+        </div>
         <div id="tm-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;"></div>
       </div>
 
@@ -4823,345 +4861,207 @@ function printReport() {
   win.document.write('<html><head><title>Golf Tournament Status Report</title>' +
     '<style>body{font-family:Georgia,serif;margin:20px;} @media print{body{margin:0;}}</style></head>' +
     '<body>' + el.outerHTML + '<script>window.onload=function(){window.print();}<\/script>
-<!-- ══════════ TEAM MANAGER JS ══════════ -->
+</script>
+</body>
 <script>
-var TM = {
-  teams: [],        // [{id, name, sponsor, players:[{id,name}]}]
-  individuals: [],  // [{id, name, teamId|null}]
-  dirty: false,
-  dragItem: null,
-  dragSource: null,
-};
+var TM={teams:[],individuals:[],dirty:false,dragItem:null,dragSource:null};
 
-// ── Load ──────────────────────────────────────────────────────────────────
-async function tmLoadData() {
-  document.getElementById('tm-grid').innerHTML = '<div style="padding:30px;color:#888;font-size:13px;">Loading…</div>';
-  var authHdr = { 'Authorization': 'Bearer ' + _jwt };
-  var [rRes] = await Promise.all([
-    fetch(NETLIFY_BASE + '/.netlify/functions/admin-data?resource=registrations', { headers: authHdr })
-  ]);
-  var regs = rRes.ok ? await rRes.json() : [];
-
-  // Also load saved assignments if any
-  var aRes = await fetch(NETLIFY_BASE + '/.netlify/functions/admin-data?resource=team-assignments', { headers: authHdr });
-  var savedAssignments = aRes.ok ? (await aRes.json() || {}) : {};
-
-  TM.teams = [];
-  TM.individuals = [];
-  var teamIdx = 0;
-
-  regs.forEach(function(r) {
-    var d = r.data || r;
-    var type = d.type || '';
-    var playerCount = d.playerCount || 0;
-    var golfers = Array.isArray(d.golfers) ? d.golfers : [];
-    var contactName = ((d.firstName || '') + ' ' + (d.lastName || '')).trim();
-    var teamName = (d.teamName && d.teamName.trim()) ? d.teamName.trim() : (contactName || 'Team ' + (++teamIdx));
-    var isSponsor = type === 'sponsor-team';
-    var isIndividual = type === 'individual' || playerCount === 1;
-
-    if (isIndividual) {
-      // Single golfer — goes to pool
-      var pName = golfers.length > 0
-        ? ((golfers[0].firstName||'') + ' ' + (golfers[0].lastName||'')).trim()
-        : contactName;
-      if (pName) TM.individuals.push({ id: r.id || d.id, name: pName, teamId: null });
+async function tmLoadData(){
+  document.getElementById('tm-grid').innerHTML='<div style="padding:30px;color:#888;font-size:13px;">Loading...</div>';
+  var ah={'Authorization':'Bearer '+_jwt};
+  var rRes=await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=registrations',{headers:ah});
+  var regs=rRes.ok?await rRes.json():[];
+  var aRes=await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=team-assignments',{headers:ah});
+  var saved=aRes.ok?await aRes.json():{};
+  TM.teams=[];TM.individuals=[];var tidx=0;
+  regs.forEach(function(r){
+    var d=r.data||r;
+    var type=d.type||'';
+    var pc=d.playerCount||0;
+    var golfers=Array.isArray(d.golfers)?d.golfers:[];
+    var cname=((d.firstName||'')+' '+(d.lastName||'')).trim();
+    var tname=(d.teamName&&d.teamName.trim())?d.teamName.trim():(cname||'Team '+(++tidx));
+    var isSponsor=type==='sponsor-team';
+    var isInd=type==='individual'||pc===1;
+    if(isInd){
+      var pn=golfers.length>0?((golfers[0].firstName||'')+' '+(golfers[0].lastName||'')).trim():cname;
+      if(pn)TM.individuals.push({id:r.id||d.id,name:pn,teamId:null});
     } else {
-      // Full team registration
-      var players = [];
-      if (golfers.length > 0) {
-        golfers.forEach(function(g, gi) {
-          var gn = ((g.firstName||'') + ' ' + (g.lastName||'')).trim();
-          if (gn) players.push({ id: (r.id||d.id) + '_g' + gi, name: gn });
-        });
-      }
-      // Fill remaining slots with placeholders
-      var slots = playerCount || 4;
-      while (players.length < slots) {
-        players.push({ id: (r.id||d.id) + '_slot' + players.length, name: 'Golfer ' + (players.length + 1) });
-      }
-      TM.teams.push({ id: r.id || d.id, name: teamName, sponsor: isSponsor, players: players });
+      var players=[];
+      golfers.forEach(function(g,gi){
+        var gn=((g.firstName||'')+' '+(g.lastName||'')).trim();
+        if(gn)players.push({id:(r.id||d.id)+'_g'+gi,name:gn});
+      });
+      var slots=pc||4;
+      while(players.length<slots)players.push({id:(r.id||d.id)+'_s'+players.length,name:'Golfer '+(players.length+1)});
+      TM.teams.push({id:r.id||d.id,name:tname,sponsor:isSponsor,players:players});
     }
   });
-
-  // Apply saved assignments: move individuals to their assigned teams
-  if (savedAssignments && savedAssignments.assignments) {
-    savedAssignments.assignments.forEach(function(a) {
-      var ind = TM.individuals.find(function(i){ return i.id === a.individualId; });
-      var team = TM.teams.find(function(t){ return t.id === a.teamId; });
-      if (ind && team) {
-        ind.teamId = a.teamId;
-        team.players.push({ id: ind.id, name: ind.name });
-      }
+  if(saved&&saved.assignments){
+    saved.assignments.forEach(function(a){
+      var ind=TM.individuals.find(function(i){return i.id===a.individualId;});
+      var team=TM.teams.find(function(t){return t.id===a.teamId;});
+      if(ind&&team){ind.teamId=a.teamId;team.players.push({id:ind.id,name:ind.name});}
     });
-    // Apply custom team names
-    if (savedAssignments.teamNames) {
-      Object.keys(savedAssignments.teamNames).forEach(function(tid) {
-        var t = TM.teams.find(function(t){ return t.id === tid; });
-        if (t) t.name = savedAssignments.teamNames[tid];
-      });
-    }
-    // Restore extra teams added manually
-    if (savedAssignments.extraTeams) {
-      savedAssignments.extraTeams.forEach(function(et) {
-        if (!TM.teams.find(function(t){ return t.id === et.id; })) {
-          TM.teams.push(et);
-        }
-      });
-    }
   }
-
-  TM.dirty = false;
-  tmUpdateSaveStatus();
-  tmRender();
-  document.getElementById('cnt-teams').textContent = TM.teams.length;
-}
-
-// ── Save ──────────────────────────────────────────────────────────────────
-async function tmSave() {
-  var authHdr = { 'Authorization': 'Bearer ' + _jwt, 'Content-Type': 'application/json' };
-  var assignments = TM.individuals
-    .filter(function(i){ return i.teamId; })
-    .map(function(i){ return { individualId: i.id, teamId: i.teamId }; });
-
-  var teamNames = {};
-  TM.teams.forEach(function(t){ teamNames[t.id] = t.name; });
-
-  var extraTeams = TM.teams.filter(function(t){ return t.id.startsWith('tm-extra-'); });
-
-  var payload = { assignments: assignments, teamNames: teamNames, extraTeams: extraTeams, savedAt: new Date().toISOString() };
-
-  var res = await fetch(NETLIFY_BASE + '/.netlify/functions/admin-data?resource=team-assignments', {
-    method: 'PUT', headers: authHdr, body: JSON.stringify(payload)
-  });
-  if (res.ok) {
-    TM.dirty = false;
-    tmUpdateSaveStatus();
-    toast('✅ Team assignments saved');
-  } else {
-    toast('❌ Save failed — check console');
-    console.error(await res.text());
+  if(saved&&saved.teamNames){
+    Object.keys(saved.teamNames).forEach(function(tid){
+      var t=TM.teams.find(function(t){return t.id===tid;});
+      if(t)t.name=saved.teamNames[tid];
+    });
   }
-}
-
-function tmMarkDirty() {
-  TM.dirty = true;
-  tmUpdateSaveStatus();
-}
-
-function tmUpdateSaveStatus() {
-  var el = document.getElementById('tm-save-status');
-  if (!el) return;
-  if (TM.dirty) {
-    el.textContent = '⚠️ Unsaved changes';
-    el.style.background = '#fff3cd';
-    el.style.borderColor = '#f0ad4e';
-    el.style.color = '#856404';
-  } else {
-    el.textContent = '✓ All changes saved';
-    el.style.background = '#d4edda';
-    el.style.borderColor = '#c3e6cb';
-    el.style.color = '#155724';
+  if(saved&&saved.extraTeams){
+    saved.extraTeams.forEach(function(et){
+      if(!TM.teams.find(function(t){return t.id===et.id;}))TM.teams.push(et);
+    });
   }
+  TM.dirty=false;tmUpdateSaveStatus();tmRender();
+  document.getElementById('cnt-teams').textContent=TM.teams.length;
 }
 
-// ── Render ────────────────────────────────────────────────────────────────
-function tmRender() {
-  tmRenderPool();
-  tmRenderGrid();
-  tmUpdateStats();
+async function tmSave(){
+  var ah={'Authorization':'Bearer '+_jwt,'Content-Type':'application/json'};
+  var assignments=TM.individuals.filter(function(i){return i.teamId;}).map(function(i){return{individualId:i.id,teamId:i.teamId};});
+  var teamNames={};TM.teams.forEach(function(t){teamNames[t.id]=t.name;});
+  var extraTeams=TM.teams.filter(function(t){return t.id.indexOf('tm-extra-')===0;});
+  var payload={assignments:assignments,teamNames:teamNames,extraTeams:extraTeams,savedAt:new Date().toISOString()};
+  var res=await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=team-assignments',{method:'PUT',headers:ah,body:JSON.stringify(payload)});
+  if(res.ok){TM.dirty=false;tmUpdateSaveStatus();toast('Team assignments saved');}
+  else{toast('Save failed');console.error(await res.text());}
 }
 
-function tmRenderPool() {
-  var pool = document.getElementById('tm-pool');
-  var unassigned = TM.individuals.filter(function(p){ return !p.teamId; });
-  document.getElementById('tm-pool-count').textContent = unassigned.length;
-  if (unassigned.length === 0) {
-    pool.innerHTML = '<span style="font-size:12px;color:#888;font-style:italic;">All individuals have been assigned to teams</span>';
-    return;
-  }
-  pool.innerHTML = unassigned.map(function(p) {
-    return '<div class="tm-pool-chip" draggable="true" data-id="'+p.id+'" '+
-      'ondragstart="tmDragStart(event,'individual','pool')" '+
-      'ondragend="tmDragEnd(event)" '+
-      'style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:grab;'+
-      'border:1px solid #5aab78;background:#fff;color:#1a7f4b;user-select:none;">'+
-      p.name+'</div>';
+function tmMarkDirty(){TM.dirty=true;tmUpdateSaveStatus();}
+
+function tmUpdateSaveStatus(){
+  var el=document.getElementById('tm-save-status');if(!el)return;
+  if(TM.dirty){el.textContent='Unsaved changes';el.style.background='#fff3cd';el.style.borderColor='#f0ad4e';el.style.color='#856404';}
+  else{el.textContent='All changes saved';el.style.background='#d4edda';el.style.borderColor='#c3e6cb';el.style.color='#155724';}
+}
+
+function tmRender(){tmRenderPool();tmRenderGrid();tmUpdateStats();}
+
+function tmRenderPool(){
+  var pool=document.getElementById('tm-pool');
+  var unassigned=TM.individuals.filter(function(p){return!p.teamId;});
+  document.getElementById('tm-pool-count').textContent=unassigned.length;
+  if(!unassigned.length){pool.innerHTML='<span style="font-size:12px;color:#888;font-style:italic;">All individuals assigned</span>';return;}
+  pool.innerHTML=unassigned.map(function(p){
+    return '<div draggable="true" data-id="'+p.id+'" ondragstart="tmDragStart(event,'individual','pool')" ondragend="tmDragEnd(event)" style="padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:grab;border:1px solid #5aab78;background:#fff;color:#1a7f4b;user-select:none;">'+p.name+'</div>';
   }).join('');
 }
 
-function tmRenderGrid() {
-  var grid = document.getElementById('tm-grid');
-  var canAdd = TM.teams.length < 36;
-  grid.innerHTML = TM.teams.map(function(team, idx) {
-    var isSponsor = team.sponsor;
-    var isFull = team.players.length >= 4;
-    return '<div class="tm-card" id="tmcard-'+team.id+'" style="background:#fff;border:1px solid #dde8dd;border-radius:10px;overflow:hidden;">'
-      + '<div style="padding:9px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;background:#f6f8f6;">'
-      +   '<div style="display:flex;align-items:center;gap:7px;flex:1;min-width:0;">'
-      +     '<div style="width:22px;height:22px;border-radius:50%;background:#1a7f4b;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(idx+1)+'</div>'
-      +     '<div id="tmname-'+team.id+'" title="'+team.name+'" ondblclick="tmEditName(''+team.id+'')" style="font-size:13px;font-weight:600;color:#1a3322;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text;">'+team.name+'</div>'
-      +     (isSponsor ? '<span style="font-size:10px;padding:1px 5px;border-radius:8px;background:#d4edda;color:#155724;flex-shrink:0;">Sponsor</span>' : '')
-      +   '</div>'
-      +   '<div style="display:flex;gap:3px;flex-shrink:0;">'
-      +     '<button onclick="tmEditName(''+team.id+'')" title="Rename" style="border:none;background:none;cursor:pointer;color:#888;padding:2px 4px;border-radius:4px;font-size:13px;">✏️</button>'
-      +     '<button onclick="tmDeleteTeam(''+team.id+'')" title="Delete" style="border:none;background:none;cursor:pointer;color:#888;padding:2px 4px;border-radius:4px;font-size:13px;">🗑</button>'
-      +   '</div>'
-      + '</div>'
-      + '<div style="padding:8px;">'
-      +   team.players.map(function(p) {
-            return '<div draggable="true" data-id="'+p.id+'" data-teamid="'+team.id+'" '+
-              'ondragstart="tmDragStart(event,'player',''+team.id+'')" '+
-              'ondragend="tmDragEnd(event)" '+
-              'style="display:flex;align-items:center;justify-content:space-between;padding:4px 7px;border-radius:5px;font-size:12px;margin-bottom:3px;cursor:grab;border:1px solid #e8ede8;background:#fafcfa;user-select:none;">'
-              + '<span style="color:#555;">⠿ '+p.name+'</span>'
-              + '<button onclick="tmRemoveFromTeam(''+team.id+'',''+p.id+'')" title="Unassign" style="border:none;background:none;cursor:pointer;color:#bbb;font-size:11px;padding:0 2px;line-height:1;">✕</button>'
-              + '</div>';
-          }).join('')
-      +   '<div class="tm-drop" data-teamid="'+team.id+'" '
-      +     'ondragover="tmDragOver(event)" ondragleave="tmDragLeave(event)" ondrop="tmDrop(event,''+team.id+'')" '
-      +     'style="border:1.5px dashed #ccc;border-radius:5px;padding:5px;text-align:center;font-size:11px;color:#aaa;margin-top:4px;min-height:28px;display:flex;align-items:center;justify-content:center;transition:all .15s;">'
-      +     (isFull ? '<span style="color:#e6a817;">Full (4 players)</span>' : 'Drop player here')
-      +   '</div>'
-      + '</div>'
-      + '</div>';
-  }).join('') + (canAdd ? '<button onclick="tmAddTeam()" style="border:1.5px dashed #ccc;border-radius:10px;background:none;cursor:pointer;color:#888;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;min-height:70px;transition:all .15s;width:100%;" onmouseover="this.style.borderColor='#5aab78';this.style.color='#1a7f4b';" onmouseout="this.style.borderColor='#ccc';this.style.color='#888';">+ Add Team</button>' : '');
+function tmRenderGrid(){
+  var grid=document.getElementById('tm-grid');
+  grid.innerHTML=TM.teams.map(function(team,idx){
+    var full=team.players.length>=4;
+    return '<div style="background:#fff;border:1px solid #dde8dd;border-radius:10px;overflow:hidden;">'
+      +'<div style="padding:9px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;background:#f6f8f6;">'
+      +'<div style="display:flex;align-items:center;gap:7px;flex:1;min-width:0;">'
+      +'<div style="width:22px;height:22px;border-radius:50%;background:#1a7f4b;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(idx+1)+'</div>'
+      +'<div id="tmname-'+team.id+'" title="'+team.name+'" ondblclick="tmEditName(''+team.id+'')" style="font-size:13px;font-weight:600;color:#1a3322;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text;">'+team.name+'</div>'
+      +(team.sponsor?'<span style="font-size:10px;padding:1px 5px;border-radius:8px;background:#d4edda;color:#155724;flex-shrink:0;">Sponsor</span>':'')
+      +'</div>'
+      +'<div style="display:flex;gap:3px;flex-shrink:0;">'
+      +'<button onclick="tmEditName(''+team.id+'')" style="border:none;background:none;cursor:pointer;color:#888;padding:2px 4px;font-size:13px;" title="Rename">&#x270F;</button>'
+      +'<button onclick="tmDeleteTeam(''+team.id+'')" style="border:none;background:none;cursor:pointer;color:#888;padding:2px 4px;font-size:13px;" title="Delete">&#x1F5D1;</button>'
+      +'</div></div>'
+      +'<div style="padding:8px;">'
+      +team.players.map(function(p){
+        return '<div draggable="true" data-id="'+p.id+'" data-teamid="'+team.id+'" ondragstart="tmDragStart(event,'player',''+team.id+'')" ondragend="tmDragEnd(event)" style="display:flex;align-items:center;justify-content:space-between;padding:4px 7px;border-radius:5px;font-size:12px;margin-bottom:3px;cursor:grab;border:1px solid #e8ede8;background:#fafcfa;user-select:none;">'
+          +'<span style="color:#555;">&#x283F; '+p.name+'</span>'
+          +'<button onclick="tmRemoveFromTeam(''+team.id+'',''+p.id+'')" style="border:none;background:none;cursor:pointer;color:#bbb;font-size:11px;padding:0 2px;" title="Unassign">x</button>'
+          +'</div>';
+      }).join('')
+      +'<div class="tm-drop" data-teamid="'+team.id+'" ondragover="tmDragOver(event)" ondragleave="tmDragLeave(event)" ondrop="tmDrop(event,''+team.id+'')" style="border:1.5px dashed #ccc;border-radius:5px;padding:5px;text-align:center;font-size:11px;color:#aaa;margin-top:4px;min-height:28px;display:flex;align-items:center;justify-content:center;transition:all .15s;">'
+      +(full?'<span style="color:#e6a817;">Full (4)</span>':'Drop player here')
+      +'</div>'
+      +'</div></div>';
+  }).join('')
+  +(TM.teams.length<36?'<div onclick="tmAddTeam()" style="border:1.5px dashed #ccc;border-radius:10px;cursor:pointer;color:#888;font-size:13px;display:flex;align-items:center;justify-content:center;min-height:70px;transition:all .15s;" onmouseover="this.style.borderColor='#5aab78';this.style.color='#1a7f4b';" onmouseout="this.style.borderColor='#ccc';this.style.color='#888';">+ Add Team</div>':'');
 }
 
-function tmUpdateStats() {
-  var unassigned = TM.individuals.filter(function(i){ return !i.teamId; }).length;
-  var totalGolfers = TM.individuals.length + TM.teams.reduce(function(s,t){ return s + t.players.length; }, 0);
-  document.getElementById('tm-cnt-teams').textContent = TM.teams.length;
-  document.getElementById('tm-cnt-unassigned').textContent = unassigned;
-  document.getElementById('tm-cnt-golfers').textContent = totalGolfers;
-  document.getElementById('cnt-teams').textContent = TM.teams.length;
-  document.getElementById('tm-pool-count').textContent = unassigned;
+function tmUpdateStats(){
+  var u=TM.individuals.filter(function(i){return!i.teamId;}).length;
+  var g=TM.individuals.length+TM.teams.reduce(function(s,t){return s+t.players.length;},0);
+  var e=function(id){return document.getElementById(id);};
+  if(e('tm-cnt-teams'))e('tm-cnt-teams').textContent=TM.teams.length;
+  if(e('tm-cnt-unassigned'))e('tm-cnt-unassigned').textContent=u;
+  if(e('tm-cnt-golfers'))e('tm-cnt-golfers').textContent=g;
+  if(e('cnt-teams'))e('cnt-teams').textContent=TM.teams.length;
+  if(e('tm-pool-count'))e('tm-pool-count').textContent=u;
 }
 
-// ── Drag & drop ───────────────────────────────────────────────────────────
-function tmDragStart(e, type, source) {
-  TM.dragItem = { id: e.currentTarget.dataset.id, type: type };
-  TM.dragSource = source;
-  e.currentTarget.style.opacity = '0.4';
-  e.dataTransfer.effectAllowed = 'move';
-}
-function tmDragEnd(e) {
-  e.currentTarget.style.opacity = '';
-  document.querySelectorAll('.tm-drop').forEach(function(z){ z.style.borderColor='#ccc'; z.style.background=''; });
-}
-function tmDragOver(e) {
-  e.preventDefault();
-  e.currentTarget.style.borderColor = '#1a7f4b';
-  e.currentTarget.style.background = '#f0faf4';
-}
-function tmDragLeave(e) {
-  e.currentTarget.style.borderColor = '#ccc';
-  e.currentTarget.style.background = '';
-}
-function tmDrop(e, targetTeamId) {
-  e.preventDefault();
-  e.currentTarget.style.borderColor = '#ccc';
-  e.currentTarget.style.background = '';
-  if (!TM.dragItem) return;
-  var targetTeam = TM.teams.find(function(t){ return t.id === targetTeamId; });
-  if (!targetTeam) return;
+function tmDragStart(e,type,source){TM.dragItem={id:e.currentTarget.dataset.id,type:type};TM.dragSource=source;e.currentTarget.style.opacity='0.4';e.dataTransfer.effectAllowed='move';}
+function tmDragEnd(e){e.currentTarget.style.opacity='';document.querySelectorAll('.tm-drop').forEach(function(z){z.style.borderColor='#ccc';z.style.background='';});}
+function tmDragOver(e){e.preventDefault();e.currentTarget.style.borderColor='#1a7f4b';e.currentTarget.style.background='#f0faf4';}
+function tmDragLeave(e){e.currentTarget.style.borderColor='#ccc';e.currentTarget.style.background='';}
 
-  if (TM.dragItem.type === 'individual') {
-    var ind = TM.individuals.find(function(p){ return p.id === TM.dragItem.id; });
-    if (!ind || ind.teamId === targetTeamId) return;
-    if (ind.teamId) {
-      var old = TM.teams.find(function(t){ return t.id === ind.teamId; });
-      if (old) old.players = old.players.filter(function(p){ return p.id !== ind.id; });
-    }
-    ind.teamId = targetTeamId;
-    targetTeam.players.push({ id: ind.id, name: ind.name });
-    toast(ind.name + ' → ' + targetTeam.name);
-  } else if (TM.dragItem.type === 'player') {
-    if (TM.dragSource === targetTeamId) return;
-    var srcTeam = TM.teams.find(function(t){ return t.id === TM.dragSource; });
-    if (!srcTeam) return;
-    var pi = srcTeam.players.findIndex(function(p){ return p.id === TM.dragItem.id; });
-    if (pi === -1) return;
-    var player = srcTeam.players.splice(pi, 1)[0];
-    targetTeam.players.push(player);
-    var ind2 = TM.individuals.find(function(p){ return p.id === player.id; });
-    if (ind2) ind2.teamId = targetTeamId;
-    toast(player.name + ' → ' + targetTeam.name);
+function tmDrop(e,tid){
+  e.preventDefault();e.currentTarget.style.borderColor='#ccc';e.currentTarget.style.background='';
+  if(!TM.dragItem)return;
+  var tt=TM.teams.find(function(t){return t.id===tid;});if(!tt)return;
+  if(TM.dragItem.type==='individual'){
+    var ind=TM.individuals.find(function(p){return p.id===TM.dragItem.id;});
+    if(!ind||ind.teamId===tid)return;
+    if(ind.teamId){var old=TM.teams.find(function(t){return t.id===ind.teamId;});if(old)old.players=old.players.filter(function(p){return p.id!==ind.id;});}
+    ind.teamId=tid;tt.players.push({id:ind.id,name:ind.name});
+    toast(ind.name+' added to '+tt.name);
+  } else {
+    if(TM.dragSource===tid)return;
+    var src=TM.teams.find(function(t){return t.id===TM.dragSource;});if(!src)return;
+    var pi=src.players.findIndex(function(p){return p.id===TM.dragItem.id;});if(pi===-1)return;
+    var player=src.players.splice(pi,1)[0];
+    tt.players.push(player);
+    var ind2=TM.individuals.find(function(p){return p.id===player.id;});if(ind2)ind2.teamId=tid;
+    toast(player.name+' moved to '+tt.name);
   }
-  tmMarkDirty();
-  tmRender();
+  tmMarkDirty();tmRender();
 }
 
-// ── Actions ───────────────────────────────────────────────────────────────
-function tmRemoveFromTeam(teamId, playerId) {
-  var team = TM.teams.find(function(t){ return t.id === teamId; });
-  if (!team) return;
-  var pi = team.players.findIndex(function(p){ return p.id === playerId; });
-  if (pi === -1) return;
-  var player = team.players.splice(pi, 1)[0];
-  var ind = TM.individuals.find(function(p){ return p.id === player.id; });
-  if (ind) ind.teamId = null;
-  tmMarkDirty();
-  tmRender();
-  toast(player.name + ' returned to pool');
+function tmRemoveFromTeam(tid,pid){
+  var team=TM.teams.find(function(t){return t.id===tid;});if(!team)return;
+  var pi=team.players.findIndex(function(p){return p.id===pid;});if(pi===-1)return;
+  var player=team.players.splice(pi,1)[0];
+  var ind=TM.individuals.find(function(p){return p.id===player.id;});if(ind)ind.teamId=null;
+  tmMarkDirty();tmRender();toast(player.name+' returned to pool');
 }
 
-function tmEditName(teamId) {
-  var team = TM.teams.find(function(t){ return t.id === teamId; });
-  if (!team) return;
-  var nameEl = document.getElementById('tmname-' + teamId);
-  if (!nameEl) return;
-  var input = document.createElement('input');
-  input.value = team.name;
-  input.style.cssText = 'font-size:13px;font-weight:600;border:none;border-bottom:2px solid #1a7f4b;background:transparent;outline:none;width:100%;';
-  nameEl.replaceWith(input);
-  input.focus(); input.select();
-  function save() { var v = input.value.trim(); if (v) { team.name = v; tmMarkDirty(); } tmRender(); }
-  input.addEventListener('blur', save);
-  input.addEventListener('keydown', function(e){ if (e.key === 'Enter') input.blur(); if (e.key === 'Escape') { input.value = team.name; input.blur(); } });
+function tmEditName(tid){
+  var team=TM.teams.find(function(t){return t.id===tid;});if(!team)return;
+  var nameEl=document.getElementById('tmname-'+tid);if(!nameEl)return;
+  var input=document.createElement('input');
+  input.value=team.name;
+  input.style.cssText='font-size:13px;font-weight:600;border:none;border-bottom:2px solid #1a7f4b;background:transparent;outline:none;width:100%;';
+  nameEl.replaceWith(input);input.focus();input.select();
+  function save(){var v=input.value.trim();if(v){team.name=v;tmMarkDirty();}tmRender();}
+  input.addEventListener('blur',save);
+  input.addEventListener('keydown',function(e){if(e.key==='Enter')input.blur();if(e.key==='Escape'){input.value=team.name;input.blur();}});
 }
 
-function tmDeleteTeam(teamId) {
-  var team = TM.teams.find(function(t){ return t.id === teamId; });
-  if (!team) return;
-  if (!confirm('Delete "' + team.name + '"? Players will return to the pool.')) return;
-  team.players.forEach(function(p){ var ind = TM.individuals.find(function(i){ return i.id === p.id; }); if (ind) ind.teamId = null; });
-  TM.teams = TM.teams.filter(function(t){ return t.id !== teamId; });
-  tmMarkDirty();
-  tmRender();
-  toast(team.name + ' deleted');
+function tmDeleteTeam(tid){
+  var team=TM.teams.find(function(t){return t.id===tid;});if(!team)return;
+  if(!confirm('Delete "'+team.name+'"? Players will return to the pool.'))return;
+  team.players.forEach(function(p){var ind=TM.individuals.find(function(i){return i.id===p.id;});if(ind)ind.teamId=null;});
+  TM.teams=TM.teams.filter(function(t){return t.id!==tid;});
+  tmMarkDirty();tmRender();toast(team.name+' deleted');
 }
 
-function tmAddTeam() {
-  if (TM.teams.length >= 36) { toast('Maximum 36 teams reached'); return; }
-  var nameInput = document.getElementById('tm-new-team-name');
-  var name = (nameInput ? nameInput.value.trim() : '') || 'Team ' + (TM.teams.length + 1);
-  TM.teams.push({ id: 'tm-extra-' + Date.now(), name: name, sponsor: false, players: [] });
-  if (nameInput) nameInput.value = '';
-  tmMarkDirty();
-  tmRender();
-  toast(name + ' added');
+function tmAddTeam(){
+  if(TM.teams.length>=36){toast('Maximum 36 teams reached');return;}
+  var ni=document.getElementById('tm-new-team-name');
+  var name=(ni?ni.value.trim():'')||'Team '+(TM.teams.length+1);
+  TM.teams.push({id:'tm-extra-'+Date.now(),name:name,sponsor:false,players:[]});
+  if(ni)ni.value='';tmMarkDirty();tmRender();toast(name+' added');
 }
 
-// ── Hook into showPanel ───────────────────────────────────────────────────
-var _tmOrigShowPanel = showPanel;
-showPanel = function(name) {
-  _tmOrigShowPanel(name);
-  if (name === 'teams' && TM.teams.length === 0) tmLoadData();
-  var capMsg = document.getElementById('tm-capacity-msg');
-  if (capMsg) capMsg.textContent = TM.teams.length >= 36 ? 'Maximum reached.' : (36 - TM.teams.length) + ' slots remaining.';
-};
+(function(){
+  var orig=showPanel;
+  showPanel=function(name){
+    orig(name);
+    if(name==='teams'&&TM.teams.length===0)tmLoadData();
+    var c=document.getElementById('tm-capacity-msg');
+    if(c)c.textContent=TM.teams.length>=36?'Maximum reached.':(36-TM.teams.length)+' slots remaining.';
+  };
+})();
 </script>
-
-</body></html>');
-  win.document.close();
-}
-
-
-
-
-
-
-</script>
-</body>
 </html>
