@@ -4824,28 +4824,40 @@ async function tmLoadData(){
   var regs=rRes.ok?await rRes.json():[];
   var aRes=await fetch(NETLIFY_BASE+"/.netlify/functions/admin-data?resource=team-assignments",{headers:ah});
   var saved=aRes.ok?await aRes.json():{};
-  TM.teams=[];TM.individuals=[];var tidx=0;
+  TM.teams=[];TM.individuals=[];
+
   regs.forEach(function(r){
     var d=r.data||r;
     var type=d.type||"";
-    var pc=d.playerCount||0;
+    var pc=parseInt(d.playerCount)||0;
     var golfers=Array.isArray(d.golfers)?d.golfers:[];
-    var cname=((d.firstName||"")+" "+(d.lastName||"")).trim();
-    var tname=(d.teamName&&d.teamName.trim())?d.teamName.trim():(cname||"Team "+(++tidx));
+    // For sponsor-teams: real name is firstName (e.g. "Nationwide Insurance")
+    // teamName holds the package (e.g. "Beverage Cart") — don't use as team name
     var isSponsor=type==="sponsor-team";
-    var isInd=type==="individual"||pc===1;
+    var contactName=((d.firstName||"")+" "+(d.lastName||"")).trim();
+    var tname=isSponsor ? contactName : ((d.teamName&&d.teamName.trim()) ? d.teamName.trim() : contactName);
+    // Individual: type=individual, OR playerCount=1, OR teamName="Single"
+    var isInd=type==="individual"||(pc===1&&type!=="sponsor-team")||d.teamName==="Single";
     if(isInd){
-      var pn=golfers.length>0?((golfers[0].firstName||"")+" "+(golfers[0].lastName||"")).trim():cname;
+      var pn=golfers.length>0?((golfers[0].firstName||"")+" "+(golfers[0].lastName||"")).trim():contactName;
       if(pn)TM.individuals.push({id:r.id||d.id,name:pn,teamId:null});
-    } else {
+      return;
+    }
+    // Sponsor-teams with 8 players = 2 teams (e.g. HCFF, Lexus)
+    var numTeams=(isSponsor&&pc>=8)?2:1;
+    var slotsEach=Math.floor((pc||4)/numTeams);
+    for(var t=0;t<numTeams;t++){
+      var tid=(r.id||d.id)+(numTeams>1?"_t"+t:"");
+      var tlabel=tname+(numTeams>1?" ("+(t===0?"A":"B")+")":"");
       var players=[];
-      golfers.forEach(function(g,gi){
-        var gn=((g.firstName||"")+" "+(g.lastName||"")).trim();
-        if(gn)players.push({id:(r.id||d.id)+"_g"+gi,name:gn});
-      });
-      var slots=pc||4;
-      while(players.length<slots)players.push({id:(r.id||d.id)+"_s"+players.length,name:"Golfer "+(players.length+1)});
-      TM.teams.push({id:r.id||d.id,name:tname,sponsor:isSponsor,players:players,notes:""});
+      // Assign golfers to this sub-team
+      var gStart=t*slotsEach;
+      for(var gi=gStart;gi<gStart+slotsEach&&gi<golfers.length;gi++){
+        var gn=((golfers[gi].firstName||"")+" "+(golfers[gi].lastName||"")).trim();
+        if(gn)players.push({id:tid+"_g"+gi,name:gn});
+      }
+      while(players.length<slotsEach)players.push({id:tid+"_s"+players.length,name:"Golfer "+(players.length+1)});
+      TM.teams.push({id:tid,name:tlabel,sponsor:isSponsor,players:players,notes:""});
     }
   });
   if(saved&&saved.assignments){
