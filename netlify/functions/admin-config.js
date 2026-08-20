@@ -1,21 +1,24 @@
 // netlify/functions/admin-config.js
 // GET  — public
-//   ?key=sponsor-config  → returns sponsor config (levels, benefits, alacarte)
-//   ?key=event-content   → returns { html: "..." } for the home page highlights block
-//   ?key=team-capacity   → COMPUTED LIVE from registrations + reserved-teams in Supabase
+//   ?key=sponsor-config      → returns sponsor config (levels, benefits, alacarte)
+//   ?key=event-content       → returns { html: "..." } for the home page highlights block
+//   ?key=team-capacity       → COMPUTED LIVE from registrations + reserved-teams in Supabase
+//   ?key=registration-status → returns { open: bool, message: string }
 // POST — requires x-admin-key header
-//   body must include { _key: "sponsor-config"|"event-content", ...data }
+//   body must include { _key: "sponsor-config"|"event-content"|"registration-status", ...data }
 
 const ADMIN_KEY  = process.env.ADMIN_PASSWORD;
 const BLOB_KEYS  = {
-  'sponsor-config': 'golf-admin/sponsor-config',
-  'event-content':  'golf-admin/event-content',
-  'team-capacity':  'golf-admin/team-capacity',
+  'sponsor-config':      'golf-admin/sponsor-config',
+  'event-content':       'golf-admin/event-content',
+  'team-capacity':       'golf-admin/team-capacity',
+  'registration-status': 'golf-admin/registration-status',
 };
 const DEFAULT_VALS = {
-  'sponsor-config': JSON.stringify({ benefits: [], levels: [], alacarte: [] }),
-  'event-content':  JSON.stringify({ html: '' }),
-  'team-capacity':  JSON.stringify({ totalTeams: 36, confirmedTeams: 0, reservedTeams: 0, usedSlots: 0, openSlots: 36, individuals: 0 }),
+  'sponsor-config':      JSON.stringify({ benefits: [], levels: [], alacarte: [] }),
+  'event-content':       JSON.stringify({ html: '' }),
+  'team-capacity':       JSON.stringify({ totalTeams: 36, confirmedTeams: 0, reservedTeams: 0, usedSlots: 0, openSlots: 36, individuals: 0 }),
+  'registration-status': JSON.stringify({ open: true, message: '' }),
 };
 
 const MAX_TEAMS = 36;

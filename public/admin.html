@@ -657,6 +657,22 @@ tr:hover td { background: #f8faf8; }
           </div>
         </div>
 
+        <!-- Registration Open/Closed Toggle -->
+        <div class="card" style="max-width:680px;margin-top:18px;border:2px solid var(--gl);">
+          <div class="card-hdr" style="background:linear-gradient(90deg,#1a3a1a,#2d5a2d);color:#fff;">
+            <span class="card-hdr-title">🚦 Registration Status</span>
+          </div>
+          <div class="card-body" style="padding:20px;">
+            <p style="font-size:13px;color:#555;margin:0 0 16px;">Control whether the public registration page accepts new registrations. When closed, visitors see a custom message instead of the registration form.</p>
+            <div class="toggle-row" style="margin-bottom:16px;">
+              <button class="toggle-switch on" id="reg-status-toggle" onclick="toggleRegStatus()" title="Toggle registration open/closed"></button>
+              <span id="reg-status-label" style="font-size:14px;font-weight:600;color:#2d7a4a;">Registration OPEN</span>
+            </div>
+            <label style="display:block;font-size:13px;font-weight:600;color:#444;margin-bottom:6px;">Closed Message <span style="font-weight:400;color:#888;">(shown to visitors when registration is closed)</span></label>
+            <textarea id="reg-status-message" class="form-input" rows="3" style="width:100%;resize:vertical;" placeholder="The 39th Annual Rough Riders Charity Golf Tournament is sold out. Thank you to everyone who registered!">The 39th Annual Rough Riders Charity Golf Tournament is sold out. Thank you to everyone who registered!</textarea>
+          </div>
+        </div>
+
         <div style="margin-top:18px;max-width:680px;display:flex;gap:10px;">
           <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
           <span id="settings-save-msg" style="font-size:13px;color:#2d7a4a;align-self:center;"></span>
@@ -4398,6 +4414,15 @@ async function loadSettings() {
       SETTINGS = Object.assign({ adminEmails: [], notifyOnEntry: true, notifyOnSponsor: true }, d);
     }
   } catch(e) { console.warn('loadSettings:', e); }
+  // Also load registration status
+  try {
+    var rs = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-config?key=registration-status');
+    if (rs.ok) {
+      var rd = await rs.json();
+      SETTINGS._regOpen    = rd.open    !== false;
+      SETTINGS._regMessage = rd.message || '';
+    }
+  } catch(e) { console.warn('loadSettings regStatus:', e); }
   renderSettingsUI();
 }
 
@@ -4418,6 +4443,27 @@ function renderSettingsUI() {
   var notifySponsor = document.getElementById('settings-notify-sponsor');
   if (notifyEntry)   notifyEntry.checked   = SETTINGS.notifyOnEntry   !== false;
   if (notifySponsor) notifySponsor.checked = SETTINGS.notifyOnSponsor !== false;
+  // Registration status toggle
+  var regOpen  = SETTINGS._regOpen !== false;
+  var togBtn   = document.getElementById('reg-status-toggle');
+  var togLabel = document.getElementById('reg-status-label');
+  var regMsg   = document.getElementById('reg-status-message');
+  if (togBtn) {
+    togBtn.classList.toggle('on', regOpen);
+    togLabel.textContent = regOpen ? 'Registration OPEN' : 'Registration CLOSED';
+    togLabel.style.color = regOpen ? '#2d7a4a' : '#b44';
+  }
+  if (regMsg && SETTINGS._regMessage) regMsg.value = SETTINGS._regMessage;
+}
+
+function toggleRegStatus() {
+  var btn   = document.getElementById('reg-status-toggle');
+  var label = document.getElementById('reg-status-label');
+  if (!btn) return;
+  var nowOpen = btn.classList.toggle('on');
+  label.textContent = nowOpen ? 'Registration OPEN' : 'Registration CLOSED';
+  label.style.color = nowOpen ? '#2d7a4a' : '#b44';
+  SETTINGS._regOpen = nowOpen;
 }
 
 function addSettingsEmail() {
@@ -4441,12 +4487,30 @@ async function saveSettings() {
   SETTINGS.notifyOnEntry   = notifyEntry   ? notifyEntry.checked   : true;
   SETTINGS.notifyOnSponsor = notifySponsor ? notifySponsor.checked : true;
 
+  // Capture registration status from UI
+  var togBtn = document.getElementById('reg-status-toggle');
+  var regMsg = document.getElementById('reg-status-message');
+  var regOpen    = togBtn ? togBtn.classList.contains('on') : true;
+  var regMessage = regMsg ? regMsg.value.trim() : '';
+  SETTINGS._regOpen    = regOpen;
+  SETTINGS._regMessage = regMessage;
+
   var msg = document.getElementById('settings-save-msg');
   msg.textContent = 'Saving…';
+  msg.style.color = '#2d7a4a';
   try {
     var authHdr2 = { 'Authorization': 'Bearer ' + _jwt };
+    // Save general settings
     var res = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-data?resource=settings', { method: 'PUT', headers: Object.assign({'Content-Type':'application/json'}, authHdr2), body: JSON.stringify(SETTINGS) });
     if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
+    // Save registration status (requires x-admin-key = raw admin password)
+    var adminKey = ADMIN_KEY;
+    var rsRes = await fetch(NETLIFY_BASE+'/.netlify/functions/admin-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+      body: JSON.stringify({ _key: 'registration-status', open: regOpen, message: regMessage })
+    });
+    if (!rsRes.ok) throw new Error('Reg status save failed');
     msg.textContent = '✓ Saved';
     toast('Settings saved ✓');
     setTimeout(function(){ msg.textContent = ''; }, 3000);
